@@ -6,6 +6,7 @@ from app.api.v1 import (
     auth,
     boutiques,
     categories,
+    dashboard,
     produits,
     sessions,
     sync,
@@ -29,4 +30,7 @@ api_router.include_router(
 )
 api_router.include_router(
     abonnements.router, prefix="/abonnements", tags=["abonnements"]
+)
+api_router.include_router(
+    dashboard.router, prefix="/dashboard", tags=["dashboard"]
 )
