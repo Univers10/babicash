@@ -1,6 +1,7 @@
 import uuid
 from decimal import Decimal
 
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -307,6 +308,39 @@ async def _process_entree_stock(
 async def push(
     db: AsyncSession, boutique: Boutique, payload: SyncPushRequest
 ) -> SyncPushResponse:
+    # Vérification quota freemium — uniquement pour les nouvelles ventes
+    # (les idempotentes ne comptent pas, on les détecte en avance)
+    if payload.ventes:
+        from app.services import abonnement_service  # import local pour éviter circulaire
+
+        # Compter combien sont réellement nouvelles (non encore synchronisées)
+        ids_locaux = [v.id_local_smartphone for v in payload.ventes]
+        deja_sync = (
+            await db.execute(
+                select(Vente.id_local_smartphone).where(
+                    Vente.id_local_smartphone.in_(ids_locaux)
+                )
+            )
+        ).scalars().all()
+        nb_nouvelles = len(payload.ventes) - len(deja_sync)
+
+        if nb_nouvelles > 0:
+            autorise, abo, ventes_mois = await abonnement_service.verifier_quota(
+                db, boutique.id, nb_nouvelles
+            )
+            if not autorise:
+                raise HTTPException(
+                    status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                    detail={
+                        "code": "QUOTA_DEPASSE",
+                        "message": f"Quota mensuel atteint ({ventes_mois}/{abo.quota_ventes_mois} ventes). "
+                                   f"Passez au plan PRO pour continuer.",
+                        "ventes_utilisees": ventes_mois,
+                        "quota": abo.quota_ventes_mois,
+                        "plan": abo.plan,
+                    },
+                )
+
     response = SyncPushResponse()
     # Accumule les produits modifiés pour détecter les alertes stock
     produits_modifies: dict[uuid.UUID, Produit] = {}

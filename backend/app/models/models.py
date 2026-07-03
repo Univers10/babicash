@@ -211,6 +211,30 @@ class LigneVente(Base):
     vente: Mapped["Vente"] = relationship(back_populates="lignes")
 
 
+class Abonnement(Base):
+    __tablename__ = "abonnements"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    boutique_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("boutiques.id"), nullable=False, unique=True
+    )
+    plan: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="FREE"
+    )  # FREE | PRO
+    quota_ventes_mois: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=20
+    )
+    date_debut: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    date_fin: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )  # None = pas d'expiration (PRO actif)
+    actif: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+
 class TransactionCaisse(Base):
     __tablename__ = "transactions_caisse"
 
