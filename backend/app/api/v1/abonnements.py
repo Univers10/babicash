@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends
@@ -65,7 +65,7 @@ async def get_quota_boutique(
     ventes_mois = await abonnement_service.compter_ventes_mois(db, boutique_id)
 
     pro_actif = abo.plan == "PRO" and abo.actif and (
-        abo.date_fin is None or abo.date_fin > datetime.now()
+        abo.date_fin is None or abo.date_fin > datetime.now(timezone.utc)
     )
 
     return {

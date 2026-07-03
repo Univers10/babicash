@@ -71,11 +71,25 @@ async def resume_caisse(
     date_debut: datetime | None = None,
     date_fin: datetime | None = None,
 ) -> dict:
-    """Recettes ventes + entrées, dépenses, solde net sur la période."""
+    """Recettes ventes, dépenses, solde net sur la période."""
     debut = date_debut or _debut_periode(granularite)
     fin = date_fin or datetime.now(timezone.utc)
 
-    stmt = (
+    # Recettes : somme des montants_total des ventes
+    recettes_row = (
+        await db.execute(
+            select(func.coalesce(func.sum(Vente.montant_total), 0).label("total"))
+            .where(
+                Vente.boutique_id == boutique_id,
+                Vente.date_vente >= debut,
+                Vente.date_vente <= fin,
+            )
+        )
+    ).one()
+    recettes_ventes = Decimal(str(recettes_row.total))
+
+    # Dépenses et entrées stock : via TransactionCaisse
+    stmt_tx = (
         select(
             TransactionCaisse.type_transaction,
             func.coalesce(func.sum(TransactionCaisse.montant), 0).label("total"),
@@ -87,26 +101,24 @@ async def resume_caisse(
         )
         .group_by(TransactionCaisse.type_transaction)
     )
-    rows = (await db.execute(stmt)).all()
+    rows_tx = (await db.execute(stmt_tx)).all()
+    totaux_tx: dict[str, Decimal] = {
+        row.type_transaction: Decimal(str(row.total)) for row in rows_tx
+    }
 
-    totaux: dict[str, Decimal] = {}
-    for row in rows:
-        totaux[row.type_transaction] = Decimal(str(row.total))
-
-    recettes = totaux.get("VENTE", Decimal("0")) + totaux.get("ENTREE", Decimal("0"))
-    depenses = totaux.get("SORTIE_DEPENSE", Decimal("0"))
-    entrees_stock = totaux.get("ENTREE_STOCK", Decimal("0"))
+    depenses = totaux_tx.get("SORTIE_DEPENSE", Decimal("0"))
+    entrees_stock = totaux_tx.get("ENTREE_STOCK", Decimal("0"))
 
     return {
         "boutique_id": str(boutique_id),
         "granularite": granularite,
         "date_debut": debut.isoformat(),
         "date_fin": fin.isoformat(),
-        "recettes_ventes": totaux.get("VENTE", Decimal("0")),
+        "recettes_ventes": recettes_ventes,
         "depenses": depenses,
         "entrees_stock_montant": entrees_stock,
-        "solde_net": recettes - depenses,
-        "detail_par_type": {k: str(v) for k, v in totaux.items()},
+        "solde_net": recettes_ventes - depenses,
+        "detail_transactions": {k: str(v) for k, v in totaux_tx.items()},
     }
 
 

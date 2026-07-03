@@ -85,8 +85,10 @@ async def test_resume_caisse(client, seeded):
     )
     assert r.status_code == 200, r.text
     body = r.json()
+    assert float(body["recettes_ventes"]) == pytest.approx(500.0)
     assert float(body["depenses"]) == pytest.approx(1500.0)
-    assert "solde_net" in body
+    assert float(body["solde_net"]) == pytest.approx(-1000.0)
+    assert "detail_transactions" in body
 
 
 @pytest.mark.asyncio
