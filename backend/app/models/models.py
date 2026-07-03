@@ -217,13 +217,19 @@ class Abonnement(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    boutique_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(as_uuid=True), ForeignKey("boutiques.id"), nullable=False, unique=True
+    # 1 abonnement par propriétaire (OWNER), couvre toutes ses boutiques
+    proprietaire_id: Mapped[str] = mapped_column(
+        String(255), nullable=False, unique=True
     )
     plan: Mapped[str] = mapped_column(
         String(20), nullable=False, default="FREE"
     )  # FREE | PRO
-    quota_ventes_mois: Mapped[int] = mapped_column(
+    # Prix de base mensuel en FCFA (boutique 1)
+    prix_base: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2), nullable=False, default=Decimal("5000.00")
+    )
+    # Quota ventes/mois par boutique (FREE=20, PRO=illimité)
+    quota_ventes_par_boutique: Mapped[int] = mapped_column(
         Integer, nullable=False, default=20
     )
     date_debut: Mapped[datetime] = mapped_column(

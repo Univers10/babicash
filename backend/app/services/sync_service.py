@@ -326,17 +326,17 @@ async def push(
 
         if nb_nouvelles > 0:
             autorise, abo, ventes_mois = await abonnement_service.verifier_quota(
-                db, boutique.id, nb_nouvelles
+                db, boutique.id, boutique.proprietaire_id, nb_nouvelles
             )
             if not autorise:
                 raise HTTPException(
                     status_code=status.HTTP_402_PAYMENT_REQUIRED,
                     detail={
                         "code": "QUOTA_DEPASSE",
-                        "message": f"Quota mensuel atteint ({ventes_mois}/{abo.quota_ventes_mois} ventes). "
+                        "message": f"Quota mensuel atteint ({ventes_mois}/{abo.quota_ventes_par_boutique} ventes). "
                                    f"Passez au plan PRO pour continuer.",
                         "ventes_utilisees": ventes_mois,
-                        "quota": abo.quota_ventes_mois,
+                        "quota": abo.quota_ventes_par_boutique,
                         "plan": abo.plan,
                     },
                 )
