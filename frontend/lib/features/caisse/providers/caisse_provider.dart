@@ -5,6 +5,7 @@ import '../../../data/local/database.dart';
 import '../../../data/remote/sync_api.dart';
 import '../../../data/models/sync_model.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../sessions/providers/sessions_provider.dart';
 import '../models/panier_item.dart';
 import 'package:drift/drift.dart' as drift;
 
@@ -103,11 +104,14 @@ class CaisseNotifier extends Notifier<void> {
       final idLocal = const Uuid().v4();
       final montantTotal =
           panier.fold(0.0, (sum, item) => sum + item.total);
+      final sessionAsync = ref.read(sessionNotifierProvider);
+      final sessionId = sessionAsync.valueOrNull?.id;
 
       // 1. Écriture locale (offline-first)
       await db.insertVente(LocalVentesCompanion(
         idLocal: drift.Value(idLocal),
         boutiqueId: drift.Value(user!.boutiqueId!),
+        sessionId: sessionId != null ? drift.Value(sessionId) : const drift.Value.absent(),
         modePaiement: drift.Value(modePaiement),
         montantTotal: drift.Value(montantTotal),
         synced: const drift.Value(false),
@@ -138,6 +142,7 @@ class CaisseNotifier extends Notifier<void> {
             VenteIn(
               idLocal: idLocal,
               modePaiement: modePaiement,
+              sessionId: sessionId,
               lignes: lignes,
             ),
           ],
