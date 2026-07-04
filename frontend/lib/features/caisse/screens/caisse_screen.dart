@@ -6,11 +6,9 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/local/database.dart';
 import '../../../features/auth/providers/auth_provider.dart';
-import '../../../features/stock/providers/stock_provider.dart';
 import '../../../shared/widgets/amount_text.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_snackbar.dart';
-import '../models/panier_item.dart';
 import '../providers/caisse_provider.dart';
 import '../widgets/panier_widget.dart';
 import '../widgets/numpad_widget.dart';
@@ -86,7 +84,7 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
           Expanded(
             child: _mode == CaisseMode.catalogue
                 ? CatalogueGrid(onProduitTap: _addProduitToPanier)
-                : NumpadWidget(onMontantValidé: _addMontantLibre),
+                : NumpadWidget(onMontantValide: _addMontantLibre),
           ),
 
           // Barre de total + action

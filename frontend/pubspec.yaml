@@ -19,7 +19,7 @@ dependencies:
 
   # Network
   dio: ^5.4.3+1
-  retrofit: ^4.1.0
+  retrofit: ^4.9.2
   pretty_dio_logger: ^1.3.1
 
   # Local DB (Offline-First)
@@ -41,7 +41,7 @@ dependencies:
   # PDF & partage WhatsApp
   pdf: ^3.11.1
   printing: ^5.13.1
-  share_plus: ^9.0.0
+  share_plus: ^12.0.2
   url_launcher: ^6.3.0
 
   # Icons
@@ -61,11 +61,10 @@ dev_dependencies:
   flutter_lints: ^4.0.0
 
   # Code generation
-  build_runner: ^2.4.11
-  riverpod_generator: ^2.4.3
-  drift_dev: ^2.18.0
-  retrofit_generator: ^8.1.0
-  freezed: ^2.5.2
+  build_runner: ^2.4.14
+  riverpod_generator: ^2.4.0
+  drift_dev: ^2.20.0
+  freezed: ^2.5.8
   json_serializable: ^6.8.0
 
 flutter:

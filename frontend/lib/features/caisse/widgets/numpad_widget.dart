@@ -3,11 +3,10 @@ import 'package:material_symbols_icons/symbols.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../shared/widgets/amount_text.dart';
 
 class NumpadWidget extends StatefulWidget {
-  const NumpadWidget({super.key, required this.onMontantValidé});
-  final void Function(double) onMontantValidé;
+  const NumpadWidget({super.key, required this.onMontantValide});
+  final void Function(double) onMontantValide;
 
   @override
   State<NumpadWidget> createState() => _NumpadWidgetState();
@@ -33,7 +32,7 @@ class _NumpadWidgetState extends State<NumpadWidget> {
 
   void _add() {
     if (_montant <= 0) return;
-    widget.onMontantValidé(_montant);
+    widget.onMontantValide(_montant);
     _clear();
   }
 
