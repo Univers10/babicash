@@ -1,20 +1,35 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:retrofit/retrofit.dart';
 import '../../core/network/api_client.dart';
 import '../models/boutique_model.dart';
 
-part 'boutiques_api.g.dart';
+class BoutiquesApi {
+  BoutiquesApi(this._dio, {this.baseUrl});
 
-@RestApi()
-abstract class BoutiquesApi {
-  factory BoutiquesApi(Dio dio, {String? baseUrl}) = _BoutiquesApi;
+  final Dio _dio;
+  String? baseUrl;
 
-  @GET('/boutiques/')
-  Future<List<BoutiqueModel>> listBoutiques();
+  String get _baseUrl {
+    if (baseUrl == null || baseUrl!.trim().isEmpty) return _dio.options.baseUrl;
+    final url = Uri.parse(baseUrl!);
+    if (url.isAbsolute) return url.toString();
+    return Uri.parse(_dio.options.baseUrl).resolveUri(url).toString();
+  }
 
-  @POST('/boutiques/')
-  Future<BoutiqueModel> createBoutique(@Body() Map<String, dynamic> body);
+  Future<List<BoutiqueModel>> listBoutiques() async {
+    final resp = await _dio.get<List<dynamic>>('$_baseUrl/boutiques/');
+    return resp.data!
+        .map((e) => BoutiqueModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<BoutiqueModel> createBoutique(Map<String, dynamic> body) async {
+    final resp = await _dio.post<Map<String, dynamic>>(
+      '$_baseUrl/boutiques/',
+      data: body,
+    );
+    return BoutiqueModel.fromJson(resp.data!);
+  }
 }
 
 final boutiquesApiProvider = Provider<BoutiquesApi>((ref) {

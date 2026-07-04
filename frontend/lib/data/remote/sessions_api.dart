@@ -1,35 +1,62 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:retrofit/retrofit.dart';
 import '../../core/network/api_client.dart';
 import '../models/session_model.dart';
 
-part 'sessions_api.g.dart';
+class SessionsApi {
+  SessionsApi(this._dio, {this.baseUrl});
 
-@RestApi()
-abstract class SessionsApi {
-  factory SessionsApi(Dio dio, {String? baseUrl}) = _SessionsApi;
+  final Dio _dio;
+  String? baseUrl;
 
-  @GET('/sessions/active')
-  Future<SessionResumeModel?> sessionActive(
-    @Query('boutique_id') String boutiqueId,
-  );
+  String get _baseUrl {
+    if (baseUrl == null || baseUrl!.trim().isEmpty) return _dio.options.baseUrl;
+    final url = Uri.parse(baseUrl!);
+    if (url.isAbsolute) return url.toString();
+    return Uri.parse(_dio.options.baseUrl).resolveUri(url).toString();
+  }
 
-  @GET('/sessions/')
+  Future<SessionResumeModel?> sessionActive(String boutiqueId) async {
+    final resp = await _dio.get<Map<String, dynamic>>(
+      '$_baseUrl/sessions/active',
+      queryParameters: {'boutique_id': boutiqueId},
+    );
+    return resp.data == null ? null : SessionResumeModel.fromJson(resp.data!);
+  }
+
   Future<List<SessionModel>> listSessions(
-    @Query('boutique_id') String boutiqueId, {
-    @Query('limit') int limit = 50,
-    @Query('offset') int offset = 0,
-  });
+    String boutiqueId, {
+    int limit = 50,
+    int offset = 0,
+  }) async {
+    final resp = await _dio.get<List<dynamic>>(
+      '$_baseUrl/sessions/',
+      queryParameters: {
+        'boutique_id': boutiqueId,
+        'limit': limit,
+        'offset': offset,
+      },
+    );
+    return resp.data!
+        .map((e) => SessionModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
 
-  @POST('/sessions/ouvrir')
-  Future<SessionModel> ouvrirSession(@Body() SessionOuvrirRequest request);
+  Future<SessionModel> ouvrirSession(SessionOuvrirRequest request) async {
+    final resp = await _dio.post<Map<String, dynamic>>(
+      '$_baseUrl/sessions/ouvrir',
+      data: request.toJson(),
+    );
+    return SessionModel.fromJson(resp.data!);
+  }
 
-  @POST('/sessions/{id}/fermer')
-  Future<SessionResumeModel> fermerSession(
-    @Path('id') String id,
-    @Body() SessionFermerRequest request,
-  );
+  Future<SessionResumeModel> fermerSession(String id, SessionFermerRequest request) async {
+    final resp = await _dio.post<Map<String, dynamic>>(
+      '$_baseUrl/sessions/$id/fermer',
+      data: request.toJson(),
+    );
+    return SessionResumeModel.fromJson(resp.data!);
+  }
 }
 
 final sessionsApiProvider = Provider<SessionsApi>((ref) {

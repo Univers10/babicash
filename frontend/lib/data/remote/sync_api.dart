@@ -1,22 +1,36 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:retrofit/retrofit.dart';
 import '../../core/network/api_client.dart';
 import '../models/sync_model.dart';
 
-part 'sync_api.g.dart';
+class SyncApi {
+  SyncApi(this._dio, {this.baseUrl});
 
-@RestApi()
-abstract class SyncApi {
-  factory SyncApi(Dio dio, {String? baseUrl}) = _SyncApi;
+  final Dio _dio;
+  String? baseUrl;
 
-  @POST('/sync/push')
-  Future<SyncPushResponse> push(@Body() SyncPushRequest request);
+  String get _baseUrl {
+    if (baseUrl == null || baseUrl!.trim().isEmpty) return _dio.options.baseUrl;
+    final url = Uri.parse(baseUrl!);
+    if (url.isAbsolute) return url.toString();
+    return Uri.parse(_dio.options.baseUrl).resolveUri(url).toString();
+  }
 
-  @GET('/sync/pull')
-  Future<SyncPullResponse> pull(
-    @Query('boutique_id') String boutiqueId,
-  );
+  Future<SyncPushResponse> push(SyncPushRequest request) async {
+    final resp = await _dio.post<Map<String, dynamic>>(
+      '$_baseUrl/sync/push',
+      data: request.toJson(),
+    );
+    return SyncPushResponse.fromJson(resp.data!);
+  }
+
+  Future<SyncPullResponse> pull(String boutiqueId) async {
+    final resp = await _dio.get<Map<String, dynamic>>(
+      '$_baseUrl/sync/pull',
+      queryParameters: {'boutique_id': boutiqueId},
+    );
+    return SyncPullResponse.fromJson(resp.data!);
+  }
 }
 
 final syncApiProvider = Provider<SyncApi>((ref) {

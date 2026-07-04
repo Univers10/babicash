@@ -112,7 +112,7 @@ class _DashboardBody extends StatelessWidget {
     final caTotal =
         (data['ca_total'] as num?)?.toDouble() ?? 0;
     final margeTotal =
-        (data['marge_nette_totale'] as num?)?.toDouble() ?? 0;
+        (data['marge_totale'] as num?)?.toDouble() ?? 0;
     final nbVentes = (data['nb_ventes_total'] as num?)?.toInt() ?? 0;
 
     return RefreshIndicator(
@@ -247,7 +247,7 @@ class _BoutiqueCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final nom = boutique['boutique_nom'] as String? ?? '—';
-    final ca = (boutique['ca'] as num?)?.toDouble() ?? 0;
+    final ca = (boutique['chiffre_affaires'] as num?)?.toDouble() ?? 0;
     final marge = (boutique['marge_nette'] as num?)?.toDouble() ?? 0;
     final nbVentes = (boutique['nb_ventes'] as num?)?.toInt() ?? 0;
 

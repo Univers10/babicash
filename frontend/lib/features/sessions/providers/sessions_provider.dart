@@ -58,8 +58,8 @@ final sessionsHistoryProvider = FutureProvider<List<LocalSession>>((ref) async {
   return (db.select(db.localSessions)
         ..where((s) => s.boutiqueId.equals(user!.boutiqueId!))
         ..orderBy([
-          (s) => OrderingTerm(
-              expression: s.dateOuverture, mode: OrderingMode.desc)
+          (s) => drift.OrderingTerm(
+              expression: s.dateOuverture, mode: drift.OrderingMode.desc)
         ]))
       .get();
 });

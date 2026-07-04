@@ -6,6 +6,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/local/database.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/abonnements/providers/quota_provider.dart';
 import '../../../shared/widgets/amount_text.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_snackbar.dart';
@@ -31,6 +32,7 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
     final panier = ref.watch(panierProvider);
     final total = panier.fold(0.0, (sum, item) => sum + item.total);
     final user = ref.watch(authStateProvider).value;
+    final quotaAsync = ref.watch(quotaProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -47,6 +49,30 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
           ],
         ),
         actions: [
+          // Quota freemium
+          quotaAsync.when(
+            data: (info) {
+              if (info == null || info.illimite) return const SizedBox.shrink();
+              final reste = info.ventesRestantes ?? 0;
+              return Padding(
+                padding: const EdgeInsets.only(right: AppSpacing.sm),
+                child: Chip(
+                  visualDensity: VisualDensity.compact,
+                  backgroundColor: reste <= 5 ? AppColors.error.withValues(alpha: 0.1) : AppColors.accentContainer,
+                  side: BorderSide.none,
+                  label: Text(
+                    '$reste ventes',
+                    style: AppTextStyles.caption.copyWith(
+                      color: reste <= 5 ? AppColors.error : AppColors.brown,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              );
+            },
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
           // Basculer mode
           Container(
             margin: const EdgeInsets.only(right: AppSpacing.lg),
