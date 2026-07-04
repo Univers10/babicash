@@ -12,17 +12,22 @@ import '../../../shared/widgets/amount_text.dart';
 
 // ── Providers données dashboard ───────────────────────────────────────────────
 
-final _consolideProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
-  final user = ref.watch(authStateProvider).value;
-  if (user == null || !user.isOwner) return null;
-  final dio = ref.watch(dioProvider);
-  try {
-    final resp = await dio.get('/dashboard/consolide');
-    return resp.data as Map<String, dynamic>;
-  } on DioException catch (e) {
-    throw mapDioError(e);
-  }
-});
+final _consolideProvider = FutureProvider.family<Map<String, dynamic>?, String>(
+  (ref, granularite) async {
+    final user = ref.watch(authStateProvider).value;
+    if (user == null || !user.isOwner) return null;
+    final dio = ref.watch(dioProvider);
+    try {
+      final resp = await dio.get(
+        '/dashboard/consolide',
+        queryParameters: {'granularite': granularite},
+      );
+      return resp.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      throw mapDioError(e);
+    }
+  },
+);
 
 final _granulariteProvider = StateProvider<String>((_) => 'mois');
 
@@ -31,8 +36,8 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final consolideAsync = ref.watch(_consolideProvider);
     final granularite = ref.watch(_granulariteProvider);
+    final consolideAsync = ref.watch(_consolideProvider(granularite));
     final user = ref.watch(authStateProvider).value;
 
     return Scaffold(

@@ -6,27 +6,18 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/local/database.dart';
-import '../../../features/auth/providers/auth_provider.dart';
+import '../providers/sessions_provider.dart';
 import '../../../shared/widgets/amount_text.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_snackbar.dart';
 import '../../../shared/widgets/app_text_field.dart';
-import 'package:drift/drift.dart' as drift;
-import 'package:uuid/uuid.dart';
-
-final _sessionProvider = FutureProvider<LocalSession?>((ref) async {
-  final db = ref.watch(appDatabaseProvider);
-  final user = ref.watch(authStateProvider).value;
-  if (user?.boutiqueId == null) return null;
-  return db.getSessionOuverte(user!.boutiqueId!);
-});
 
 class SessionsScreen extends ConsumerWidget {
   const SessionsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sessionAsync = ref.watch(_sessionProvider);
+    final sessionAsync = ref.watch(sessionNotifierProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -35,7 +26,7 @@ class SessionsScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
         data: (session) => session == null
-            ? _OuvertureSession()
+            ? const _OuvertureSession()
             : _SessionActive(session: session),
       ),
     );
@@ -45,6 +36,8 @@ class SessionsScreen extends ConsumerWidget {
 // ── Ouverture session ─────────────────────────────────────────────────────────
 
 class _OuvertureSession extends ConsumerStatefulWidget {
+  const _OuvertureSession();
+
   @override
   ConsumerState<_OuvertureSession> createState() => _OuvertureSessionState();
 }
@@ -61,23 +54,16 @@ class _OuvertureSessionState extends ConsumerState<_OuvertureSession> {
 
   Future<void> _ouvrir() async {
     final montant = double.tryParse(_fondCtrl.text) ?? 0;
-    final user = ref.read(authStateProvider).value;
-    if (user?.boutiqueId == null) return;
-
     setState(() => _loading = true);
     try {
-      final db = ref.read(appDatabaseProvider);
-      await db.upsertSession(LocalSessionsCompanion(
-        id: drift.Value(const Uuid().v4()),
-        boutiqueId: drift.Value(user!.boutiqueId!),
-        utilisateurNom: drift.Value(user.nom),
-        montantInitial: drift.Value(montant),
-        statut: const drift.Value('OUVERT'),
-        synced: const drift.Value(false),
-      ));
-      ref.invalidate(_sessionProvider);
+      final ok = await ref
+          .read(sessionNotifierProvider.notifier)
+          .ouvrir(montant);
+      if (!ok && mounted) {
+        AppSnackbar.error(context, 'Impossible d\'ouvrir la session.');
+      }
     } finally {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -157,21 +143,16 @@ class _SessionActiveState extends ConsumerState<_SessionActive> {
     }
     setState(() => _loading = true);
     try {
-      final db = ref.read(appDatabaseProvider);
-      await db.upsertSession(LocalSessionsCompanion(
-        id: drift.Value(widget.session.id),
-        boutiqueId: drift.Value(widget.session.boutiqueId),
-        utilisateurNom: drift.Value(widget.session.utilisateurNom),
-        montantInitial: drift.Value(widget.session.montantInitial),
-        montantFinalDeclare: drift.Value(montant),
-        dateFermeture: drift.Value(DateTime.now()),
-        statut: const drift.Value('FERME'),
-        synced: const drift.Value(false),
-      ));
-      ref.invalidate(_sessionProvider);
-      if (mounted) AppSnackbar.success(context, 'Session fermée.');
+      final ok = await ref
+          .read(sessionNotifierProvider.notifier)
+          .fermer(montant);
+      if (ok && mounted) {
+        AppSnackbar.success(context, 'Session fermée.');
+      } else if (mounted) {
+        AppSnackbar.error(context, 'Impossible de fermer la session.');
+      }
     } finally {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 

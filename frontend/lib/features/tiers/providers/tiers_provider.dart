@@ -1,19 +1,50 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/errors/app_exception.dart';
 import '../../../data/local/database.dart';
+import '../../../data/remote/tiers_api.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 
 final tiersTypeProvider = StateProvider<String>((ref) => 'CLIENT');
 
-final tiersProvider = FutureProvider.family<List<LocalTier>, String>((ref, type) async {
-  final db = ref.watch(appDatabaseProvider);
-  final user = ref.watch(authStateProvider).value;
-  if (user?.boutiqueId == null) return [];
-  return db.getTiersByBoutique(user!.boutiqueId!, type: type);
-});
+/// Pull tiers depuis le backend, met à jour le cache Drift, retourne le cache local.
+/// En offline, retourne directement le cache local.
+final tiersProvider = FutureProvider.family<List<LocalTier>, String>(
+  (ref, type) async {
+    final db = ref.watch(appDatabaseProvider);
+    final user = ref.watch(authStateProvider).value;
+    if (user?.boutiqueId == null) return [];
+    final boutiqueId = user!.boutiqueId!;
+
+    final connectivity = await Connectivity().checkConnectivity();
+    if (!connectivity.contains(ConnectivityResult.none)) {
+      try {
+        final api = ref.watch(tiersApiProvider);
+        final tiers = await api.listTiers(boutiqueId, typeTiers: type);
+        await db.batch((b) {
+          b.insertAllOnConflictUpdate(
+            db.localTiers,
+            tiers.map((t) => LocalTiersCompanion(
+              id: drift.Value(t.id),
+              boutiqueId: drift.Value(t.boutiqueId),
+              nom: drift.Value(t.nom),
+              telephone: drift.Value(t.telephone),
+              typeTiers: drift.Value(t.typeTiers),
+              soldeDu: drift.Value(t.soldeDu),
+              synced: const drift.Value(true),
+            )).toList(),
+          );
+        });
+      } on AppException {
+        // Fallback local silencieux
+      }
+    }
+
+    return db.getTiersByBoutique(boutiqueId, type: type);
+  },
+);
 
 final clientsProvider = FutureProvider<List<LocalTier>>((ref) async {
-  final db = ref.watch(appDatabaseProvider);
-  final user = ref.watch(authStateProvider).value;
-  if (user?.boutiqueId == null) return [];
-  return db.getTiersByBoutique(user!.boutiqueId!, type: 'CLIENT');
+  return ref.watch(tiersProvider('CLIENT').future);
 });
