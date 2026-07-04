@@ -1,0 +1,26 @@
+targets:
+  $default:
+    builders:
+      # Drift — génération des classes de la DB SQLite
+      drift_dev:
+        options:
+          store_date_time_values_as_text: true
+
+      # Freezed — data classes immuables
+      freezed:
+        generate_for:
+          include:
+            - lib/data/models/**
+            - lib/features/caisse/models/**
+
+      # JSON serializable
+      json_serializable:
+        options:
+          explicit_to_json: true
+          field_rename: snake_case
+
+      # Retrofit — génération des services HTTP
+      retrofit_generator:
+        generate_for:
+          include:
+            - lib/data/remote/**

@@ -12,6 +12,7 @@ abstract final class AppColors {
   static const Color primaryContainer = Color(0xFFD6EFD8);
   static const Color onPrimary = Color(0xFFFFFFFF);
   static const Color onPrimaryContainer = Color(0xFF0A3316);
+  static const Color onAccentContainer = Color(0xFF3D1F00);
 
   // ── Accent (or/orange) ───────────────────────────────────────────────────
   static const Color accent = Color(0xFFF5A623);
