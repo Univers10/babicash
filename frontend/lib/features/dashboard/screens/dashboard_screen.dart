@@ -9,6 +9,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../shared/widgets/amount_text.dart';
+import '../../../shared/widgets/menu_button.dart';
 
 // ── Providers données dashboard ───────────────────────────────────────────────
 
@@ -43,6 +44,7 @@ class DashboardScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: const MenuButton(),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

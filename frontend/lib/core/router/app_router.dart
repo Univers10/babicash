@@ -9,6 +9,7 @@ import '../../features/stock/screens/categories_screen.dart';
 import '../../features/stock/screens/stock_screen.dart';
 import '../../features/tiers/screens/tiers_screen.dart';
 import '../../features/sessions/screens/sessions_screen.dart';
+import '../../features/settings/screens/settings_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../shared/screens/shell_screen.dart';
 
@@ -19,6 +20,7 @@ abstract final class AppRoutes {
   static const caisse = '/caisse';
   static const stock = '/stock';
   static const categories = '/categories';
+  static const settings = '/settings';
   static const tiers = '/tiers';
   static const sessions = '/sessions';
   static const dashboard = '/dashboard';
@@ -73,6 +75,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.sessions,
             builder: (_, __) => const SessionsScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.settings,
+            builder: (_, __) => const SettingsScreen(),
           ),
           GoRoute(
             path: AppRoutes.dashboard,

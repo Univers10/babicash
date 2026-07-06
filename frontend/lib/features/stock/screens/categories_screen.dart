@@ -4,6 +4,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/local/database.dart';
+import '../../../shared/widgets/menu_button.dart';
 import '../providers/categories_crud_provider.dart';
 import '../providers/stock_provider.dart';
 
@@ -15,7 +16,10 @@ class CategoriesScreen extends ConsumerWidget {
     final categoriesAsync = ref.watch(categoriesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Catégories')),
+      appBar: AppBar(
+        leading: const MenuButton(),
+        title: const Text('Catégories'),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showCategorieDialog(context, ref),
         child: const Icon(Symbols.add),

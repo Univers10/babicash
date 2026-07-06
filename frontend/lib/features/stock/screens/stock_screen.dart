@@ -6,6 +6,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/router/app_router.dart';
+import '../../../shared/widgets/menu_button.dart';
 import '../providers/stock_provider.dart';
 import '../widgets/produit_card.dart';
 import '../widgets/produit_form_dialog.dart';
@@ -20,6 +21,7 @@ class StockScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: const MenuButton(),
         title: const Text('Stock'),
         actions: [
           IconButton(

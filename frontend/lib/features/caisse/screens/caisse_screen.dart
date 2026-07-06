@@ -10,6 +10,7 @@ import '../../../features/abonnements/providers/quota_provider.dart';
 import '../../../shared/widgets/amount_text.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_snackbar.dart';
+import '../../../shared/widgets/menu_button.dart';
 import '../providers/caisse_provider.dart';
 import '../widgets/panier_widget.dart';
 import '../widgets/numpad_widget.dart';
@@ -37,6 +38,7 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: const MenuButton(),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

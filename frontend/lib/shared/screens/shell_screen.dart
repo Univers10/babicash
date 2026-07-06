@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_text_styles.dart';
 import '../../features/auth/providers/auth_provider.dart';
+import '../providers/shell_provider.dart';
 
 class ShellScreen extends ConsumerWidget {
   const ShellScreen({super.key, required this.child});
@@ -12,29 +15,167 @@ class ShellScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final key = ref.watch(shellScaffoldKeyProvider);
     final user = ref.watch(authStateProvider).value;
     final isOwner = user?.isOwner ?? false;
     final location = GoRouterState.of(context).matchedLocation;
 
-    final managerItems = [
-      _NavItem(label: 'Caisse', icon: Symbols.point_of_sale, route: AppRoutes.caisse),
-      _NavItem(label: 'Stock', icon: Symbols.inventory_2, route: AppRoutes.stock),
-      _NavItem(label: 'Clients', icon: Symbols.people, route: AppRoutes.tiers),
-      _NavItem(label: 'Sessions', icon: Symbols.receipt_long, route: AppRoutes.sessions),
+    final menuGroups = [
+      _MenuGroup(
+        label: 'Opérations',
+        items: [
+          _NavItem(label: 'Caisse', icon: Symbols.point_of_sale, route: AppRoutes.caisse),
+          _NavItem(label: 'Stock', icon: Symbols.inventory_2, route: AppRoutes.stock),
+          _NavItem(label: 'Catégories', icon: Symbols.category, route: AppRoutes.categories),
+        ],
+      ),
+      _MenuGroup(
+        label: 'Gestion',
+        items: [
+          _NavItem(label: 'Tiers', icon: Symbols.people, route: AppRoutes.tiers),
+          _NavItem(label: 'Sessions', icon: Symbols.receipt_long, route: AppRoutes.sessions),
+        ],
+      ),
+      _MenuGroup(
+        label: 'Paramètres',
+        items: [
+          _NavItem(label: 'Profil', icon: Symbols.person, route: AppRoutes.settings),
+          _NavItem(label: 'Boutiques', icon: Symbols.store, route: AppRoutes.settings),
+          _NavItem(label: 'Abonnement', icon: Symbols.card_membership, route: AppRoutes.settings),
+          _NavItem(label: 'Paramètres', icon: Symbols.settings, route: AppRoutes.settings),
+        ],
+      ),
+      if (isOwner)
+        _MenuGroup(
+          label: 'Propriétaire',
+          items: [
+            _NavItem(label: 'Dashboard', icon: Symbols.dashboard, route: AppRoutes.dashboard),
+          ],
+        ),
     ];
 
-    final ownerItems = [
-      _NavItem(label: 'Dashboard', icon: Symbols.dashboard, route: AppRoutes.dashboard),
-      _NavItem(label: 'Caisse', icon: Symbols.point_of_sale, route: AppRoutes.caisse),
-      _NavItem(label: 'Stock', icon: Symbols.inventory_2, route: AppRoutes.stock),
-      _NavItem(label: 'Tiers', icon: Symbols.people, route: AppRoutes.tiers),
-    ];
-
-    final items = isOwner ? ownerItems : managerItems;
-    final currentIndex = items.indexWhere((i) => location.startsWith(i.route));
+    final bottomItems = isOwner
+        ? [
+            _NavItem(label: 'Dashboard', icon: Symbols.dashboard, route: AppRoutes.dashboard),
+            _NavItem(label: 'Caisse', icon: Symbols.point_of_sale, route: AppRoutes.caisse),
+            _NavItem(label: 'Stock', icon: Symbols.inventory_2, route: AppRoutes.stock),
+            _NavItem(label: 'Tiers', icon: Symbols.people, route: AppRoutes.tiers),
+          ]
+        : [
+            _NavItem(label: 'Caisse', icon: Symbols.point_of_sale, route: AppRoutes.caisse),
+            _NavItem(label: 'Stock', icon: Symbols.inventory_2, route: AppRoutes.stock),
+            _NavItem(label: 'Tiers', icon: Symbols.people, route: AppRoutes.tiers),
+            _NavItem(label: 'Sessions', icon: Symbols.receipt_long, route: AppRoutes.sessions),
+          ];
+    final currentIndex = bottomItems.indexWhere((i) => location.startsWith(i.route));
 
     return Scaffold(
+      key: key,
       body: child,
+      drawer: Drawer(
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                color: AppColors.primary,
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      radius: 28,
+                      backgroundColor: AppColors.onPrimary,
+                      child: Icon(Symbols.store, color: AppColors.primary),
+                    ),
+                    const VGap(AppSpacing.md),
+                    Text(
+                      'BabiCash',
+                      style: AppTextStyles.headlineSmall.copyWith(color: AppColors.onPrimary),
+                    ),
+                    if (user != null)
+                      Text(
+                        user.nom,
+                        style: AppTextStyles.bodyMedium.copyWith(color: AppColors.onPrimary.withOpacity(0.8)),
+                      ),
+                    if (user != null)
+                      Text(
+                        user.isOwner ? 'Propriétaire' : 'Manager',
+                        style: AppTextStyles.bodySmall.copyWith(color: AppColors.onPrimary.withOpacity(0.7)),
+                      ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: menuGroups.length,
+                  itemBuilder: (context, index) {
+                    final group = menuGroups[index];
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.lg,
+                            AppSpacing.md,
+                            AppSpacing.lg,
+                            AppSpacing.xs,
+                          ),
+                          child: Text(
+                            group.label,
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: AppColors.textTertiary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        ...group.items.map((item) {
+                          final isSelected = location.startsWith(item.route);
+                          return ListTile(
+                            leading: Icon(
+                              item.icon,
+                              color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                            ),
+                            title: Text(
+                              item.label,
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                              ),
+                            ),
+                            selected: isSelected,
+                            selectedTileColor: AppColors.primaryContainer.withOpacity(0.5),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: AppSpacing.borderRadiusLg,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.lg,
+                            ),
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              context.go(item.route);
+                            },
+                          );
+                        }),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Symbols.logout, color: AppColors.error),
+                title: Text('Déconnexion', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.error)),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await ref.read(authStateProvider.notifier).logout();
+                },
+              ),
+              const VGap(AppSpacing.sm),
+            ],
+          ),
+        ),
+      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppColors.surface,
@@ -50,7 +191,7 @@ class ShellScreen extends ConsumerWidget {
           child: SizedBox(
             height: 64,
             child: Row(
-              children: items.asMap().entries.map((entry) {
+              children: bottomItems.asMap().entries.map((entry) {
                 final i = entry.key;
                 final item = entry.value;
                 final isSelected = i == currentIndex;
@@ -116,4 +257,10 @@ class _NavItem {
   final String label;
   final IconData icon;
   final String route;
+}
+
+class _MenuGroup {
+  const _MenuGroup({required this.label, required this.items});
+  final String label;
+  final List<_NavItem> items;
 }

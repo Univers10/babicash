@@ -6,6 +6,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/local/database.dart';
 import '../../../shared/widgets/amount_text.dart';
+import '../../../shared/widgets/menu_button.dart';
 import '../providers/tiers_provider.dart';
 
 class TiersScreen extends ConsumerWidget {
@@ -19,6 +20,7 @@ class TiersScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: const MenuButton(),
         title: const Text('Clients & Fournisseurs'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
