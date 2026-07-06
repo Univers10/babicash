@@ -94,8 +94,8 @@ _$RecuLigneImpl _$$RecuLigneImplFromJson(Map<String, dynamic> json) =>
     _$RecuLigneImpl(
       nom: json['nom'] as String,
       quantite: (json['quantite'] as num).toInt(),
-      prixUnitaire: (json['prix_unitaire'] as num).toDouble(),
-      totalLigne: (json['total_ligne'] as num).toDouble(),
+      prixUnitaire: parseDouble(json['prix_unitaire']),
+      totalLigne: parseDouble(json['total_ligne']),
     );
 
 Map<String, dynamic> _$$RecuLigneImplToJson(_$RecuLigneImpl instance) =>
@@ -116,7 +116,7 @@ _$RecuOutImpl _$$RecuOutImplFromJson(Map<String, dynamic> json) =>
       lignes: (json['lignes'] as List<dynamic>)
           .map((e) => RecuLigne.fromJson(e as Map<String, dynamic>))
           .toList(),
-      montantTotal: (json['montant_total'] as num).toDouble(),
+      montantTotal: parseDouble(json['montant_total']),
       clientNom: json['client_nom'] as String?,
     );
 
@@ -225,8 +225,8 @@ _$ProduitModelLiteImpl _$$ProduitModelLiteImplFromJson(
     _$ProduitModelLiteImpl(
       id: json['id'] as String,
       nom: json['nom'] as String,
-      prixAchatMoyen: (json['prix_achat_moyen'] as num).toDouble(),
-      prixVenteSuggere: (json['prix_vente_suggere'] as num).toDouble(),
+      prixAchatMoyen: parseDouble(json['prix_achat_moyen']),
+      prixVenteSuggere: parseDouble(json['prix_vente_suggere']),
       stockActuel: (json['stock_actuel'] as num).toInt(),
       stockAlerte: (json['stock_alerte'] as num).toInt(),
       categorieId: json['categorie_id'] as String?,

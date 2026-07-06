@@ -5,6 +5,7 @@ import '../../../data/local/database.dart';
 import '../../../data/remote/sync_api.dart';
 import '../../../data/models/sync_model.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/boutiques/providers/boutique_provider.dart';
 import '../../sessions/providers/sessions_provider.dart';
 import '../models/panier_item.dart';
 import 'package:drift/drift.dart' as drift;
@@ -95,7 +96,8 @@ class CaisseNotifier extends Notifier<void> {
     if (panier.isEmpty) return false;
 
     final user = ref.read(authStateProvider).value;
-    if (user?.boutiqueId == null) return false;
+    final boutiqueId = await ref.read(currentBoutiqueIdProvider.future);
+    if (user == null || boutiqueId == null) return false;
 
     ref.read(caisseLoadingProvider.notifier).state = true;
 
@@ -110,7 +112,7 @@ class CaisseNotifier extends Notifier<void> {
       // 1. Écriture locale (offline-first)
       await db.insertVente(LocalVentesCompanion(
         idLocal: drift.Value(idLocal),
-        boutiqueId: drift.Value(user!.boutiqueId!),
+        boutiqueId: drift.Value(boutiqueId),
         sessionId: sessionId != null ? drift.Value(sessionId) : const drift.Value.absent(),
         modePaiement: drift.Value(modePaiement),
         montantTotal: drift.Value(montantTotal),
@@ -137,7 +139,7 @@ class CaisseNotifier extends Notifier<void> {
             )).toList();
 
         final resp = await syncApi.push(SyncPushRequest(
-          boutiqueId: user.boutiqueId!,
+          boutiqueId: boutiqueId,
           ventes: [
             VenteIn(
               idLocal: idLocal,

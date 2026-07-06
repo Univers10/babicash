@@ -5,6 +5,7 @@ import '../../../core/errors/app_exception.dart';
 import '../../../data/local/database.dart';
 import '../../../data/remote/tiers_api.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/boutiques/providers/boutique_provider.dart';
 
 final tiersTypeProvider = StateProvider<String>((ref) => 'CLIENT');
 
@@ -14,8 +15,8 @@ final tiersProvider = FutureProvider.family<List<LocalTier>, String>(
   (ref, type) async {
     final db = ref.watch(appDatabaseProvider);
     final user = ref.watch(authStateProvider).value;
-    if (user?.boutiqueId == null) return [];
-    final boutiqueId = user!.boutiqueId!;
+    final boutiqueId = await ref.watch(currentBoutiqueIdProvider.future);
+    if (user == null || boutiqueId == null) return [];
 
     final connectivity = await Connectivity().checkConnectivity();
     if (!connectivity.contains(ConnectivityResult.none)) {

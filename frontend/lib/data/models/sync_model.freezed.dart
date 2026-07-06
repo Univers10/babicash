@@ -1022,9 +1022,9 @@ RecuLigne _$RecuLigneFromJson(Map<String, dynamic> json) {
 mixin _$RecuLigne {
   String get nom => throw _privateConstructorUsedError;
   int get quantite => throw _privateConstructorUsedError;
-  @JsonKey(name: 'prix_unitaire')
+  @JsonKey(name: 'prix_unitaire', fromJson: parseDouble)
   double get prixUnitaire => throw _privateConstructorUsedError;
-  @JsonKey(name: 'total_ligne')
+  @JsonKey(name: 'total_ligne', fromJson: parseDouble)
   double get totalLigne => throw _privateConstructorUsedError;
 
   /// Serializes this RecuLigne to a JSON map.
@@ -1045,8 +1045,9 @@ abstract class $RecuLigneCopyWith<$Res> {
   $Res call(
       {String nom,
       int quantite,
-      @JsonKey(name: 'prix_unitaire') double prixUnitaire,
-      @JsonKey(name: 'total_ligne') double totalLigne});
+      @JsonKey(name: 'prix_unitaire', fromJson: parseDouble)
+      double prixUnitaire,
+      @JsonKey(name: 'total_ligne', fromJson: parseDouble) double totalLigne});
 }
 
 /// @nodoc
@@ -1101,8 +1102,9 @@ abstract class _$$RecuLigneImplCopyWith<$Res>
   $Res call(
       {String nom,
       int quantite,
-      @JsonKey(name: 'prix_unitaire') double prixUnitaire,
-      @JsonKey(name: 'total_ligne') double totalLigne});
+      @JsonKey(name: 'prix_unitaire', fromJson: parseDouble)
+      double prixUnitaire,
+      @JsonKey(name: 'total_ligne', fromJson: parseDouble) double totalLigne});
 }
 
 /// @nodoc
@@ -1150,8 +1152,10 @@ class _$RecuLigneImpl implements _RecuLigne {
   const _$RecuLigneImpl(
       {required this.nom,
       required this.quantite,
-      @JsonKey(name: 'prix_unitaire') required this.prixUnitaire,
-      @JsonKey(name: 'total_ligne') required this.totalLigne});
+      @JsonKey(name: 'prix_unitaire', fromJson: parseDouble)
+      required this.prixUnitaire,
+      @JsonKey(name: 'total_ligne', fromJson: parseDouble)
+      required this.totalLigne});
 
   factory _$RecuLigneImpl.fromJson(Map<String, dynamic> json) =>
       _$$RecuLigneImplFromJson(json);
@@ -1161,10 +1165,10 @@ class _$RecuLigneImpl implements _RecuLigne {
   @override
   final int quantite;
   @override
-  @JsonKey(name: 'prix_unitaire')
+  @JsonKey(name: 'prix_unitaire', fromJson: parseDouble)
   final double prixUnitaire;
   @override
-  @JsonKey(name: 'total_ligne')
+  @JsonKey(name: 'total_ligne', fromJson: parseDouble)
   final double totalLigne;
 
   @override
@@ -1209,11 +1213,12 @@ class _$RecuLigneImpl implements _RecuLigne {
 
 abstract class _RecuLigne implements RecuLigne {
   const factory _RecuLigne(
-          {required final String nom,
-          required final int quantite,
-          @JsonKey(name: 'prix_unitaire') required final double prixUnitaire,
-          @JsonKey(name: 'total_ligne') required final double totalLigne}) =
-      _$RecuLigneImpl;
+      {required final String nom,
+      required final int quantite,
+      @JsonKey(name: 'prix_unitaire', fromJson: parseDouble)
+      required final double prixUnitaire,
+      @JsonKey(name: 'total_ligne', fromJson: parseDouble)
+      required final double totalLigne}) = _$RecuLigneImpl;
 
   factory _RecuLigne.fromJson(Map<String, dynamic> json) =
       _$RecuLigneImpl.fromJson;
@@ -1223,10 +1228,10 @@ abstract class _RecuLigne implements RecuLigne {
   @override
   int get quantite;
   @override
-  @JsonKey(name: 'prix_unitaire')
+  @JsonKey(name: 'prix_unitaire', fromJson: parseDouble)
   double get prixUnitaire;
   @override
-  @JsonKey(name: 'total_ligne')
+  @JsonKey(name: 'total_ligne', fromJson: parseDouble)
   double get totalLigne;
 
   /// Create a copy of RecuLigne
@@ -1253,7 +1258,7 @@ mixin _$RecuOut {
   @JsonKey(name: 'mode_paiement')
   String get modePaiement => throw _privateConstructorUsedError;
   List<RecuLigne> get lignes => throw _privateConstructorUsedError;
-  @JsonKey(name: 'montant_total')
+  @JsonKey(name: 'montant_total', fromJson: parseDouble)
   double get montantTotal => throw _privateConstructorUsedError;
   @JsonKey(name: 'client_nom')
   String? get clientNom => throw _privateConstructorUsedError;
@@ -1279,7 +1284,8 @@ abstract class $RecuOutCopyWith<$Res> {
       @JsonKey(name: 'date_vente') DateTime dateVente,
       @JsonKey(name: 'mode_paiement') String modePaiement,
       List<RecuLigne> lignes,
-      @JsonKey(name: 'montant_total') double montantTotal,
+      @JsonKey(name: 'montant_total', fromJson: parseDouble)
+      double montantTotal,
       @JsonKey(name: 'client_nom') String? clientNom});
 }
 
@@ -1358,7 +1364,8 @@ abstract class _$$RecuOutImplCopyWith<$Res> implements $RecuOutCopyWith<$Res> {
       @JsonKey(name: 'date_vente') DateTime dateVente,
       @JsonKey(name: 'mode_paiement') String modePaiement,
       List<RecuLigne> lignes,
-      @JsonKey(name: 'montant_total') double montantTotal,
+      @JsonKey(name: 'montant_total', fromJson: parseDouble)
+      double montantTotal,
       @JsonKey(name: 'client_nom') String? clientNom});
 }
 
@@ -1431,7 +1438,8 @@ class _$RecuOutImpl implements _RecuOut {
       @JsonKey(name: 'date_vente') required this.dateVente,
       @JsonKey(name: 'mode_paiement') required this.modePaiement,
       required final List<RecuLigne> lignes,
-      @JsonKey(name: 'montant_total') required this.montantTotal,
+      @JsonKey(name: 'montant_total', fromJson: parseDouble)
+      required this.montantTotal,
       @JsonKey(name: 'client_nom') this.clientNom})
       : _lignes = lignes;
 
@@ -1461,7 +1469,7 @@ class _$RecuOutImpl implements _RecuOut {
   }
 
   @override
-  @JsonKey(name: 'montant_total')
+  @JsonKey(name: 'montant_total', fromJson: parseDouble)
   final double montantTotal;
   @override
   @JsonKey(name: 'client_nom')
@@ -1529,7 +1537,8 @@ abstract class _RecuOut implements RecuOut {
       @JsonKey(name: 'date_vente') required final DateTime dateVente,
       @JsonKey(name: 'mode_paiement') required final String modePaiement,
       required final List<RecuLigne> lignes,
-      @JsonKey(name: 'montant_total') required final double montantTotal,
+      @JsonKey(name: 'montant_total', fromJson: parseDouble)
+      required final double montantTotal,
       @JsonKey(name: 'client_nom') final String? clientNom}) = _$RecuOutImpl;
 
   factory _RecuOut.fromJson(Map<String, dynamic> json) = _$RecuOutImpl.fromJson;
@@ -1551,7 +1560,7 @@ abstract class _RecuOut implements RecuOut {
   @override
   List<RecuLigne> get lignes;
   @override
-  @JsonKey(name: 'montant_total')
+  @JsonKey(name: 'montant_total', fromJson: parseDouble)
   double get montantTotal;
   @override
   @JsonKey(name: 'client_nom')
@@ -2583,9 +2592,9 @@ ProduitModelLite _$ProduitModelLiteFromJson(Map<String, dynamic> json) {
 mixin _$ProduitModelLite {
   String get id => throw _privateConstructorUsedError;
   String get nom => throw _privateConstructorUsedError;
-  @JsonKey(name: 'prix_achat_moyen')
+  @JsonKey(name: 'prix_achat_moyen', fromJson: parseDouble)
   double get prixAchatMoyen => throw _privateConstructorUsedError;
-  @JsonKey(name: 'prix_vente_suggere')
+  @JsonKey(name: 'prix_vente_suggere', fromJson: parseDouble)
   double get prixVenteSuggere => throw _privateConstructorUsedError;
   @JsonKey(name: 'stock_actuel')
   int get stockActuel => throw _privateConstructorUsedError;
@@ -2613,8 +2622,10 @@ abstract class $ProduitModelLiteCopyWith<$Res> {
   $Res call(
       {String id,
       String nom,
-      @JsonKey(name: 'prix_achat_moyen') double prixAchatMoyen,
-      @JsonKey(name: 'prix_vente_suggere') double prixVenteSuggere,
+      @JsonKey(name: 'prix_achat_moyen', fromJson: parseDouble)
+      double prixAchatMoyen,
+      @JsonKey(name: 'prix_vente_suggere', fromJson: parseDouble)
+      double prixVenteSuggere,
       @JsonKey(name: 'stock_actuel') int stockActuel,
       @JsonKey(name: 'stock_alerte') int stockAlerte,
       @JsonKey(name: 'categorie_id') String? categorieId});
@@ -2687,8 +2698,10 @@ abstract class _$$ProduitModelLiteImplCopyWith<$Res>
   $Res call(
       {String id,
       String nom,
-      @JsonKey(name: 'prix_achat_moyen') double prixAchatMoyen,
-      @JsonKey(name: 'prix_vente_suggere') double prixVenteSuggere,
+      @JsonKey(name: 'prix_achat_moyen', fromJson: parseDouble)
+      double prixAchatMoyen,
+      @JsonKey(name: 'prix_vente_suggere', fromJson: parseDouble)
+      double prixVenteSuggere,
       @JsonKey(name: 'stock_actuel') int stockActuel,
       @JsonKey(name: 'stock_alerte') int stockAlerte,
       @JsonKey(name: 'categorie_id') String? categorieId});
@@ -2754,8 +2767,10 @@ class _$ProduitModelLiteImpl implements _ProduitModelLite {
   const _$ProduitModelLiteImpl(
       {required this.id,
       required this.nom,
-      @JsonKey(name: 'prix_achat_moyen') required this.prixAchatMoyen,
-      @JsonKey(name: 'prix_vente_suggere') required this.prixVenteSuggere,
+      @JsonKey(name: 'prix_achat_moyen', fromJson: parseDouble)
+      required this.prixAchatMoyen,
+      @JsonKey(name: 'prix_vente_suggere', fromJson: parseDouble)
+      required this.prixVenteSuggere,
       @JsonKey(name: 'stock_actuel') required this.stockActuel,
       @JsonKey(name: 'stock_alerte') required this.stockAlerte,
       @JsonKey(name: 'categorie_id') this.categorieId});
@@ -2768,10 +2783,10 @@ class _$ProduitModelLiteImpl implements _ProduitModelLite {
   @override
   final String nom;
   @override
-  @JsonKey(name: 'prix_achat_moyen')
+  @JsonKey(name: 'prix_achat_moyen', fromJson: parseDouble)
   final double prixAchatMoyen;
   @override
-  @JsonKey(name: 'prix_vente_suggere')
+  @JsonKey(name: 'prix_vente_suggere', fromJson: parseDouble)
   final double prixVenteSuggere;
   @override
   @JsonKey(name: 'stock_actuel')
@@ -2831,15 +2846,16 @@ class _$ProduitModelLiteImpl implements _ProduitModelLite {
 
 abstract class _ProduitModelLite implements ProduitModelLite {
   const factory _ProduitModelLite(
-      {required final String id,
-      required final String nom,
-      @JsonKey(name: 'prix_achat_moyen') required final double prixAchatMoyen,
-      @JsonKey(name: 'prix_vente_suggere')
-      required final double prixVenteSuggere,
-      @JsonKey(name: 'stock_actuel') required final int stockActuel,
-      @JsonKey(name: 'stock_alerte') required final int stockAlerte,
-      @JsonKey(name: 'categorie_id')
-      final String? categorieId}) = _$ProduitModelLiteImpl;
+          {required final String id,
+          required final String nom,
+          @JsonKey(name: 'prix_achat_moyen', fromJson: parseDouble)
+          required final double prixAchatMoyen,
+          @JsonKey(name: 'prix_vente_suggere', fromJson: parseDouble)
+          required final double prixVenteSuggere,
+          @JsonKey(name: 'stock_actuel') required final int stockActuel,
+          @JsonKey(name: 'stock_alerte') required final int stockAlerte,
+          @JsonKey(name: 'categorie_id') final String? categorieId}) =
+      _$ProduitModelLiteImpl;
 
   factory _ProduitModelLite.fromJson(Map<String, dynamic> json) =
       _$ProduitModelLiteImpl.fromJson;
@@ -2849,10 +2865,10 @@ abstract class _ProduitModelLite implements ProduitModelLite {
   @override
   String get nom;
   @override
-  @JsonKey(name: 'prix_achat_moyen')
+  @JsonKey(name: 'prix_achat_moyen', fromJson: parseDouble)
   double get prixAchatMoyen;
   @override
-  @JsonKey(name: 'prix_vente_suggere')
+  @JsonKey(name: 'prix_vente_suggere', fromJson: parseDouble)
   double get prixVenteSuggere;
   @override
   @JsonKey(name: 'stock_actuel')

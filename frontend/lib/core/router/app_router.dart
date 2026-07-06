@@ -5,6 +5,7 @@ import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/login_pin_screen.dart';
 import '../../features/caisse/screens/caisse_screen.dart';
+import '../../features/stock/screens/categories_screen.dart';
 import '../../features/stock/screens/stock_screen.dart';
 import '../../features/tiers/screens/tiers_screen.dart';
 import '../../features/sessions/screens/sessions_screen.dart';
@@ -17,6 +18,7 @@ abstract final class AppRoutes {
   static const loginPin = '/login-pin';
   static const caisse = '/caisse';
   static const stock = '/stock';
+  static const categories = '/categories';
   static const tiers = '/tiers';
   static const sessions = '/sessions';
   static const dashboard = '/dashboard';
@@ -48,6 +50,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.loginPin,
         builder: (_, __) => const LoginPinScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.categories,
+        builder: (_, __) => const CategoriesScreen(),
       ),
       ShellRoute(
         builder: (_, __, child) => ShellScreen(child: child),

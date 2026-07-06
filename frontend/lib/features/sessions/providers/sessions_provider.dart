@@ -6,13 +6,14 @@ import '../../../data/local/database.dart';
 import '../../../data/models/session_model.dart';
 import '../../../data/remote/sessions_api.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/boutiques/providers/boutique_provider.dart';
 
 /// Session active depuis le backend, sinon cache local.
 final sessionActiveProvider = FutureProvider<LocalSession?>((ref) async {
   final db = ref.watch(appDatabaseProvider);
   final user = ref.watch(authStateProvider).value;
-  if (user?.boutiqueId == null) return null;
-  final boutiqueId = user!.boutiqueId!;
+  final boutiqueId = await ref.watch(currentBoutiqueIdProvider.future);
+  if (user == null || boutiqueId == null) return null;
 
   final connectivity = await Connectivity().checkConnectivity();
   if (!connectivity.contains(ConnectivityResult.none)) {
@@ -53,10 +54,10 @@ final sessionActiveProvider = FutureProvider<LocalSession?>((ref) async {
 /// Liste des sessions locales (historique).
 final sessionsHistoryProvider = FutureProvider<List<LocalSession>>((ref) async {
   final db = ref.watch(appDatabaseProvider);
-  final user = ref.watch(authStateProvider).value;
-  if (user?.boutiqueId == null) return [];
+  final boutiqueId = await ref.watch(currentBoutiqueIdProvider.future);
+  if (boutiqueId == null) return [];
   return (db.select(db.localSessions)
-        ..where((s) => s.boutiqueId.equals(user!.boutiqueId!))
+        ..where((s) => s.boutiqueId.equals(boutiqueId))
         ..orderBy([
           (s) => drift.OrderingTerm(
               expression: s.dateOuverture, mode: drift.OrderingMode.desc)
@@ -72,8 +73,8 @@ class SessionNotifier extends AsyncNotifier<LocalSession?> {
 
   Future<bool> ouvrir(double montantInitial) async {
     final user = ref.read(authStateProvider).value;
-    if (user?.boutiqueId == null) return false;
-    final boutiqueId = user!.boutiqueId!;
+    final boutiqueId = await ref.read(currentBoutiqueIdProvider.future);
+    if (user == null || boutiqueId == null) return false;
     final db = ref.read(appDatabaseProvider);
 
     try {

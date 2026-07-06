@@ -100,6 +100,21 @@ class DashboardScreen extends ConsumerWidget {
   }
 }
 
+double _parseDouble(dynamic value) {
+  if (value == null) return 0;
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? 0;
+  return 0;
+}
+
+int _parseInt(dynamic value) {
+  if (value == null) return 0;
+  if (value is int) return value;
+  if (value is double) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? 0;
+  return 0;
+}
+
 // ── Corps dashboard ───────────────────────────────────────────────────────────
 
 class _DashboardBody extends StatelessWidget {
@@ -109,11 +124,9 @@ class _DashboardBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final boutiques = data['boutiques'] as List? ?? [];
-    final caTotal =
-        (data['ca_total'] as num?)?.toDouble() ?? 0;
-    final margeTotal =
-        (data['marge_totale'] as num?)?.toDouble() ?? 0;
-    final nbVentes = (data['nb_ventes_total'] as num?)?.toInt() ?? 0;
+    final caTotal = _parseDouble(data['ca_total']);
+    final margeTotal = _parseDouble(data['marge_totale']);
+    final nbVentes = _parseInt(data['nb_ventes_total']);
 
     return RefreshIndicator(
       onRefresh: () async {},
@@ -223,14 +236,10 @@ class _MiniKpi extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label,
-                style: const TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 11,
-                    color: Colors.white70)),
+                style: AppTextStyles.caption
+                    .copyWith(color: Colors.white70)),
             Text(value,
-                style: const TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 14,
+                style: AppTextStyles.bodyMedium.copyWith(
                     fontWeight: FontWeight.w700,
                     color: Colors.white)),
           ],
@@ -247,9 +256,9 @@ class _BoutiqueCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final nom = boutique['boutique_nom'] as String? ?? '—';
-    final ca = (boutique['chiffre_affaires'] as num?)?.toDouble() ?? 0;
-    final marge = (boutique['marge_nette'] as num?)?.toDouble() ?? 0;
-    final nbVentes = (boutique['nb_ventes'] as num?)?.toInt() ?? 0;
+    final ca = _parseDouble(boutique['chiffre_affaires']);
+    final marge = _parseDouble(boutique['marge_nette']);
+    final nbVentes = _parseInt(boutique['nb_ventes']);
 
     return Card(
       child: Padding(
@@ -375,10 +384,7 @@ class _PeriodeSelector extends StatelessWidget {
               ),
               child: Text(
                 labels[opt]!,
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
+                style: AppTextStyles.labelMedium.copyWith(
                   color:
                       isSelected ? Colors.white : AppColors.textSecondary,
                 ),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
-/// Typographie BabiCash — police Inter.
+/// Typographie BabiCash — police système par défaut.
 /// Hiérarchie claire pour une lisibilité maximale sur petits écrans.
 abstract final class AppTextStyles {
-  static const String _fontFamily = 'Inter';
+  static const String? _fontFamily = null;
 
   // ── Display ──────────────────────────────────────────────────────────────
   static const TextStyle displayLarge = TextStyle(

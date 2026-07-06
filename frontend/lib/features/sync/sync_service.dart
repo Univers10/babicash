@@ -6,6 +6,7 @@ import '../../data/local/database.dart';
 import '../../data/models/sync_model.dart';
 import '../../data/remote/sync_api.dart';
 import '../../features/auth/providers/auth_provider.dart';
+import '../../features/boutiques/providers/boutique_provider.dart';
 
 class SyncService {
   const SyncService(this._ref);
@@ -15,7 +16,8 @@ class SyncService {
   /// Retourne le nombre d'items synchronisés.
   Future<int> pushPending() async {
     final user = _ref.read(authStateProvider).value;
-    if (user?.boutiqueId == null) return 0;
+    final boutiqueId = await _ref.read(currentBoutiqueIdProvider.future);
+    if (user == null || boutiqueId == null) return 0;
 
     // Vérifier connectivité
     final connectivity = await Connectivity().checkConnectivity();
@@ -23,7 +25,6 @@ class SyncService {
 
     final db = _ref.read(appDatabaseProvider);
     final syncApi = _ref.read(syncApiProvider);
-    final boutiqueId = user!.boutiqueId!;
 
     int synced = 0;
 
@@ -95,7 +96,8 @@ class SyncService {
   /// Pull le catalogue (produits + catégories) depuis le backend.
   Future<void> pullCatalogue() async {
     final user = _ref.read(authStateProvider).value;
-    if (user?.boutiqueId == null) return;
+    final boutiqueId = await _ref.read(currentBoutiqueIdProvider.future);
+    if (user == null || boutiqueId == null) return;
 
     final connectivity = await Connectivity().checkConnectivity();
     if (connectivity.contains(ConnectivityResult.none)) return;
@@ -104,12 +106,12 @@ class SyncService {
     final syncApi = _ref.read(syncApiProvider);
 
     try {
-      final resp = await syncApi.pull(user!.boutiqueId!);
+      final resp = await syncApi.pull(boutiqueId);
 
       await db.upsertAllProduits(resp.produits
           .map((p) => LocalProduitsCompanion(
                 id: drift.Value(p.id),
-                boutiqueId: drift.Value(user.boutiqueId!),
+                boutiqueId: drift.Value(boutiqueId),
                 nom: drift.Value(p.nom),
                 prixAchatMoyen: drift.Value(p.prixAchatMoyen),
                 prixVenteSuggere: drift.Value(p.prixVenteSuggere),
@@ -122,7 +124,7 @@ class SyncService {
       await db.upsertAllCategories(resp.categories
           .map((c) => LocalCategoriesCompanion(
                 id: drift.Value(c.id),
-                boutiqueId: drift.Value(user.boutiqueId!),
+                boutiqueId: drift.Value(boutiqueId),
                 nom: drift.Value(c.nom),
               ))
           .toList());

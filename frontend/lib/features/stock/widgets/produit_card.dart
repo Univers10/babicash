@@ -5,6 +5,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/local/database.dart';
 import '../../../shared/widgets/amount_text.dart';
+import 'produit_form_dialog.dart';
 
 class ProduitCard extends StatelessWidget {
   const ProduitCard({super.key, required this.produit});
@@ -21,7 +22,13 @@ class ProduitCard extends StatelessWidget {
     else if (enAlerte) stockColor = AppColors.warning;
 
     return Card(
-      child: Padding(
+      clipBehavior: Clip.hardEdge,
+      child: InkWell(
+        onTap: () => showDialog(
+          context: context,
+          builder: (_) => ProduitFormDialog(produit: produit),
+        ),
+        child: Padding(
         padding: AppSpacing.cardPadding,
         child: Row(
           children: [
@@ -89,6 +96,7 @@ class ProduitCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

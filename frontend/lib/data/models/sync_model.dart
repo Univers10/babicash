@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../core/utils/json_helpers.dart';
 
 part 'sync_model.freezed.dart';
 part 'sync_model.g.dart';
@@ -63,8 +64,10 @@ class RecuLigne with _$RecuLigne {
   const factory RecuLigne({
     required String nom,
     required int quantite,
-    @JsonKey(name: 'prix_unitaire') required double prixUnitaire,
-    @JsonKey(name: 'total_ligne') required double totalLigne,
+    @JsonKey(name: 'prix_unitaire', fromJson: parseDouble)
+    required double prixUnitaire,
+    @JsonKey(name: 'total_ligne', fromJson: parseDouble)
+    required double totalLigne,
   }) = _RecuLigne;
   factory RecuLigne.fromJson(Map<String, dynamic> json) =>
       _$RecuLigneFromJson(json);
@@ -79,7 +82,8 @@ class RecuOut with _$RecuOut {
     @JsonKey(name: 'date_vente') required DateTime dateVente,
     @JsonKey(name: 'mode_paiement') required String modePaiement,
     required List<RecuLigne> lignes,
-    @JsonKey(name: 'montant_total') required double montantTotal,
+    @JsonKey(name: 'montant_total', fromJson: parseDouble)
+    required double montantTotal,
     @JsonKey(name: 'client_nom') String? clientNom,
   }) = _RecuOut;
   factory RecuOut.fromJson(Map<String, dynamic> json) =>
@@ -143,8 +147,10 @@ class ProduitModelLite with _$ProduitModelLite {
   const factory ProduitModelLite({
     required String id,
     required String nom,
-    @JsonKey(name: 'prix_achat_moyen') required double prixAchatMoyen,
-    @JsonKey(name: 'prix_vente_suggere') required double prixVenteSuggere,
+    @JsonKey(name: 'prix_achat_moyen', fromJson: parseDouble)
+    required double prixAchatMoyen,
+    @JsonKey(name: 'prix_vente_suggere', fromJson: parseDouble)
+    required double prixVenteSuggere,
     @JsonKey(name: 'stock_actuel') required int stockActuel,
     @JsonKey(name: 'stock_alerte') required int stockAlerte,
     @JsonKey(name: 'categorie_id') String? categorieId,

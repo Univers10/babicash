@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../storage/secure_storage.dart';
 
-const String _baseUrl = 'http://10.0.2.2:8000'; // Android emulator → localhost
+const String _baseUrl = 'http://192.168.100.117:8000'; // Réseau local
+// Pour émulateur Android : 'http://10.0.2.2:8000'
 // Pour prod : 'https://api.babicash.ci'
 
 class ApiClient {
