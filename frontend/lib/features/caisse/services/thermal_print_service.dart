@@ -24,6 +24,9 @@ class ThermalPrintService {
     final b = EscPosBuilder();
     b.init();
     b.text(vente.nomBoutique, align: PosAlign.center, bold: true);
+    if (vente.caissierNom != null) {
+      b.text('Vendeur: ${vente.caissierNom}', align: PosAlign.center);
+    }
     b.feed(1);
     b.text(fmt.format(vente.date), align: PosAlign.center);
     b.text('-' * w);
@@ -53,9 +56,6 @@ class ThermalPrintService {
 
     if (vente.clientNom != null) {
       b.text(_lr('Client', vente.clientNom!, w), bold: true);
-    }
-    if (vente.caissierNom != null) {
-      b.text(_lr('Vendeur', vente.caissierNom!, w));
     }
     b.text(_lr('Mode', vente.modePaiement.toUpperCase(), w));
 

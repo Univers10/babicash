@@ -179,7 +179,7 @@ class _TicketDialogState extends State<TicketDialog> {
                 child: Column(
                   children: [
                     // En-tête boutique
-                    _TicketHeader(nom: vente.nomBoutique, date: fmt.format(vente.date)),
+                    _TicketHeader(nom: vente.nomBoutique, date: fmt.format(vente.date), caissierNom: vente.caissierNom),
                     const _Divider(),
 
                     // Lignes articles
@@ -213,13 +213,6 @@ class _TicketDialogState extends State<TicketDialog> {
                         value: vente.clientNom!,
                         bold: true,
                         valueColor: AppColors.primary,
-                      ),
-
-                    // Caissier
-                    if (vente.caissierNom != null)
-                      _TicketRow(
-                        label: 'Vendeur',
-                        value: vente.caissierNom!,
                       ),
 
                     // Paiement
@@ -426,6 +419,12 @@ class _TicketDialogState extends State<TicketDialog> {
                     style: pw.TextStyle(
                         fontWeight: pw.FontWeight.bold, fontSize: 14)),
               ),
+              if (vente.caissierNom != null)
+                pw.Center(
+                  child: pw.Text('Vendeur : ${vente.caissierNom}',
+                      style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold, fontSize: 9)),
+                ),
               pw.Center(
                 child: pw.Text(fmt.format(vente.date),
                     style: const pw.TextStyle(fontSize: 8)),
@@ -487,8 +486,6 @@ class _TicketDialogState extends State<TicketDialog> {
 
               if (vente.clientNom != null)
                 _pdfRow('Client', vente.clientNom!),
-              if (vente.caissierNom != null)
-                _pdfRow('Vendeur', vente.caissierNom!),
               _pdfRow('Mode', vente.modePaiement.toUpperCase()),
               if (vente.montantRecu > 0 && vente.montantRecu != vente.total) ...[
                 _pdfRow('Reçu', '${vente.montantRecu.toStringAsFixed(0)} F'),
@@ -529,9 +526,10 @@ class _TicketDialogState extends State<TicketDialog> {
 // ── Sous-widgets ticket ───────────────────────────────────────────────────────
 
 class _TicketHeader extends StatelessWidget {
-  const _TicketHeader({required this.nom, required this.date});
+  const _TicketHeader({required this.nom, required this.date, this.caissierNom});
   final String nom;
   final String date;
+  final String? caissierNom;
 
   @override
   Widget build(BuildContext context) {
@@ -542,6 +540,14 @@ class _TicketHeader extends StatelessWidget {
                 color: AppColors.primary,
                 fontWeight: FontWeight.w800,
                 fontSize: 16)),
+        if (caissierNom != null) ...
+          [
+            const SizedBox(height: 2),
+            Text('Vendeur : $caissierNom',
+                style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600)),
+          ],
         const SizedBox(height: 2),
         Text(date,
             style:
