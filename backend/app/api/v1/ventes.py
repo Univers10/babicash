@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime, timezone
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -168,3 +168,64 @@ async def list_ventes(
         )
 
     return VenteListResponse(total=total, ventes=ventes_out)
+
+
+# ── Retour marchandise ────────────────────────────────────────────────────────
+
+class RetourResponse(BaseModel):
+    vente_id: uuid.UUID
+    message: str
+    stock_remis: dict[str, int]  # {nom_produit: quantite remise}
+
+
+@router.post("/{vente_id}/retour", response_model=RetourResponse)
+async def retour_marchandise(
+    vente_id: uuid.UUID,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> RetourResponse:
+    """Annule une vente et remet le stock des produits associés."""
+    vente = (
+        await db.execute(
+            select(Vente)
+            .where(Vente.id == vente_id)
+            .options(selectinload(Vente.lignes))
+        )
+    ).scalar_one_or_none()
+
+    if vente is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vente introuvable.")
+
+    await get_authorized_boutique(db, current_user, vente.boutique_id)
+
+    # Remettre le stock pour chaque ligne
+    stock_remis: dict[str, int] = {}
+    produit_ids = [l.produit_id for l in vente.lignes if l.produit_id]
+    produits: dict[uuid.UUID, Produit] = {}
+    if produit_ids:
+        rows = (await db.execute(select(Produit).where(Produit.id.in_(produit_ids)))).scalars().all()
+        produits = {p.id: p for p in rows}
+
+    for ligne in vente.lignes:
+        if ligne.produit_id and ligne.produit_id in produits:
+            produit = produits[ligne.produit_id]
+            produit.stock_actuel += ligne.quantite
+            stock_remis[produit.nom] = ligne.quantite
+
+    # Rembourser le solde client si crédit
+    if vente.mode_paiement == "CREDIT" and vente.tier_id:
+        tier = (
+            await db.execute(select(CompteTiers).where(CompteTiers.id == vente.tier_id))
+        ).scalar_one_or_none()
+        if tier is not None:
+            tier.solde_du = max(Decimal("0.00"), tier.solde_du - vente.montant_total)
+
+    # Supprimer la vente (cascade supprime les lignes)
+    await db.delete(vente)
+    await db.commit()
+
+    return RetourResponse(
+        vente_id=vente_id,
+        message=f"Vente annulée. {len(stock_remis)} produit(s) remis en stock.",
+        stock_remis=stock_remis,
+    )

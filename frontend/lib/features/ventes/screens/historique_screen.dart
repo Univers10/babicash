@@ -8,6 +8,8 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/vente_model.dart';
 import '../../../data/remote/ventes_api.dart';
 import '../../../features/boutiques/providers/boutique_provider.dart';
+import '../../../features/caisse/models/panier_item.dart';
+import '../../../features/caisse/screens/ticket_screen.dart';
 import '../../../shared/widgets/amount_text.dart';
 
 // ── Provider ─────────────────────────────────────────────────────────────────
@@ -347,10 +349,98 @@ class _HistoriqueScreenState extends ConsumerState<HistoriqueScreen> {
 
 // ── Tuile vente ───────────────────────────────────────────────────────────────
 
-class _VenteTile extends StatelessWidget {
+class _VenteTile extends ConsumerStatefulWidget {
   const _VenteTile({required this.vente, required this.fmt});
   final VenteHistorique vente;
   final DateFormat fmt;
+
+  @override
+  ConsumerState<_VenteTile> createState() => _VenteTileState();
+}
+
+class _VenteTileState extends ConsumerState<_VenteTile> {
+  bool _loadingRetour = false;
+
+  VenteHistorique get vente => widget.vente;
+  DateFormat get fmt => widget.fmt;
+
+  VenteResume _toResume() {
+    final lignes = vente.lignes.map((l) => PanierItem(
+      produitId: l.produitId,
+      nom: l.produitNom ?? 'Article libre',
+      prixUnitaire: l.prixVenduReel,
+      prixAchat: 0,
+      quantite: l.quantite,
+      remise: 0,
+    )).toList();
+    return VenteResume(
+      lignes: lignes,
+      sousTotal: vente.montantTotal,
+      remiseGlobale: 0,
+      total: vente.montantTotal,
+      modePaiement: vente.modePaiement,
+      montantRecu: 0,
+      monnaie: 0,
+      date: vente.dateVente,
+      clientNom: vente.clientNom,
+    );
+  }
+
+  Future<void> _reimprimer(BuildContext ctx) async {
+    final resume = _toResume();
+    showDialog(
+      context: ctx,
+      builder: (_) => TicketDialog(vente: resume),
+    );
+  }
+
+  Future<void> _confirmerRetour(BuildContext ctx) async {
+    final confirm = await showDialog<bool>(
+      context: ctx,
+      builder: (_) => AlertDialog(
+        title: const Text('Retour marchandise'),
+        content: Text(
+          'Annuler cette vente de ${vente.montantTotal.toStringAsFixed(0)} F ?\n'
+          'Le stock des produits sera remis à jour.'
+          '${vente.modePaiement == "CREDIT" ? "\nLe solde client sera aussi ajusté." : ""}',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            child: const Text('Confirmer le retour',
+                style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true || !mounted) return;
+
+    setState(() => _loadingRetour = true);
+    try {
+      final api = ref.read(ventesApiProvider);
+      await api.retourMarchandise(vente.id);
+      ref.invalidate(_ventesProvider);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('✅ Retour effectué. Stock remis à jour.'),
+          backgroundColor: Colors.green,
+        ));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Erreur: $e'),
+          backgroundColor: Colors.red,
+        ));
+      }
+    }
+    if (mounted) setState(() => _loadingRetour = false);
+  }
 
   Color get _modeColor {
     switch (vente.modePaiement) {
@@ -437,37 +527,75 @@ class _VenteTile extends StatelessWidget {
         style: AppTextStyles.labelLarge.copyWith(
             color: AppColors.textPrimary, fontWeight: FontWeight.w700),
       ),
-      children: vente.lignes.map((l) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: Row(
-            children: [
-              Icon(
-                l.venteAPerte
-                    ? Symbols.trending_down
-                    : Symbols.circle,
-                size: 10,
-                color: l.venteAPerte
-                    ? AppColors.error
-                    : AppColors.textDisabled,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  '${l.produitNom ?? "Article libre"} × ${l.quantite}',
+      children: [
+        ...vente.lignes.map((l) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(
+              children: [
+                Icon(
+                  l.venteAPerte ? Symbols.trending_down : Symbols.circle,
+                  size: 10,
+                  color: l.venteAPerte ? AppColors.error : AppColors.textDisabled,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '${l.produitNom ?? "Article libre"} × ${l.quantite}',
+                    style: AppTextStyles.bodySmall
+                        .copyWith(color: AppColors.textSecondary),
+                  ),
+                ),
+                AmountText(
+                  amount: l.prixVenduReel * l.quantite,
                   style: AppTextStyles.bodySmall
-                      .copyWith(color: AppColors.textSecondary),
+                      .copyWith(color: AppColors.textPrimary),
+                ),
+              ],
+            ),
+          );
+        }),
+        // ── Boutons d'action ─────────────────────────────────────────
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _reimprimer(context),
+                icon: const Icon(Symbols.print, size: 16),
+                label: const Text('Réimprimer', style: TextStyle(fontSize: 12)),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  padding: const EdgeInsets.symmetric(vertical: 6),
                 ),
               ),
-              AmountText(
-                amount: l.prixVenduReel * l.quantite,
-                style: AppTextStyles.bodySmall
-                    .copyWith(color: AppColors.textPrimary),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _loadingRetour ? null : () => _confirmerRetour(context),
+                icon: _loadingRetour
+                    ? const SizedBox(
+                        width: 14, height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Symbols.undo, size: 16),
+                label: const Text('Retour', style: TextStyle(fontSize: 12)),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.error,
+                  side: const BorderSide(color: AppColors.error),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                ),
               ),
-            ],
-          ),
-        );
-      }).toList(),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+      ],
     );
   }
 }

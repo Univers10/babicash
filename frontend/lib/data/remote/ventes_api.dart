@@ -7,6 +7,10 @@ class VentesApi {
   VentesApi(this._dio);
   final Dio _dio;
 
+  Future<void> retourMarchandise(String venteId) async {
+    await _dio.post<Map<String, dynamic>>('/ventes/$venteId/retour');
+  }
+
   Future<VenteListResponse> listVentes({
     required String boutiqueId,
     String? modePaiement,

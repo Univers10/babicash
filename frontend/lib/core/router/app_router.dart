@@ -33,7 +33,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     initialLocation: AppRoutes.caisse,
-    debugLogDiagnostics: false,
+    debugLogDiagnostics: true,
     redirect: (context, state) {
       final isLoggedIn = authState.hasValue && authState.value != null;
       final isOnAuth = state.matchedLocation == AppRoutes.login ||
