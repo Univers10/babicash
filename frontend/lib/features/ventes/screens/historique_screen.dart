@@ -462,7 +462,7 @@ class _VenteTileState extends ConsumerState<_VenteTile> {
   Future<void> _confirmerRetour(BuildContext ctx) async {
     final confirm = await showDialog<bool>(
       context: ctx,
-      builder: (_) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         title: const Text('Retour marchandise'),
         content: Text(
           'Annuler cette vente de ${vente.montantTotal.toStringAsFixed(0)} F ?\n'
@@ -471,11 +471,11 @@ class _VenteTileState extends ConsumerState<_VenteTile> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
+            onPressed: () => Navigator.pop(dialogCtx, false),
             child: const Text('Annuler'),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
+            onPressed: () => Navigator.pop(dialogCtx, true),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             child: const Text('Confirmer le retour',
                 style: TextStyle(color: Colors.white)),
