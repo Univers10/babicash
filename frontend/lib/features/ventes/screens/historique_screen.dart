@@ -518,7 +518,9 @@ class _VenteTileState extends ConsumerState<_VenteTile> {
         ],
       ),
       subtitle: Text(
-        fmt.format(vente.dateVente.toLocal()),
+        vente.caissierNom != null
+            ? '${fmt.format(vente.dateVente.toLocal())} · ${vente.caissierNom}'
+            : fmt.format(vente.dateVente.toLocal()),
         style:
             AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
       ),

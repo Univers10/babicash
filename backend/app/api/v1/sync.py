@@ -27,7 +27,8 @@ async def sync_push(
     db: AsyncSession = Depends(get_db),
 ) -> SyncPushResponse:
     boutique = await get_authorized_boutique(db, current_user, payload.boutique_id)
-    return await sync_service.push(db, boutique, payload)
+    caissier_id = uuid.UUID(current_user.id) if current_user.id else None
+    return await sync_service.push(db, boutique, payload, caissier_id=caissier_id)
 
 
 @router.get("/pull", response_model=SyncPullResponse)

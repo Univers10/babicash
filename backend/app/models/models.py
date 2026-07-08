@@ -179,6 +179,10 @@ class Vente(Base):
     id_local_smartphone: Mapped[str | None] = mapped_column(
         String(255), unique=True, nullable=True
     )
+    # Caissier qui a effectué la vente
+    caissier_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
     # Signalement propriétaire si au moins une ligne est vendue à perte
     signale_proprietaire: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False

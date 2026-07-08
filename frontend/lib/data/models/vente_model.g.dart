@@ -43,6 +43,8 @@ _$VenteHistoriqueImpl _$$VenteHistoriqueImplFromJson(
       signaleProprietaire: json['signale_proprietaire'] as bool? ?? false,
       tierId: json['tier_id'] as String?,
       clientNom: json['client_nom'] as String?,
+      caissierId: json['caissier_id'] as String?,
+      caissierNom: json['caissier_nom'] as String?,
       lignes: (json['lignes'] as List<dynamic>?)
               ?.map((e) =>
                   LigneVenteHistorique.fromJson(e as Map<String, dynamic>))
@@ -61,6 +63,8 @@ Map<String, dynamic> _$$VenteHistoriqueImplToJson(
       'signale_proprietaire': instance.signaleProprietaire,
       'tier_id': instance.tierId,
       'client_nom': instance.clientNom,
+      'caissier_id': instance.caissierId,
+      'caissier_nom': instance.caissierNom,
       'lignes': instance.lignes.map((e) => e.toJson()).toList(),
     };
 

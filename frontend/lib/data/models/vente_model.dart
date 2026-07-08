@@ -31,6 +31,8 @@ class VenteHistorique with _$VenteHistorique {
     @JsonKey(name: 'signale_proprietaire') @Default(false) bool signaleProprietaire,
     @JsonKey(name: 'tier_id') String? tierId,
     @JsonKey(name: 'client_nom') String? clientNom,
+    @JsonKey(name: 'caissier_id') String? caissierId,
+    @JsonKey(name: 'caissier_nom') String? caissierNom,
     @Default([]) List<LigneVenteHistorique> lignes,
   }) = _VenteHistorique;
 

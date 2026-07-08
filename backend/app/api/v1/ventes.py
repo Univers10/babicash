@@ -11,7 +11,7 @@ from sqlalchemy.orm import selectinload
 from app.access import get_authorized_boutique
 from app.core.db import get_db
 from app.deps import get_current_user
-from app.models import CompteTiers, LigneVente, Produit, Vente
+from app.models import CompteTiers, LigneVente, Produit, User, Vente
 from app.schemas.auth import CurrentUser
 
 router = APIRouter()
@@ -42,6 +42,8 @@ class VenteOut(BaseModel):
     signale_proprietaire: bool
     tier_id: uuid.UUID | None
     client_nom: str | None = None
+    caissier_id: uuid.UUID | None = None
+    caissier_nom: str | None = None
     lignes: list[LigneVenteOut] = []
 
 
@@ -60,6 +62,7 @@ async def list_ventes(
     date_fin: date | None = Query(None),
     search: str | None = Query(None, description="Recherche par nom client"),
     signale_seulement: bool = Query(False),
+    caissier_id: uuid.UUID | None = Query(None, description="Filtrer par caissier"),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
     current_user: CurrentUser = Depends(get_current_user),
@@ -87,6 +90,8 @@ async def list_ventes(
         )
     if signale_seulement:
         stmt = stmt.where(Vente.signale_proprietaire.is_(True))
+    if caissier_id:
+        stmt = stmt.where(Vente.caissier_id == caissier_id)
 
     # Filtre par nom client via jointure
     if search:
@@ -102,7 +107,7 @@ async def list_ventes(
         )
     ).scalars().unique().all()
 
-    # Charger les noms des produits et clients en batch
+    # Charger les noms des produits, clients et caissiers en batch
     tier_ids = {v.tier_id for v in rows if v.tier_id}
     tiers: dict[uuid.UUID, str] = {}
     if tier_ids:
@@ -110,6 +115,14 @@ async def list_ventes(
             await db.execute(select(CompteTiers).where(CompteTiers.id.in_(tier_ids)))
         ).scalars().all()
         tiers = {t.id: t.nom for t in tier_rows}
+
+    caissier_ids = {v.caissier_id for v in rows if v.caissier_id}
+    caissiers: dict[uuid.UUID, str] = {}
+    if caissier_ids:
+        user_rows = (
+            await db.execute(select(User).where(User.id.in_(caissier_ids)))
+        ).scalars().all()
+        caissiers = {u.id: u.nom for u in user_rows}
 
     produit_ids = {l.produit_id for v in rows for l in v.lignes if l.produit_id}
     produits: dict[uuid.UUID, str] = {}
@@ -133,6 +146,8 @@ async def list_ventes(
         )
     if signale_seulement:
         count_stmt = count_stmt.where(Vente.signale_proprietaire.is_(True))
+    if caissier_id:
+        count_stmt = count_stmt.where(Vente.caissier_id == caissier_id)
     if search:
         count_stmt = count_stmt.join(CompteTiers, Vente.tier_id == CompteTiers.id, isouter=True).where(
             CompteTiers.nom.ilike(f"%{search}%")
@@ -163,6 +178,8 @@ async def list_ventes(
                 signale_proprietaire=v.signale_proprietaire,
                 tier_id=v.tier_id,
                 client_nom=tiers.get(v.tier_id) if v.tier_id else None,
+                caissier_id=v.caissier_id,
+                caissier_nom=caissiers.get(v.caissier_id) if v.caissier_id else None,
                 lignes=lignes_out,
             )
         )

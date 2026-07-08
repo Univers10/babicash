@@ -342,6 +342,10 @@ mixin _$VenteHistorique {
   String? get tierId => throw _privateConstructorUsedError;
   @JsonKey(name: 'client_nom')
   String? get clientNom => throw _privateConstructorUsedError;
+  @JsonKey(name: 'caissier_id')
+  String? get caissierId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'caissier_nom')
+  String? get caissierNom => throw _privateConstructorUsedError;
   List<LigneVenteHistorique> get lignes => throw _privateConstructorUsedError;
 
   /// Serializes this VenteHistorique to a JSON map.
@@ -370,6 +374,8 @@ abstract class $VenteHistoriqueCopyWith<$Res> {
       @JsonKey(name: 'signale_proprietaire') bool signaleProprietaire,
       @JsonKey(name: 'tier_id') String? tierId,
       @JsonKey(name: 'client_nom') String? clientNom,
+      @JsonKey(name: 'caissier_id') String? caissierId,
+      @JsonKey(name: 'caissier_nom') String? caissierNom,
       List<LigneVenteHistorique> lignes});
 }
 
@@ -396,6 +402,8 @@ class _$VenteHistoriqueCopyWithImpl<$Res, $Val extends VenteHistorique>
     Object? signaleProprietaire = null,
     Object? tierId = freezed,
     Object? clientNom = freezed,
+    Object? caissierId = freezed,
+    Object? caissierNom = freezed,
     Object? lignes = null,
   }) {
     return _then(_value.copyWith(
@@ -431,6 +439,14 @@ class _$VenteHistoriqueCopyWithImpl<$Res, $Val extends VenteHistorique>
           ? _value.clientNom
           : clientNom // ignore: cast_nullable_to_non_nullable
               as String?,
+      caissierId: freezed == caissierId
+          ? _value.caissierId
+          : caissierId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      caissierNom: freezed == caissierNom
+          ? _value.caissierNom
+          : caissierNom // ignore: cast_nullable_to_non_nullable
+              as String?,
       lignes: null == lignes
           ? _value.lignes
           : lignes // ignore: cast_nullable_to_non_nullable
@@ -457,6 +473,8 @@ abstract class _$$VenteHistoriqueImplCopyWith<$Res>
       @JsonKey(name: 'signale_proprietaire') bool signaleProprietaire,
       @JsonKey(name: 'tier_id') String? tierId,
       @JsonKey(name: 'client_nom') String? clientNom,
+      @JsonKey(name: 'caissier_id') String? caissierId,
+      @JsonKey(name: 'caissier_nom') String? caissierNom,
       List<LigneVenteHistorique> lignes});
 }
 
@@ -481,6 +499,8 @@ class __$$VenteHistoriqueImplCopyWithImpl<$Res>
     Object? signaleProprietaire = null,
     Object? tierId = freezed,
     Object? clientNom = freezed,
+    Object? caissierId = freezed,
+    Object? caissierNom = freezed,
     Object? lignes = null,
   }) {
     return _then(_$VenteHistoriqueImpl(
@@ -516,6 +536,14 @@ class __$$VenteHistoriqueImplCopyWithImpl<$Res>
           ? _value.clientNom
           : clientNom // ignore: cast_nullable_to_non_nullable
               as String?,
+      caissierId: freezed == caissierId
+          ? _value.caissierId
+          : caissierId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      caissierNom: freezed == caissierNom
+          ? _value.caissierNom
+          : caissierNom // ignore: cast_nullable_to_non_nullable
+              as String?,
       lignes: null == lignes
           ? _value._lignes
           : lignes // ignore: cast_nullable_to_non_nullable
@@ -537,6 +565,8 @@ class _$VenteHistoriqueImpl implements _VenteHistorique {
       @JsonKey(name: 'signale_proprietaire') this.signaleProprietaire = false,
       @JsonKey(name: 'tier_id') this.tierId,
       @JsonKey(name: 'client_nom') this.clientNom,
+      @JsonKey(name: 'caissier_id') this.caissierId,
+      @JsonKey(name: 'caissier_nom') this.caissierNom,
       final List<LigneVenteHistorique> lignes = const []})
       : _lignes = lignes;
 
@@ -566,6 +596,12 @@ class _$VenteHistoriqueImpl implements _VenteHistorique {
   @override
   @JsonKey(name: 'client_nom')
   final String? clientNom;
+  @override
+  @JsonKey(name: 'caissier_id')
+  final String? caissierId;
+  @override
+  @JsonKey(name: 'caissier_nom')
+  final String? caissierNom;
   final List<LigneVenteHistorique> _lignes;
   @override
   @JsonKey()
@@ -577,7 +613,7 @@ class _$VenteHistoriqueImpl implements _VenteHistorique {
 
   @override
   String toString() {
-    return 'VenteHistorique(id: $id, boutiqueId: $boutiqueId, dateVente: $dateVente, montantTotal: $montantTotal, modePaiement: $modePaiement, signaleProprietaire: $signaleProprietaire, tierId: $tierId, clientNom: $clientNom, lignes: $lignes)';
+    return 'VenteHistorique(id: $id, boutiqueId: $boutiqueId, dateVente: $dateVente, montantTotal: $montantTotal, modePaiement: $modePaiement, signaleProprietaire: $signaleProprietaire, tierId: $tierId, clientNom: $clientNom, caissierId: $caissierId, caissierNom: $caissierNom, lignes: $lignes)';
   }
 
   @override
@@ -599,6 +635,10 @@ class _$VenteHistoriqueImpl implements _VenteHistorique {
             (identical(other.tierId, tierId) || other.tierId == tierId) &&
             (identical(other.clientNom, clientNom) ||
                 other.clientNom == clientNom) &&
+            (identical(other.caissierId, caissierId) ||
+                other.caissierId == caissierId) &&
+            (identical(other.caissierNom, caissierNom) ||
+                other.caissierNom == caissierNom) &&
             const DeepCollectionEquality().equals(other._lignes, _lignes));
   }
 
@@ -614,6 +654,8 @@ class _$VenteHistoriqueImpl implements _VenteHistorique {
       signaleProprietaire,
       tierId,
       clientNom,
+      caissierId,
+      caissierNom,
       const DeepCollectionEquality().hash(_lignes));
 
   /// Create a copy of VenteHistorique
@@ -644,6 +686,8 @@ abstract class _VenteHistorique implements VenteHistorique {
       @JsonKey(name: 'signale_proprietaire') final bool signaleProprietaire,
       @JsonKey(name: 'tier_id') final String? tierId,
       @JsonKey(name: 'client_nom') final String? clientNom,
+      @JsonKey(name: 'caissier_id') final String? caissierId,
+      @JsonKey(name: 'caissier_nom') final String? caissierNom,
       final List<LigneVenteHistorique> lignes}) = _$VenteHistoriqueImpl;
 
   factory _VenteHistorique.fromJson(Map<String, dynamic> json) =
@@ -672,6 +716,12 @@ abstract class _VenteHistorique implements VenteHistorique {
   @override
   @JsonKey(name: 'client_nom')
   String? get clientNom;
+  @override
+  @JsonKey(name: 'caissier_id')
+  String? get caissierId;
+  @override
+  @JsonKey(name: 'caissier_nom')
+  String? get caissierNom;
   @override
   List<LigneVenteHistorique> get lignes;
 

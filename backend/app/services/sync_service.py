@@ -54,7 +54,8 @@ def _build_recu(
 
 
 async def _process_vente(
-    db: AsyncSession, boutique: Boutique, vente_in: VenteIn
+    db: AsyncSession, boutique: Boutique, vente_in: VenteIn,
+    caissier_id: uuid.UUID | None = None,
 ) -> tuple[VentePushResult, dict[uuid.UUID, Produit]]:
     # Idempotence: si l'id_local existe déjà, ne pas recréer.
     existing = (
@@ -90,6 +91,7 @@ async def _process_vente(
         mode_paiement=vente_in.mode_paiement,
         id_local_smartphone=vente_in.id_local_smartphone,
         montant_total=Decimal("0.00"),
+        caissier_id=caissier_id,
         synced=True,
     )
     if vente_in.date_vente is not None:
@@ -306,7 +308,8 @@ async def _process_entree_stock(
 
 
 async def push(
-    db: AsyncSession, boutique: Boutique, payload: SyncPushRequest
+    db: AsyncSession, boutique: Boutique, payload: SyncPushRequest,
+    caissier_id: uuid.UUID | None = None,
 ) -> SyncPushResponse:
     # Vérification quota freemium — uniquement pour les nouvelles ventes
     # (les idempotentes ne comptent pas, on les détecte en avance)
@@ -345,7 +348,7 @@ async def push(
     # Accumule les produits modifiés pour détecter les alertes stock
     produits_modifies: dict[uuid.UUID, Produit] = {}
     for vente_in in payload.ventes:
-        result, produits_vente = await _process_vente(db, boutique, vente_in)
+        result, produits_vente = await _process_vente(db, boutique, vente_in, caissier_id)
         response.ventes.append(result)
         produits_modifies.update(produits_vente)
     for depense_in in payload.depenses:
