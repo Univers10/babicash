@@ -13,7 +13,7 @@ _$TierModelImpl _$$TierModelImplFromJson(Map<String, dynamic> json) =>
       nom: json['nom'] as String,
       telephone: json['telephone'] as String?,
       typeTiers: json['type_tiers'] as String,
-      soldeDu: (json['solde_du'] as num?)?.toDouble() ?? 0,
+      soldeDu: json['solde_du'] == null ? 0 : parseDouble(json['solde_du']),
     );
 
 Map<String, dynamic> _$$TierModelImplToJson(_$TierModelImpl instance) =>

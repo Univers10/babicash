@@ -1,7 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/errors/app_exception.dart';
 import '../../../data/local/database.dart';
 import '../../../data/remote/tiers_api.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -16,13 +15,19 @@ final tiersProvider = FutureProvider.family<List<LocalTier>, String>(
     final db = ref.watch(appDatabaseProvider);
     final user = ref.watch(authStateProvider).value;
     final boutiqueId = await ref.watch(currentBoutiqueIdProvider.future);
+    // ignore: avoid_print
+    print('[tiersProvider] user=$user boutiqueId=$boutiqueId type=$type');
     if (user == null || boutiqueId == null) return [];
 
     final connectivity = await Connectivity().checkConnectivity();
+    // ignore: avoid_print
+    print('[tiersProvider] connectivity=$connectivity');
     if (!connectivity.contains(ConnectivityResult.none)) {
       try {
         final api = ref.watch(tiersApiProvider);
         final tiers = await api.listTiers(boutiqueId, typeTiers: type);
+        // ignore: avoid_print
+        print('[tiersProvider] API retourne ${tiers.length} tiers');
         await db.batch((b) {
           b.insertAllOnConflictUpdate(
             db.localTiers,
@@ -37,12 +42,16 @@ final tiersProvider = FutureProvider.family<List<LocalTier>, String>(
             )).toList(),
           );
         });
-      } on AppException {
-        // Fallback local silencieux
+      } catch (e) {
+        // ignore: avoid_print
+        print('[tiersProvider] ERREUR API: $e');
       }
     }
 
-    return db.getTiersByBoutique(boutiqueId, type: type);
+    final local = await db.getTiersByBoutique(boutiqueId, type: type);
+    // ignore: avoid_print
+    print('[tiersProvider] DB locale retourne ${local.length} tiers');
+    return local;
   },
 );
 

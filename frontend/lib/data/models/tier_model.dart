@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../core/utils/json_helpers.dart';
 
 part 'tier_model.freezed.dart';
 part 'tier_model.g.dart';
@@ -11,7 +12,7 @@ class TierModel with _$TierModel {
     required String nom,
     String? telephone,
     @JsonKey(name: 'type_tiers') required String typeTiers,
-    @JsonKey(name: 'solde_du') @Default(0) double soldeDu,
+    @JsonKey(name: 'solde_du', fromJson: parseDouble) @Default(0) double soldeDu,
   }) = _TierModel;
 
   factory TierModel.fromJson(Map<String, dynamic> json) =>

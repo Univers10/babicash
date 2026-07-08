@@ -37,9 +37,11 @@ dependencies:
   # Connectivity
   connectivity_plus: ^6.0.3
 
-  # PDF & partage WhatsApp
+  # PDF & impression thermique Bluetooth
   pdf: ^3.11.1
   printing: ^5.13.1
+  pos_universal_printer: ^0.2.10
+  permission_handler: ^11.3.1
   share_plus: ^12.0.2
   url_launcher: ^6.3.0
 

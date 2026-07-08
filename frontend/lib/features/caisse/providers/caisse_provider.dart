@@ -68,6 +68,13 @@ class PanierNotifier extends Notifier<List<PanierItem>> {
     ];
   }
 
+  void updateRemise(int index, double remise) {
+    state = [
+      for (int i = 0; i < state.length; i++)
+        if (i == index) state[i].copyWith(remise: remise.clamp(0, 100)) else state[i],
+    ];
+  }
+
   void remove(int index) {
     state = [
       for (int i = 0; i < state.length; i++)
@@ -80,6 +87,14 @@ class PanierNotifier extends Notifier<List<PanierItem>> {
 
 final panierProvider =
     NotifierProvider<PanierNotifier, List<PanierItem>>(PanierNotifier.new);
+
+// ── Remise globale (%) ────────────────────────────────────────────────────────
+
+final remiseGlobaleProvider = StateProvider<double>((_) => 0.0);
+
+// ── Client sélectionné ────────────────────────────────────────────────────────
+
+final clientSelectionneProvider = StateProvider<LocalTier?>((ref) => null);
 
 // ── Loading state ─────────────────────────────────────────────────────────────
 
@@ -104,16 +119,19 @@ class CaisseNotifier extends Notifier<void> {
     try {
       final db = ref.read(appDatabaseProvider);
       final idLocal = const Uuid().v4();
-      final montantTotal =
-          panier.fold(0.0, (sum, item) => sum + item.total);
+      final remiseGlobale = ref.read(remiseGlobaleProvider);
+      final sousTotal = panier.fold(0.0, (sum, item) => sum + item.total);
+      final montantTotal = sousTotal * (1 - remiseGlobale / 100);
       final sessionAsync = ref.read(sessionNotifierProvider);
       final sessionId = sessionAsync.valueOrNull?.id;
+      final client = ref.read(clientSelectionneProvider);
 
       // 1. Écriture locale (offline-first)
       await db.insertVente(LocalVentesCompanion(
         idLocal: drift.Value(idLocal),
         boutiqueId: drift.Value(boutiqueId),
         sessionId: sessionId != null ? drift.Value(sessionId) : const drift.Value.absent(),
+        tierId: client != null ? drift.Value(client.id) : const drift.Value.absent(),
         modePaiement: drift.Value(modePaiement),
         montantTotal: drift.Value(montantTotal),
         synced: const drift.Value(false),
@@ -145,6 +163,7 @@ class CaisseNotifier extends Notifier<void> {
               idLocal: idLocal,
               modePaiement: modePaiement,
               sessionId: sessionId,
+              tierId: client?.id,
               lignes: lignes,
             ),
           ],
@@ -159,6 +178,8 @@ class CaisseNotifier extends Notifier<void> {
       }
 
       ref.read(panierProvider.notifier).clear();
+      ref.read(remiseGlobaleProvider.notifier).state = 0.0;
+      ref.read(clientSelectionneProvider.notifier).state = null;
       return true;
     } finally {
       ref.read(caisseLoadingProvider.notifier).state = false;

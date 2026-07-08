@@ -10,12 +10,14 @@ class PanierItem with _$PanierItem {
     required double prixUnitaire,
     required double prixAchat,
     @Default(1) int quantite,
+    @Default(0.0) double remise, // pourcentage 0-100
   }) = _PanierItem;
 
   const PanierItem._();
 
-  double get total => prixUnitaire * quantite;
-  double get margeUnitaire => prixUnitaire - prixAchat;
+  double get prixApresRemise => prixUnitaire * (1 - remise / 100);
+  double get total => prixApresRemise * quantite;
+  double get margeUnitaire => prixApresRemise - prixAchat;
   double get margeTotal => margeUnitaire * quantite;
-  bool get aVendreAPerte => produitId != null && prixUnitaire < prixAchat;
+  bool get aVendreAPerte => produitId != null && prixApresRemise < prixAchat;
 }

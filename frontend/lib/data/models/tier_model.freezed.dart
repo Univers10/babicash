@@ -27,7 +27,7 @@ mixin _$TierModel {
   String? get telephone => throw _privateConstructorUsedError;
   @JsonKey(name: 'type_tiers')
   String get typeTiers => throw _privateConstructorUsedError;
-  @JsonKey(name: 'solde_du')
+  @JsonKey(name: 'solde_du', fromJson: parseDouble)
   double get soldeDu => throw _privateConstructorUsedError;
 
   /// Serializes this TierModel to a JSON map.
@@ -51,7 +51,7 @@ abstract class $TierModelCopyWith<$Res> {
       String nom,
       String? telephone,
       @JsonKey(name: 'type_tiers') String typeTiers,
-      @JsonKey(name: 'solde_du') double soldeDu});
+      @JsonKey(name: 'solde_du', fromJson: parseDouble) double soldeDu});
 }
 
 /// @nodoc
@@ -119,7 +119,7 @@ abstract class _$$TierModelImplCopyWith<$Res>
       String nom,
       String? telephone,
       @JsonKey(name: 'type_tiers') String typeTiers,
-      @JsonKey(name: 'solde_du') double soldeDu});
+      @JsonKey(name: 'solde_du', fromJson: parseDouble) double soldeDu});
 }
 
 /// @nodoc
@@ -180,7 +180,7 @@ class _$TierModelImpl implements _TierModel {
       required this.nom,
       this.telephone,
       @JsonKey(name: 'type_tiers') required this.typeTiers,
-      @JsonKey(name: 'solde_du') this.soldeDu = 0});
+      @JsonKey(name: 'solde_du', fromJson: parseDouble) this.soldeDu = 0});
 
   factory _$TierModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$TierModelImplFromJson(json);
@@ -198,7 +198,7 @@ class _$TierModelImpl implements _TierModel {
   @JsonKey(name: 'type_tiers')
   final String typeTiers;
   @override
-  @JsonKey(name: 'solde_du')
+  @JsonKey(name: 'solde_du', fromJson: parseDouble)
   final double soldeDu;
 
   @override
@@ -250,7 +250,8 @@ abstract class _TierModel implements TierModel {
       required final String nom,
       final String? telephone,
       @JsonKey(name: 'type_tiers') required final String typeTiers,
-      @JsonKey(name: 'solde_du') final double soldeDu}) = _$TierModelImpl;
+      @JsonKey(name: 'solde_du', fromJson: parseDouble)
+      final double soldeDu}) = _$TierModelImpl;
 
   factory _TierModel.fromJson(Map<String, dynamic> json) =
       _$TierModelImpl.fromJson;
@@ -268,7 +269,7 @@ abstract class _TierModel implements TierModel {
   @JsonKey(name: 'type_tiers')
   String get typeTiers;
   @override
-  @JsonKey(name: 'solde_du')
+  @JsonKey(name: 'solde_du', fromJson: parseDouble)
   double get soldeDu;
 
   /// Create a copy of TierModel

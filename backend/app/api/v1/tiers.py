@@ -1,7 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.access import get_authorized_boutique
@@ -59,6 +59,22 @@ async def create_tiers(
 ) -> CompteTiers:
     # OWNER et MANAGER (verrouillé sur sa boutique) peuvent créer un tiers
     await get_authorized_boutique(db, current_user, payload.boutique_id)
+    if payload.telephone:
+        existing = (
+            await db.execute(
+                select(CompteTiers).where(
+                    and_(
+                        CompteTiers.boutique_id == payload.boutique_id,
+                        CompteTiers.telephone == payload.telephone,
+                    )
+                )
+            )
+        ).scalar_one_or_none()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Un client avec le numéro {payload.telephone} existe déjà.",
+            )
     tier = CompteTiers(
         boutique_id=payload.boutique_id,
         nom=payload.nom,

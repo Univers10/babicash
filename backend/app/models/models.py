@@ -9,6 +9,7 @@ from sqlalchemy import (
     Integer,
     Numeric,
     String,
+    UniqueConstraint,
     Uuid,
     func,
 )
@@ -105,6 +106,9 @@ class Produit(Base):
 
 class CompteTiers(Base):
     __tablename__ = "comptes_tiers"
+    __table_args__ = (
+        UniqueConstraint("boutique_id", "telephone", name="uq_tiers_boutique_telephone"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4

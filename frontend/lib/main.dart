@@ -9,10 +9,11 @@ import 'features/sync/sync_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Portrait uniquement (standard pour les applications de caisse)
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
   ]);
 
   SystemChrome.setSystemUIOverlayStyle(

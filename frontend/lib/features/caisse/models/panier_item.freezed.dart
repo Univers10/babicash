@@ -21,6 +21,7 @@ mixin _$PanierItem {
   double get prixUnitaire => throw _privateConstructorUsedError;
   double get prixAchat => throw _privateConstructorUsedError;
   int get quantite => throw _privateConstructorUsedError;
+  double get remise => throw _privateConstructorUsedError;
 
   /// Create a copy of PanierItem
   /// with the given fields replaced by the non-null parameter values.
@@ -40,7 +41,8 @@ abstract class $PanierItemCopyWith<$Res> {
       String nom,
       double prixUnitaire,
       double prixAchat,
-      int quantite});
+      int quantite,
+      double remise});
 }
 
 /// @nodoc
@@ -63,6 +65,7 @@ class _$PanierItemCopyWithImpl<$Res, $Val extends PanierItem>
     Object? prixUnitaire = null,
     Object? prixAchat = null,
     Object? quantite = null,
+    Object? remise = null,
   }) {
     return _then(_value.copyWith(
       produitId: freezed == produitId
@@ -85,6 +88,10 @@ class _$PanierItemCopyWithImpl<$Res, $Val extends PanierItem>
           ? _value.quantite
           : quantite // ignore: cast_nullable_to_non_nullable
               as int,
+      remise: null == remise
+          ? _value.remise
+          : remise // ignore: cast_nullable_to_non_nullable
+              as double,
     ) as $Val);
   }
 }
@@ -102,7 +109,8 @@ abstract class _$$PanierItemImplCopyWith<$Res>
       String nom,
       double prixUnitaire,
       double prixAchat,
-      int quantite});
+      int quantite,
+      double remise});
 }
 
 /// @nodoc
@@ -123,6 +131,7 @@ class __$$PanierItemImplCopyWithImpl<$Res>
     Object? prixUnitaire = null,
     Object? prixAchat = null,
     Object? quantite = null,
+    Object? remise = null,
   }) {
     return _then(_$PanierItemImpl(
       produitId: freezed == produitId
@@ -145,6 +154,10 @@ class __$$PanierItemImplCopyWithImpl<$Res>
           ? _value.quantite
           : quantite // ignore: cast_nullable_to_non_nullable
               as int,
+      remise: null == remise
+          ? _value.remise
+          : remise // ignore: cast_nullable_to_non_nullable
+              as double,
     ));
   }
 }
@@ -157,7 +170,8 @@ class _$PanierItemImpl extends _PanierItem {
       required this.nom,
       required this.prixUnitaire,
       required this.prixAchat,
-      this.quantite = 1})
+      this.quantite = 1,
+      this.remise = 0.0})
       : super._();
 
   @override
@@ -171,10 +185,13 @@ class _$PanierItemImpl extends _PanierItem {
   @override
   @JsonKey()
   final int quantite;
+  @override
+  @JsonKey()
+  final double remise;
 
   @override
   String toString() {
-    return 'PanierItem(produitId: $produitId, nom: $nom, prixUnitaire: $prixUnitaire, prixAchat: $prixAchat, quantite: $quantite)';
+    return 'PanierItem(produitId: $produitId, nom: $nom, prixUnitaire: $prixUnitaire, prixAchat: $prixAchat, quantite: $quantite, remise: $remise)';
   }
 
   @override
@@ -190,12 +207,13 @@ class _$PanierItemImpl extends _PanierItem {
             (identical(other.prixAchat, prixAchat) ||
                 other.prixAchat == prixAchat) &&
             (identical(other.quantite, quantite) ||
-                other.quantite == quantite));
+                other.quantite == quantite) &&
+            (identical(other.remise, remise) || other.remise == remise));
   }
 
   @override
   int get hashCode => Object.hash(
-      runtimeType, produitId, nom, prixUnitaire, prixAchat, quantite);
+      runtimeType, produitId, nom, prixUnitaire, prixAchat, quantite, remise);
 
   /// Create a copy of PanierItem
   /// with the given fields replaced by the non-null parameter values.
@@ -212,7 +230,8 @@ abstract class _PanierItem extends PanierItem {
       required final String nom,
       required final double prixUnitaire,
       required final double prixAchat,
-      final int quantite}) = _$PanierItemImpl;
+      final int quantite,
+      final double remise}) = _$PanierItemImpl;
   const _PanierItem._() : super._();
 
   @override
@@ -225,6 +244,8 @@ abstract class _PanierItem extends PanierItem {
   double get prixAchat;
   @override
   int get quantite;
+  @override
+  double get remise;
 
   /// Create a copy of PanierItem
   /// with the given fields replaced by the non-null parameter values.
