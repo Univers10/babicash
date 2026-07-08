@@ -6,6 +6,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/local/database.dart';
 import '../../../features/abonnements/providers/quota_provider.dart';
+import '../../../data/remote/abonnements_api.dart';
+import '../../../data/models/abonnement_model.dart';
 import '../../../shared/widgets/amount_text.dart';
 import '../../../shared/widgets/menu_button.dart';
 import '../providers/caisse_provider.dart';
@@ -1452,16 +1454,30 @@ class _PaiementDialogState extends ConsumerState<_PaiementDialog> {
       clientNom: client?.nom,
     );
 
-    final ok = await ref
-        .read(caisseProvider.notifier)
-        .enregistrerVente(modePaiement: _modePaiement);
-    if (mounted) {
-      final rootCtx = Navigator.of(context, rootNavigator: true).context;
-      Navigator.of(context).pop();
-      if (ok) {
+    try {
+      final ok = await ref
+          .read(caisseProvider.notifier)
+          .enregistrerVente(modePaiement: _modePaiement);
+      if (mounted) {
+        final rootCtx = Navigator.of(context, rootNavigator: true).context;
+        Navigator.of(context).pop();
+        if (ok) {
+          showDialog(
+            context: rootCtx,
+            builder: (_) => TicketDialog(vente: vente),
+          );
+        }
+      }
+    } on QuotaException catch (e) {
+      if (mounted) {
+        final rootCtx = Navigator.of(context, rootNavigator: true).context;
+        Navigator.of(context).pop();
         showDialog(
           context: rootCtx,
-          builder: (_) => TicketDialog(vente: vente),
+          builder: (_) => _QuotaDepasseDialog(
+            ventesUtilisees: e.ventesUtilisees,
+            quota: e.quota,
+          ),
         );
       }
     }
@@ -1950,6 +1966,139 @@ class _ClientPickerDialogState extends ConsumerState<_ClientPickerDialog> {
                 ),
               ),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Dialog quota dépassé ──────────────────────────────────────────────────────
+
+class _QuotaDepasseDialog extends ConsumerStatefulWidget {
+  const _QuotaDepasseDialog({required this.ventesUtilisees, required this.quota});
+  final int ventesUtilisees;
+  final int quota;
+
+  @override
+  ConsumerState<_QuotaDepasseDialog> createState() => _QuotaDepasseDialogState();
+}
+
+class _QuotaDepasseDialogState extends ConsumerState<_QuotaDepasseDialog> {
+  bool _upgrading = false;
+
+  Future<void> _upgrade() async {
+    setState(() => _upgrading = true);
+    try {
+      final api = ref.read(abonnementsApiProvider);
+      await api.upgrade(const UpgradePlanRequest(plan: 'PRO'));
+      ref.invalidate(quotaProvider);
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('✅ Plan PRO activé ! Ventes illimitées.'),
+          backgroundColor: Colors.green,
+        ));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Erreur lors de l\'activation. Réessayez.'),
+          backgroundColor: Colors.red,
+        ));
+      }
+    }
+    if (mounted) setState(() => _upgrading = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Icône
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Symbols.lock, size: 36, color: AppColors.error),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Quota mensuel atteint',
+              style: AppTextStyles.headlineMedium.copyWith(
+                  fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Vous avez utilisé ${widget.ventesUtilisees}/${widget.quota} ventes ce mois.\nPassez au plan PRO pour des ventes illimitées.',
+              style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary, height: 1.5),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            // Prix
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.primaryContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Symbols.star, color: AppColors.primary, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Plan PRO — 5 000 FCFA/mois',
+                    style: AppTextStyles.labelLarge.copyWith(
+                        color: AppColors.primary, fontWeight: FontWeight.w700),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '✓ Ventes illimitées  ✓ Toutes les boutiques  ✓ Support prioritaire',
+              style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            // CTA Upgrade
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: _upgrading ? null : _upgrade,
+                icon: _upgrading
+                    ? const SizedBox(
+                        width: 18, height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Icon(Symbols.rocket_launch, size: 20),
+                label: Text(_upgrading ? 'Activation...' : 'Passer au plan PRO'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Pas maintenant',
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+            ),
           ],
         ),
       ),

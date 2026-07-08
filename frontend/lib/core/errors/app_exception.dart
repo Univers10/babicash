@@ -66,12 +66,13 @@ AppException mapDioError(DioException e) {
         case 401:
           return const UnauthorizedException();
         case 402:
-          // Quota freemium dépassé
-          if (data is Map && data['code'] == 'QUOTA_DEPASSE') {
+          // Quota freemium dépassé — FastAPI wrape dans {"detail": {...}}
+          final detail402 = data is Map ? (data['detail'] ?? data) : null;
+          if (detail402 is Map && detail402['code'] == 'QUOTA_DEPASSE') {
             return QuotaException(
-              ventesUtilisees: data['ventes_utilisees'] as int? ?? 0,
-              quota: data['quota'] as int? ?? 20,
-              plan: data['plan'] as String? ?? 'FREE',
+              ventesUtilisees: detail402['ventes_utilisees'] as int? ?? 0,
+              quota: detail402['quota'] as int? ?? 20,
+              plan: detail402['plan'] as String? ?? 'FREE',
             );
           }
           return const ForbiddenException('Abonnement requis.');

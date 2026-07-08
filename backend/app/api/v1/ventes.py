@@ -1,0 +1,170 @@
+import uuid
+from datetime import date, datetime, timezone
+from decimal import Decimal
+
+from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel, ConfigDict
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from app.access import get_authorized_boutique
+from app.core.db import get_db
+from app.deps import get_current_user
+from app.models import CompteTiers, LigneVente, Produit, Vente
+from app.schemas.auth import CurrentUser
+
+router = APIRouter()
+
+
+# ── Schemas ───────────────────────────────────────────────────────────────────
+
+class LigneVenteOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    produit_id: uuid.UUID | None
+    produit_nom: str | None = None
+    quantite: int
+    prix_vendu_reel: Decimal
+    marge_calculee: Decimal
+    vente_a_perte: bool
+
+
+class VenteOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    boutique_id: uuid.UUID
+    date_vente: datetime
+    montant_total: Decimal
+    mode_paiement: str
+    signale_proprietaire: bool
+    tier_id: uuid.UUID | None
+    client_nom: str | None = None
+    lignes: list[LigneVenteOut] = []
+
+
+class VenteListResponse(BaseModel):
+    total: int
+    ventes: list[VenteOut]
+
+
+# ── Endpoint ──────────────────────────────────────────────────────────────────
+
+@router.get("/", response_model=VenteListResponse)
+async def list_ventes(
+    boutique_id: uuid.UUID = Query(...),
+    mode_paiement: str | None = Query(None),
+    date_debut: date | None = Query(None),
+    date_fin: date | None = Query(None),
+    search: str | None = Query(None, description="Recherche par nom client"),
+    signale_seulement: bool = Query(False),
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> VenteListResponse:
+    await get_authorized_boutique(db, current_user, boutique_id)
+
+    stmt = (
+        select(Vente)
+        .where(Vente.boutique_id == boutique_id)
+        .options(
+            selectinload(Vente.lignes),
+        )
+    )
+
+    if mode_paiement:
+        stmt = stmt.where(Vente.mode_paiement == mode_paiement)
+    if date_debut:
+        stmt = stmt.where(
+            Vente.date_vente >= datetime(date_debut.year, date_debut.month, date_debut.day, tzinfo=timezone.utc)
+        )
+    if date_fin:
+        stmt = stmt.where(
+            Vente.date_vente < datetime(date_fin.year, date_fin.month, date_fin.day + 1, tzinfo=timezone.utc)
+        )
+    if signale_seulement:
+        stmt = stmt.where(Vente.signale_proprietaire.is_(True))
+
+    # Filtre par nom client via jointure
+    if search:
+        stmt = stmt.join(CompteTiers, Vente.tier_id == CompteTiers.id, isouter=True).where(
+            CompteTiers.nom.ilike(f"%{search}%")
+        )
+
+    total_stmt = stmt.with_only_columns(select(Vente.id).where(Vente.boutique_id == boutique_id).subquery().c.id)
+
+    rows = (
+        await db.execute(
+            stmt.order_by(Vente.date_vente.desc()).limit(limit).offset(offset)
+        )
+    ).scalars().unique().all()
+
+    # Charger les noms des produits et clients en batch
+    tier_ids = {v.tier_id for v in rows if v.tier_id}
+    tiers: dict[uuid.UUID, str] = {}
+    if tier_ids:
+        tier_rows = (
+            await db.execute(select(CompteTiers).where(CompteTiers.id.in_(tier_ids)))
+        ).scalars().all()
+        tiers = {t.id: t.nom for t in tier_rows}
+
+    produit_ids = {l.produit_id for v in rows for l in v.lignes if l.produit_id}
+    produits: dict[uuid.UUID, str] = {}
+    if produit_ids:
+        prod_rows = (
+            await db.execute(select(Produit).where(Produit.id.in_(produit_ids)))
+        ).scalars().all()
+        produits = {p.id: p.nom for p in prod_rows}
+
+    # Compter le total (sans limit/offset)
+    count_stmt = select(Vente.id).where(Vente.boutique_id == boutique_id)
+    if mode_paiement:
+        count_stmt = count_stmt.where(Vente.mode_paiement == mode_paiement)
+    if date_debut:
+        count_stmt = count_stmt.where(
+            Vente.date_vente >= datetime(date_debut.year, date_debut.month, date_debut.day, tzinfo=timezone.utc)
+        )
+    if date_fin:
+        count_stmt = count_stmt.where(
+            Vente.date_vente < datetime(date_fin.year, date_fin.month, date_fin.day + 1, tzinfo=timezone.utc)
+        )
+    if signale_seulement:
+        count_stmt = count_stmt.where(Vente.signale_proprietaire.is_(True))
+    if search:
+        count_stmt = count_stmt.join(CompteTiers, Vente.tier_id == CompteTiers.id, isouter=True).where(
+            CompteTiers.nom.ilike(f"%{search}%")
+        )
+    total = len((await db.execute(count_stmt)).scalars().all())
+
+    ventes_out: list[VenteOut] = []
+    for v in rows:
+        lignes_out = [
+            LigneVenteOut(
+                id=l.id,
+                produit_id=l.produit_id,
+                produit_nom=produits.get(l.produit_id) if l.produit_id else "Article libre",
+                quantite=l.quantite,
+                prix_vendu_reel=l.prix_vendu_reel,
+                marge_calculee=l.marge_calculee,
+                vente_a_perte=l.vente_a_perte,
+            )
+            for l in v.lignes
+        ]
+        ventes_out.append(
+            VenteOut(
+                id=v.id,
+                boutique_id=v.boutique_id,
+                date_vente=v.date_vente,
+                montant_total=v.montant_total,
+                mode_paiement=v.mode_paiement,
+                signale_proprietaire=v.signale_proprietaire,
+                tier_id=v.tier_id,
+                client_nom=tiers.get(v.tier_id) if v.tier_id else None,
+                lignes=lignes_out,
+            )
+        )
+
+    return VenteListResponse(total=total, ventes=ventes_out)

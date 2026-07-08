@@ -1,6 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/errors/app_exception.dart';
+export '../../../core/errors/app_exception.dart' show QuotaException;
 import '../../../data/local/database.dart';
 import '../../../data/remote/sync_api.dart';
 import '../../../data/models/sync_model.dart';
@@ -173,8 +175,19 @@ class CaisseNotifier extends Notifier<void> {
         if (resp.ventes.isNotEmpty) {
           await db.marquerVenteSync(idLocal, resp.ventes.first.venteId);
         }
+      } on DioException catch (e) {
+        final appErr = mapDioError(e);
+        if (appErr is QuotaException) {
+          // Quota épuisé → supprimer la vente locale et remonter au UI
+          await db.deleteVente(idLocal);
+          ref.read(panierProvider.notifier).clear();
+          ref.read(remiseGlobaleProvider.notifier).state = 0.0;
+          ref.read(clientSelectionneProvider.notifier).state = null;
+          throw appErr;
+        }
+        // Autres erreurs réseau → restera synced=false pour le background worker
       } on AppException {
-        // Sync échouée → restera synced=false pour le background worker
+        // Autres erreurs app → restera synced=false pour le background worker
       }
 
       ref.read(panierProvider.notifier).clear();

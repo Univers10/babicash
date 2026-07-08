@@ -12,6 +12,7 @@ from app.api.v1 import (
     sync,
     tiers,
     users,
+    ventes,
 )
 
 api_router = APIRouter()
@@ -31,6 +32,7 @@ api_router.include_router(
 api_router.include_router(
     abonnements.router, prefix="/abonnements", tags=["abonnements"]
 )
+api_router.include_router(ventes.router, prefix="/ventes", tags=["ventes"])
 api_router.include_router(
     dashboard.router, prefix="/dashboard", tags=["dashboard"]
 )

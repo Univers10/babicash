@@ -33,6 +33,7 @@ class ShellScreen extends ConsumerWidget {
         label: 'Gestion',
         items: [
           _NavItem(label: 'Tiers', icon: Symbols.people, route: AppRoutes.tiers),
+          _NavItem(label: 'Historique', icon: Symbols.history, route: AppRoutes.historique),
           _NavItem(label: 'Sessions', icon: Symbols.receipt_long, route: AppRoutes.sessions),
         ],
       ),
@@ -58,13 +59,13 @@ class ShellScreen extends ConsumerWidget {
         ? [
             _NavItem(label: 'Dashboard', icon: Symbols.dashboard, route: AppRoutes.dashboard),
             _NavItem(label: 'Caisse', icon: Symbols.point_of_sale, route: AppRoutes.caisse),
+            _NavItem(label: 'Historique', icon: Symbols.history, route: AppRoutes.historique),
             _NavItem(label: 'Stock', icon: Symbols.inventory_2, route: AppRoutes.stock),
-            _NavItem(label: 'Tiers', icon: Symbols.people, route: AppRoutes.tiers),
           ]
         : [
             _NavItem(label: 'Caisse', icon: Symbols.point_of_sale, route: AppRoutes.caisse),
             _NavItem(label: 'Stock', icon: Symbols.inventory_2, route: AppRoutes.stock),
-            _NavItem(label: 'Tiers', icon: Symbols.people, route: AppRoutes.tiers),
+            _NavItem(label: 'Historique', icon: Symbols.history, route: AppRoutes.historique),
             _NavItem(label: 'Sessions', icon: Symbols.receipt_long, route: AppRoutes.sessions),
           ];
     final currentIndex = bottomItems.indexWhere((i) => location.startsWith(i.route));

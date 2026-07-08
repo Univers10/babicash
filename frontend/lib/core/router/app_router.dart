@@ -11,6 +11,7 @@ import '../../features/tiers/screens/tiers_screen.dart';
 import '../../features/sessions/screens/sessions_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
+import '../../features/ventes/screens/historique_screen.dart';
 import '../../shared/screens/shell_screen.dart';
 
 // Noms des routes
@@ -24,6 +25,7 @@ abstract final class AppRoutes {
   static const tiers = '/tiers';
   static const sessions = '/sessions';
   static const dashboard = '/dashboard';
+  static const historique = '/historique';
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -83,6 +85,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.dashboard,
             builder: (_, __) => const DashboardScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.historique,
+            builder: (_, __) => const HistoriqueScreen(),
           ),
         ],
       ),

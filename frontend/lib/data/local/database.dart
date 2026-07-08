@@ -154,6 +154,11 @@ class AppDatabase extends _$AppDatabase {
             ..where((l) => l.venteIdLocal.equals(idLocal)))
           .get();
 
+  Future<void> deleteVente(String idLocal) async {
+    await (delete(localLignesVente)..where((l) => l.venteIdLocal.equals(idLocal))).go();
+    await (delete(localVentes)..where((v) => v.idLocal.equals(idLocal))).go();
+  }
+
   Future<void> marquerVenteSync(String idLocal, String serverVenteId) =>
       (update(localVentes)..where((v) => v.idLocal.equals(idLocal)))
           .write(LocalVentesCompanion(
