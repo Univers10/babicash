@@ -17,6 +17,7 @@ import '../../../data/remote/tiers_api.dart';
 import '../../../data/models/tier_model.dart';
 import 'ticket_screen.dart';
 import '../widgets/catalogue_grid.dart';
+import '../../../features/stock/providers/stock_provider.dart';
 import '../models/panier_item.dart';
 
 // ── POS Screen ────────────────────────────────────────────────────────────────
@@ -58,6 +59,7 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
               quotaAsync: quotaAsync,
               searchCtrl: _searchCtrl,
               onSearch: (v) => setState(() => _searchQuery = v),
+              onRefresh: _refreshData,
             ),
             // ── Body ────────────────────────────────────────────────────────
             Expanded(
@@ -114,6 +116,12 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
   void _addProduit(LocalProduit p) =>
       ref.read(panierProvider.notifier).addProduit(p);
 
+  void _refreshData() {
+    ref.invalidate(stockProvider);
+    ref.invalidate(quotaProvider);
+    ref.invalidate(clientsProvider);
+  }
+
   void _showPaiement(BuildContext context) {
     showDialog(
       context: context,
@@ -140,10 +148,12 @@ class _PosTopBar extends StatelessWidget {
     required this.quotaAsync,
     required this.searchCtrl,
     required this.onSearch,
+    required this.onRefresh,
   });
   final AsyncValue quotaAsync;
   final TextEditingController searchCtrl;
   final ValueChanged<String> onSearch;
+  final VoidCallback onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -209,7 +219,16 @@ class _PosTopBar extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
+          // Bouton refresh
+          IconButton(
+            onPressed: onRefresh,
+            icon: const Icon(Symbols.refresh, color: Colors.white, size: 20),
+            tooltip: 'Recharger les données',
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+          const SizedBox(width: 4),
           // Quota chip
           quotaAsync.when(
             data: (info) {

@@ -184,9 +184,6 @@ class _TicketDialogState extends State<TicketDialog> {
                     ...vente.lignes.map((item) => _TicketLigne(item: item)),
                     const _Divider(),
 
-                    // Sous-total
-                    _TicketRow(label: 'Sous-total', value: '${vente.sousTotal.toStringAsFixed(0)} F'),
-
                     // Remise globale
                     if (vente.remiseGlobale > 0) ...[
                       _TicketRow(
@@ -456,9 +453,6 @@ class _TicketDialogState extends State<TicketDialog> {
 
               pw.Divider(),
 
-              // Sous-total
-              _pdfRow('Sous-total', '${vente.sousTotal.toStringAsFixed(0)} F'),
-
               // Remise globale
               if (vente.remiseGlobale > 0)
                 _pdfRow(
@@ -482,6 +476,8 @@ class _TicketDialogState extends State<TicketDialog> {
               ),
               pw.SizedBox(height: 4),
 
+              if (vente.clientNom != null)
+                _pdfRow('Client', vente.clientNom!),
               _pdfRow('Mode', vente.modePaiement.toUpperCase()),
               if (vente.montantRecu > 0 && vente.montantRecu != vente.total) ...[
                 _pdfRow('Reçu', '${vente.montantRecu.toStringAsFixed(0)} F'),

@@ -40,7 +40,6 @@ class ThermalPrintService {
 
     b.text('-' * w);
     b.feed(1);
-    b.text(_lr('Sous-total', '${vente.sousTotal.toStringAsFixed(0)} F', w));
 
     if (vente.remiseGlobale > 0) {
       final eco = (vente.sousTotal - vente.total).toStringAsFixed(0);
@@ -51,6 +50,10 @@ class ThermalPrintService {
     b.text(_lr('TOTAL', '${vente.total.toStringAsFixed(0)} F', w), bold: true);
     b.text('=' * w);
     b.feed(1);
+
+    if (vente.clientNom != null) {
+      b.text(_lr('Client', vente.clientNom!, w), bold: true);
+    }
     b.text(_lr('Mode', vente.modePaiement.toUpperCase(), w));
 
     if (vente.montantRecu > 0 && vente.montantRecu != vente.total) {
