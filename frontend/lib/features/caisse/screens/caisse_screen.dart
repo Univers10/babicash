@@ -11,6 +11,7 @@ import '../../../data/models/abonnement_model.dart';
 import '../../../shared/widgets/amount_text.dart';
 import '../../../shared/widgets/menu_button.dart';
 import '../providers/caisse_provider.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/boutiques/providers/boutique_provider.dart';
 import '../../../features/tiers/providers/tiers_provider.dart';
 import '../../../data/remote/tiers_api.dart';
@@ -1461,6 +1462,7 @@ class _PaiementDialogState extends ConsumerState<_PaiementDialog> {
         : _modes.contains('ESPECES') ? mEspeces : _modes.contains('MOBILE_MONEY') ? mMobile : 0.0;
     final monnaie = montantRecu > total ? montantRecu - total : 0.0;
 
+    final caissierNom = ref.read(authStateProvider).value?.nom;
     final vente = VenteResume(
       lignes: List.from(panier),
       sousTotal: sousTotal,
@@ -1471,6 +1473,7 @@ class _PaiementDialogState extends ConsumerState<_PaiementDialog> {
       monnaie: monnaie,
       date: DateTime.now(),
       clientNom: client?.nom,
+      caissierNom: caissierNom,
     );
 
     try {

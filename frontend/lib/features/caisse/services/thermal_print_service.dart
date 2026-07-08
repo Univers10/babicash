@@ -54,6 +54,9 @@ class ThermalPrintService {
     if (vente.clientNom != null) {
       b.text(_lr('Client', vente.clientNom!, w), bold: true);
     }
+    if (vente.caissierNom != null) {
+      b.text(_lr('Vendeur', vente.caissierNom!, w));
+    }
     b.text(_lr('Mode', vente.modePaiement.toUpperCase(), w));
 
     if (vente.montantRecu > 0 && vente.montantRecu != vente.total) {

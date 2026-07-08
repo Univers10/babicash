@@ -26,6 +26,7 @@ class VenteResume {
     required this.date,
     this.nomBoutique = 'BabiCash',
     this.clientNom,
+    this.caissierNom,
   });
 
   final List<PanierItem> lignes;
@@ -38,6 +39,7 @@ class VenteResume {
   final DateTime date;
   final String nomBoutique;
   final String? clientNom;
+  final String? caissierNom;
 }
 
 // ── Dialog ticket ─────────────────────────────────────────────────────────────
@@ -211,6 +213,13 @@ class _TicketDialogState extends State<TicketDialog> {
                         value: vente.clientNom!,
                         bold: true,
                         valueColor: AppColors.primary,
+                      ),
+
+                    // Caissier
+                    if (vente.caissierNom != null)
+                      _TicketRow(
+                        label: 'Vendeur',
+                        value: vente.caissierNom!,
                       ),
 
                     // Paiement
@@ -478,6 +487,8 @@ class _TicketDialogState extends State<TicketDialog> {
 
               if (vente.clientNom != null)
                 _pdfRow('Client', vente.clientNom!),
+              if (vente.caissierNom != null)
+                _pdfRow('Vendeur', vente.caissierNom!),
               _pdfRow('Mode', vente.modePaiement.toUpperCase()),
               if (vente.montantRecu > 0 && vente.montantRecu != vente.total) ...[
                 _pdfRow('Reçu', '${vente.montantRecu.toStringAsFixed(0)} F'),

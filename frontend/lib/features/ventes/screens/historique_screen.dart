@@ -21,12 +21,16 @@ class _FiltresVentes {
     this.dateFin,
     this.search,
     this.signaleSeulement = false,
+    this.caissierId,
+    this.caissierNom,
   });
   final String? modePaiement;
   final DateTime? dateDebut;
   final DateTime? dateFin;
   final String? search;
   final bool signaleSeulement;
+  final String? caissierId;
+  final String? caissierNom;
 
   _FiltresVentes copyWith({
     Object? modePaiement = _sentinel,
@@ -34,6 +38,8 @@ class _FiltresVentes {
     Object? dateFin = _sentinel,
     Object? search = _sentinel,
     bool? signaleSeulement,
+    Object? caissierId = _sentinel,
+    Object? caissierNom = _sentinel,
   }) =>
       _FiltresVentes(
         modePaiement: modePaiement == _sentinel ? this.modePaiement : modePaiement as String?,
@@ -41,6 +47,8 @@ class _FiltresVentes {
         dateFin: dateFin == _sentinel ? this.dateFin : dateFin as DateTime?,
         search: search == _sentinel ? this.search : search as String?,
         signaleSeulement: signaleSeulement ?? this.signaleSeulement,
+        caissierId: caissierId == _sentinel ? this.caissierId : caissierId as String?,
+        caissierNom: caissierNom == _sentinel ? this.caissierNom : caissierNom as String?,
       );
 
   static const _sentinel = Object();
@@ -60,6 +68,7 @@ final _ventesProvider = FutureProvider.autoDispose<VenteListResponse>((ref) asyn
     dateFin: filtres.dateFin,
     search: filtres.search,
     signaleSeulement: filtres.signaleSeulement,
+    caissierId: filtres.caissierId,
     limit: 100,
   );
 });
@@ -84,6 +93,47 @@ class _HistoriqueScreenState extends ConsumerState<HistoriqueScreen> {
     super.dispose();
   }
 
+  Future<void> _choisirVendeur(BuildContext context, _FiltresVentes filtres) async {
+    final ventes = ref.read(_ventesProvider).value?.ventes ?? [];
+    final vendeurs = <String, String>{};
+    for (final v in ventes) {
+      if (v.caissierId != null && v.caissierNom != null) {
+        vendeurs[v.caissierId!] = v.caissierNom!;
+      }
+    }
+    if (vendeurs.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Aucun vendeur trouvé dans les ventes affichées')),
+      );
+      return;
+    }
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: const Text('Filtrer par vendeur'),
+        children: [
+          for (final entry in vendeurs.entries)
+            SimpleDialogOption(
+              onPressed: () {
+                ref.read(_filtresProvider.notifier).state = filtres.copyWith(
+                  caissierId: entry.key,
+                  caissierNom: entry.value,
+                );
+                Navigator.of(ctx).pop();
+              },
+              child: Row(
+                children: [
+                  const Icon(Symbols.person, size: 16),
+                  const SizedBox(width: 8),
+                  Text(entry.value),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final filtres = ref.watch(_filtresProvider);
@@ -92,7 +142,8 @@ class _HistoriqueScreenState extends ConsumerState<HistoriqueScreen> {
         filtres.dateDebut != null ||
         filtres.dateFin != null ||
         (filtres.search?.isNotEmpty ?? false) ||
-        filtres.signaleSeulement;
+        filtres.signaleSeulement ||
+        filtres.caissierId != null;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -200,6 +251,19 @@ class _HistoriqueScreenState extends ConsumerState<HistoriqueScreen> {
                         onTap: () => ref.read(_filtresProvider.notifier).state =
                             filtres.copyWith(
                                 signaleSeulement: !filtres.signaleSeulement),
+                      ),
+                      const SizedBox(width: 6),
+                      _FiltreChip(
+                        label: filtres.caissierNom != null
+                            ? 'Vendeur: ${filtres.caissierNom}'
+                            : 'Vendeur',
+                        icon: Symbols.person,
+                        selected: filtres.caissierId != null,
+                        onTap: () => _choisirVendeur(context, filtres),
+                        onClear: filtres.caissierId != null
+                            ? () => ref.read(_filtresProvider.notifier).state =
+                                filtres.copyWith(caissierId: null, caissierNom: null)
+                            : null,
                       ),
                       const SizedBox(width: 6),
                       _DateChip(
@@ -383,6 +447,7 @@ class _VenteTileState extends ConsumerState<_VenteTile> {
       monnaie: 0,
       date: vente.dateVente,
       clientNom: vente.clientNom,
+      caissierNom: vente.caissierNom,
     );
   }
 
@@ -611,12 +676,14 @@ class _FiltreChip extends StatelessWidget {
     required this.selected,
     required this.onTap,
     this.color,
+    this.onClear,
   });
   final String label;
   final IconData icon;
   final bool selected;
   final VoidCallback onTap;
   final Color? color;
+  final VoidCallback? onClear;
 
   @override
   Widget build(BuildContext context) {
@@ -625,8 +692,8 @@ class _FiltreChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: EdgeInsets.only(
+            left: 10, top: 5, bottom: 5, right: onClear != null ? 4 : 10),
         decoration: BoxDecoration(
           color: selected ? c.withValues(alpha: 0.12) : AppColors.surfaceVariant,
           borderRadius: BorderRadius.circular(20),
@@ -648,6 +715,14 @@ class _FiltreChip extends StatelessWidget {
                 color: selected ? c : AppColors.textSecondary,
               ),
             ),
+            if (onClear != null) ...
+              [
+                const SizedBox(width: 2),
+                GestureDetector(
+                  onTap: onClear,
+                  child: Icon(Symbols.close, size: 13, color: c),
+                ),
+              ],
           ],
         ),
       ),

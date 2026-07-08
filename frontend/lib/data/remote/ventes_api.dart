@@ -18,6 +18,7 @@ class VentesApi {
     DateTime? dateFin,
     String? search,
     bool signaleSeulement = false,
+    String? caissierId,
     int limit = 50,
     int offset = 0,
   }) async {
@@ -32,6 +33,7 @@ class VentesApi {
           'date_fin': '${dateFin.year}-${dateFin.month.toString().padLeft(2, '0')}-${dateFin.day.toString().padLeft(2, '0')}',
         if (search != null && search.isNotEmpty) 'search': search,
         if (signaleSeulement) 'signale_seulement': true,
+        if (caissierId != null) 'caissier_id': caissierId,
         'limit': limit,
         'offset': offset,
       },
