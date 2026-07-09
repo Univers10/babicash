@@ -1,13 +1,13 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.access import get_authorized_boutique
 from app.core.db import get_db
 from app.deps import get_current_user, require_owner
-from app.models import Categorie
+from app.models import Categorie, Produit
 from app.schemas.auth import CurrentUser
 from app.schemas.crud import CategorieCreate, CategorieOut, CategorieUpdate
 
@@ -81,5 +81,18 @@ async def delete_categorie(
             status_code=status.HTTP_404_NOT_FOUND, detail="Catégorie introuvable"
         )
     await get_authorized_boutique(db, current_user, categorie.boutique_id)
+
+    # Vérifier si des produits utilisent cette catégorie
+    count = (
+        await db.execute(
+            select(func.count()).where(Produit.categorie_id == categorie_id)
+        )
+    ).scalar_one()
+    if count > 0:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Impossible de supprimer : {count} produit(s) utilisent cette catégorie. Déplacez-les d'abord.",
+        )
+
     await db.delete(categorie)
     await db.commit()

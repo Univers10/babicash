@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -146,7 +147,7 @@ class CategoriesScreen extends ConsumerWidget {
     final controller = TextEditingController(text: categorie?.nom ?? '');
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
@@ -171,7 +172,7 @@ class CategoriesScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogCtx).pop(),
             child: const Text('Annuler'),
           ),
           FilledButton.icon(
@@ -186,11 +187,14 @@ class CategoriesScreen extends ConsumerWidget {
                 } else {
                   await notifier.updateCategorie(categorie.id, nom);
                 }
-                if (context.mounted) Navigator.of(context).pop();
+                if (dialogCtx.mounted) Navigator.of(dialogCtx).pop();
               } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erreur : $e')),
+                if (dialogCtx.mounted) {
+                  ScaffoldMessenger.of(dialogCtx).showSnackBar(
+                    SnackBar(
+                      content: Text(_extractErrorMessage(e)),
+                      backgroundColor: AppColors.error,
+                    ),
                   );
                 }
               }
@@ -205,7 +209,7 @@ class CategoriesScreen extends ConsumerWidget {
   void _deleteCategorie(BuildContext context, WidgetRef ref, String id) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
@@ -219,7 +223,7 @@ class CategoriesScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogCtx).pop(),
             child: const Text('Annuler'),
           ),
           FilledButton.icon(
@@ -228,11 +232,15 @@ class CategoriesScreen extends ConsumerWidget {
             onPressed: () async {
               try {
                 await ref.read(categoriesCrudProvider.notifier).deleteCategorie(id);
-                if (context.mounted) Navigator.of(context).pop();
+                if (dialogCtx.mounted) Navigator.of(dialogCtx).pop();
               } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erreur : $e')),
+                if (dialogCtx.mounted) {
+                  final msg = _extractErrorMessage(e);
+                  ScaffoldMessenger.of(dialogCtx).showSnackBar(
+                    SnackBar(
+                      content: Text(msg),
+                      backgroundColor: AppColors.error,
+                    ),
                   );
                 }
               }
@@ -243,6 +251,16 @@ class CategoriesScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+String _extractErrorMessage(Object e) {
+  if (e is DioException && e.response?.data is Map) {
+    final detail = (e.response!.data as Map)['detail'];
+    if (detail is String) return detail;
+  }
+  return 'Erreur : $e';
 }
 
 // ── Carte catégorie (style Odoo POS) ─────────────────────────────────────────

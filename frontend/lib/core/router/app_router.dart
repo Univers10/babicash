@@ -55,10 +55,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.loginPin,
         builder: (_, __) => const LoginPinScreen(),
       ),
-      GoRoute(
-        path: AppRoutes.categories,
-        builder: (_, __) => const CategoriesScreen(),
-      ),
       ShellRoute(
         builder: (_, __, child) => ShellScreen(child: child),
         routes: [
@@ -69,6 +65,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.stock,
             builder: (_, __) => const StockScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.categories,
+            builder: (_, __) => const CategoriesScreen(),
           ),
           GoRoute(
             path: AppRoutes.tiers,
