@@ -30,6 +30,14 @@ class BoutiquesApi {
     );
     return BoutiqueModel.fromJson(resp.data!);
   }
+
+  Future<BoutiqueModel> renameBoutique(String boutiqueId, String nom) async {
+    final resp = await _dio.patch<Map<String, dynamic>>(
+      '$_baseUrl/boutiques/$boutiqueId',
+      data: {'nom': nom},
+    );
+    return BoutiqueModel.fromJson(resp.data!);
+  }
 }
 
 final boutiquesApiProvider = Provider<BoutiquesApi>((ref) {
