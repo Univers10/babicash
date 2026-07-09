@@ -107,12 +107,18 @@ class _BabiCashAppState extends ConsumerState<BabiCashApp> {
       return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: const Color(0xFFEAEAEA),
           body: Center(
             child: _videoReady && _ctrl != null
-                ? AspectRatio(
-                    aspectRatio: _ctrl!.value.aspectRatio,
-                    child: VideoPlayer(_ctrl!),
+                ? SizedBox.expand(
+                    child: FittedBox(
+                      fit: BoxFit.cover,
+                      child: SizedBox(
+                        width: _ctrl!.value.size.width,
+                        height: _ctrl!.value.size.height,
+                        child: VideoPlayer(_ctrl!),
+                      ),
+                    ),
                   )
                 : Image.asset(
                     'assets/images/logo.png',
