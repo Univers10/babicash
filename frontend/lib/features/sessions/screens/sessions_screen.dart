@@ -7,12 +7,23 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/local/database.dart';
 import '../../../data/models/session_model.dart';
+import '../../../data/models/vente_model.dart';
+import '../../../data/remote/ventes_api.dart';
+import '../../../features/boutiques/providers/boutique_provider.dart';
 import '../providers/sessions_provider.dart';
 import '../../../shared/widgets/amount_text.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_snackbar.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/menu_button.dart';
+
+/// Ventes de la session active (depuis le backend).
+final sessionVentesProvider = FutureProvider.family<VenteListResponse, String>((ref, sessionId) async {
+  final boutiqueId = await ref.watch(currentBoutiqueIdProvider.future);
+  if (boutiqueId == null) return const VenteListResponse(total: 0, ventes: []);
+  final api = ref.watch(ventesApiProvider);
+  return api.listVentes(boutiqueId: boutiqueId, sessionId: sessionId, limit: 200);
+});
 
 class SessionsScreen extends ConsumerWidget {
   const SessionsScreen({super.key});
@@ -213,7 +224,11 @@ class _SessionActiveState extends ConsumerState<_SessionActive> {
             value: AmountText.format(widget.session.montantInitial),
             icon: Symbols.payments,
           ),
-          const VGap(AppSpacing.xxxl),
+          const VGap(AppSpacing.xl),
+
+          // ── Ventes de la session ──────────────────────────────────────
+          _SessionVentesList(sessionId: widget.session.id),
+          const VGap(AppSpacing.xl),
 
           // Fermeture
           Text('Fermer la session', style: AppTextStyles.headlineSmall),
@@ -235,6 +250,223 @@ class _SessionActiveState extends ConsumerState<_SessionActive> {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Liste des ventes de la session ─────────────────────────────────────────
+
+class _SessionVentesList extends ConsumerWidget {
+  const _SessionVentesList({required this.sessionId});
+  final String sessionId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ventesAsync = ref.watch(sessionVentesProvider(sessionId));
+    final fmt = DateFormat('HH:mm');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Symbols.receipt_long, size: 20, color: AppColors.primary),
+            const SizedBox(width: 8),
+            Text('Ventes de la session', style: AppTextStyles.headlineSmall),
+            const Spacer(),
+            IconButton(
+              icon: const Icon(Symbols.refresh, size: 20),
+              onPressed: () => ref.invalidate(sessionVentesProvider(sessionId)),
+              tooltip: 'Actualiser',
+            ),
+          ],
+        ),
+        const VGap(AppSpacing.sm),
+        ventesAsync.when(
+          loading: () => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+          error: (e, _) => Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.error.withValues(alpha: 0.08),
+              borderRadius: AppSpacing.borderRadiusMd,
+            ),
+            child: Text('Erreur de chargement', style: AppTextStyles.bodySmall.copyWith(color: AppColors.error)),
+          ),
+          data: (response) {
+            final ventes = response.ventes;
+            if (ventes.isEmpty) {
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: AppSpacing.borderRadiusMd,
+                  border: Border.all(color: AppColors.borderLight),
+                ),
+                child: Column(
+                  children: [
+                    Icon(Symbols.point_of_sale, size: 32, color: AppColors.textDisabled),
+                    const SizedBox(height: 8),
+                    Text('Aucune vente pour cette session',
+                        style: AppTextStyles.bodySmall.copyWith(color: AppColors.textTertiary)),
+                  ],
+                ),
+              );
+            }
+
+            final totalEspeces = ventes
+                .where((v) => v.modePaiement == 'ESPECES')
+                .fold(0.0, (s, v) => s + v.montantTotal);
+            final totalMobile = ventes
+                .where((v) => v.modePaiement == 'MOBILE_MONEY')
+                .fold(0.0, (s, v) => s + v.montantTotal);
+            final totalCredit = ventes
+                .where((v) => v.modePaiement == 'CREDIT')
+                .fold(0.0, (s, v) => s + v.montantTotal);
+            final totalGlobal = ventes.fold(0.0, (s, v) => s + v.montantTotal);
+
+            return Column(
+              children: [
+                // Résumé rapide
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryContainer.withValues(alpha: 0.5),
+                    borderRadius: AppSpacing.borderRadiusMd,
+                  ),
+                  child: Wrap(
+                    spacing: 16,
+                    runSpacing: 8,
+                    children: [
+                      _VenteStat(label: 'Total', value: AmountText.format(totalGlobal), color: AppColors.primary),
+                      _VenteStat(label: '${ventes.length} ventes', value: '', color: AppColors.textSecondary),
+                      if (totalEspeces > 0)
+                        _VenteStat(label: 'Espèces', value: AmountText.format(totalEspeces), color: AppColors.success),
+                      if (totalMobile > 0)
+                        _VenteStat(label: 'Mobile', value: AmountText.format(totalMobile), color: AppColors.accent),
+                      if (totalCredit > 0)
+                        _VenteStat(label: 'Crédit', value: AmountText.format(totalCredit), color: AppColors.error),
+                    ],
+                  ),
+                ),
+                const VGap(AppSpacing.sm),
+                // Liste des ventes
+                ...ventes.take(50).map((v) => Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: AppSpacing.borderRadiusSm,
+                          border: Border.all(color: AppColors.borderLight),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: _modeColor(v.modePaiement).withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(_modeIcon(v.modePaiement), size: 16, color: _modeColor(v.modePaiement)),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    v.clientNom ?? _modeLabel(v.modePaiement),
+                                    style: AppTextStyles.labelMedium,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    '${fmt.format(v.dateVente.toLocal())} · ${v.lignes.length} article${v.lignes.length > 1 ? 's' : ''}',
+                                    style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              AmountText.format(v.montantTotal),
+                              style: AppTextStyles.labelMedium.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Color _modeColor(String mode) {
+    switch (mode) {
+      case 'ESPECES':
+        return AppColors.success;
+      case 'MOBILE_MONEY':
+        return AppColors.accent;
+      case 'CREDIT':
+        return AppColors.error;
+      default:
+        return AppColors.primary;
+    }
+  }
+
+  IconData _modeIcon(String mode) {
+    switch (mode) {
+      case 'ESPECES':
+        return Symbols.payments;
+      case 'MOBILE_MONEY':
+        return Symbols.phone_android;
+      case 'CREDIT':
+        return Symbols.credit_card;
+      default:
+        return Symbols.receipt;
+    }
+  }
+
+  String _modeLabel(String mode) {
+    switch (mode) {
+      case 'ESPECES':
+        return 'Espèces';
+      case 'MOBILE_MONEY':
+        return 'Mobile Money';
+      case 'CREDIT':
+        return 'Crédit';
+      default:
+        return mode;
+    }
+  }
+}
+
+class _VenteStat extends StatelessWidget {
+  const _VenteStat({required this.label, required this.value, required this.color});
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTextStyles.caption.copyWith(color: color)),
+        if (value.isNotEmpty)
+          Text(value, style: AppTextStyles.labelMedium.copyWith(color: color, fontWeight: FontWeight.w700)),
+      ],
     );
   }
 }

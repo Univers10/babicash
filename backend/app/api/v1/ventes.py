@@ -65,6 +65,7 @@ async def list_ventes(
     search: str | None = Query(None, description="Recherche par nom client"),
     signale_seulement: bool = Query(False),
     caissier_id: uuid.UUID | None = Query(None, description="Filtrer par caissier"),
+    session_id: uuid.UUID | None = Query(None, description="Filtrer par session de caisse"),
     include_retours: bool = Query(False, description="Inclure les ventes retournées"),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
@@ -95,6 +96,8 @@ async def list_ventes(
         stmt = stmt.where(Vente.signale_proprietaire.is_(True))
     if caissier_id:
         stmt = stmt.where(Vente.caissier_id == caissier_id)
+    if session_id:
+        stmt = stmt.where(Vente.session_id == session_id)
     if not include_retours:
         stmt = stmt.where(Vente.statut == 'ACTIVE')
 
