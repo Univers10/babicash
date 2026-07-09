@@ -49,7 +49,16 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
     final total = sousTotal * (1 - remiseGlobale / 100);
     final quotaAsync = ref.watch(quotaProvider);
     final isTablet = MediaQuery.of(context).size.width > 720;
-    final sessionActive = ref.watch(sessionNotifierProvider).valueOrNull;
+    final sessionAsync = ref.watch(sessionNotifierProvider);
+    final sessionActive = sessionAsync.valueOrNull;
+
+    // ── Écran verrouillé si pas de session ─────────────────────────────
+    if (sessionActive == null) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(child: _CaisseLockScreen(sessionAsync: sessionAsync)),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -64,25 +73,6 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
               onSearch: (v) => setState(() => _searchQuery = v),
               onRefresh: _refreshData,
             ),
-            // ── Alerte session ────────────────────────────────────────────
-            if (sessionActive == null)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                color: AppColors.warning.withValues(alpha: 0.15),
-                child: Row(
-                  children: [
-                    Icon(Symbols.warning, size: 18, color: AppColors.warning),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Aucune session ouverte. Ouvrez une session pour vendre.',
-                        style: TextStyle(fontSize: 12, color: AppColors.warning, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             // ── Body ────────────────────────────────────────────────────────
             Expanded(
               child: isTablet
@@ -2153,6 +2143,147 @@ class _QuotaDepasseDialogState extends ConsumerState<_QuotaDepasseDialog> {
               child: Text('Pas maintenant',
                   style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Écran de verrouillage caisse ───────────────────────────────────────────
+
+class _CaisseLockScreen extends ConsumerStatefulWidget {
+  const _CaisseLockScreen({required this.sessionAsync});
+  final AsyncValue<LocalSession?> sessionAsync;
+
+  @override
+  ConsumerState<_CaisseLockScreen> createState() => _CaisseLockScreenState();
+}
+
+class _CaisseLockScreenState extends ConsumerState<_CaisseLockScreen> {
+  final _fondCtrl = TextEditingController();
+  bool _loading = false;
+
+  @override
+  void dispose() {
+    _fondCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _ouvrirSession() async {
+    final montant = double.tryParse(_fondCtrl.text) ?? 0;
+    setState(() => _loading = true);
+    try {
+      final ok = await ref
+          .read(sessionNotifierProvider.notifier)
+          .ouvrir(montant);
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Impossible d\'ouvrir la session.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isLoading = widget.sessionAsync.isLoading;
+
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Icône cadenas
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(28),
+              ),
+              child: Icon(
+                Symbols.lock,
+                size: 48,
+                color: AppColors.primary.withValues(alpha: 0.7),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Caisse verrouillée',
+              style: AppTextStyles.headlineLarge.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Ouvrez une session pour commencer à vendre.',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 40),
+
+            if (isLoading)
+              const CircularProgressIndicator()
+            else ...[
+              // Champ fond de caisse
+              Container(
+                constraints: const BoxConstraints(maxWidth: 320),
+                child: TextField(
+                  controller: _fondCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Fond de caisse (FCFA)',
+                    hintText: '0',
+                    prefixIcon: const Icon(Symbols.payments),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: AppColors.surface,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Bouton ouvrir
+              Container(
+                constraints: const BoxConstraints(maxWidth: 320),
+                width: double.infinity,
+                height: 52,
+                child: FilledButton.icon(
+                  onPressed: _loading ? null : _ouvrirSession,
+                  icon: _loading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Symbols.lock_open, size: 20),
+                  label: Text(
+                    _loading ? 'Ouverture...' : 'Ouvrir la session',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
