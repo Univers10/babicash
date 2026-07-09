@@ -183,6 +183,13 @@ class Vente(Base):
     caissier_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
+    # Statut de la vente
+    statut: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="ACTIVE"
+    )  # ACTIVE | RETOURNEE
+    date_retour: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     # Signalement propriétaire si au moins une ligne est vendue à perte
     signale_proprietaire: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False

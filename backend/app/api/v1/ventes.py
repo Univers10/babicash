@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, UTC
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -44,6 +44,8 @@ class VenteOut(BaseModel):
     client_nom: str | None = None
     caissier_id: uuid.UUID | None = None
     caissier_nom: str | None = None
+    statut: str = 'ACTIVE'
+    date_retour: datetime | None = None
     lignes: list[LigneVenteOut] = []
 
 
@@ -63,6 +65,7 @@ async def list_ventes(
     search: str | None = Query(None, description="Recherche par nom client"),
     signale_seulement: bool = Query(False),
     caissier_id: uuid.UUID | None = Query(None, description="Filtrer par caissier"),
+    include_retours: bool = Query(False, description="Inclure les ventes retournées"),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
     current_user: CurrentUser = Depends(get_current_user),
@@ -92,6 +95,8 @@ async def list_ventes(
         stmt = stmt.where(Vente.signale_proprietaire.is_(True))
     if caissier_id:
         stmt = stmt.where(Vente.caissier_id == caissier_id)
+    if not include_retours:
+        stmt = stmt.where(Vente.statut == 'ACTIVE')
 
     # Filtre par nom client via jointure
     if search:
@@ -148,6 +153,8 @@ async def list_ventes(
         count_stmt = count_stmt.where(Vente.signale_proprietaire.is_(True))
     if caissier_id:
         count_stmt = count_stmt.where(Vente.caissier_id == caissier_id)
+    if not include_retours:
+        count_stmt = count_stmt.where(Vente.statut == 'ACTIVE')
     if search:
         count_stmt = count_stmt.join(CompteTiers, Vente.tier_id == CompteTiers.id, isouter=True).where(
             CompteTiers.nom.ilike(f"%{search}%")
@@ -180,6 +187,8 @@ async def list_ventes(
                 client_nom=tiers.get(v.tier_id) if v.tier_id else None,
                 caissier_id=v.caissier_id,
                 caissier_nom=caissiers.get(v.caissier_id) if v.caissier_id else None,
+                statut=v.statut,
+                date_retour=v.date_retour,
                 lignes=lignes_out,
             )
         )
@@ -237,8 +246,9 @@ async def retour_marchandise(
         if tier is not None:
             tier.solde_du = max(Decimal("0.00"), tier.solde_du - vente.montant_total)
 
-    # Supprimer la vente (cascade supprime les lignes)
-    await db.delete(vente)
+    # Marquer la vente comme retournée (conserver pour l'historique)
+    vente.statut = 'RETOURNEE'
+    vente.date_retour = datetime.now(UTC)
     await db.commit()
 
     return RetourResponse(

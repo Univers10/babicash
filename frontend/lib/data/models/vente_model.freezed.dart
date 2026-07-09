@@ -346,6 +346,9 @@ mixin _$VenteHistorique {
   String? get caissierId => throw _privateConstructorUsedError;
   @JsonKey(name: 'caissier_nom')
   String? get caissierNom => throw _privateConstructorUsedError;
+  String get statut => throw _privateConstructorUsedError;
+  @JsonKey(name: 'date_retour')
+  DateTime? get dateRetour => throw _privateConstructorUsedError;
   List<LigneVenteHistorique> get lignes => throw _privateConstructorUsedError;
 
   /// Serializes this VenteHistorique to a JSON map.
@@ -376,6 +379,8 @@ abstract class $VenteHistoriqueCopyWith<$Res> {
       @JsonKey(name: 'client_nom') String? clientNom,
       @JsonKey(name: 'caissier_id') String? caissierId,
       @JsonKey(name: 'caissier_nom') String? caissierNom,
+      String statut,
+      @JsonKey(name: 'date_retour') DateTime? dateRetour,
       List<LigneVenteHistorique> lignes});
 }
 
@@ -404,6 +409,8 @@ class _$VenteHistoriqueCopyWithImpl<$Res, $Val extends VenteHistorique>
     Object? clientNom = freezed,
     Object? caissierId = freezed,
     Object? caissierNom = freezed,
+    Object? statut = null,
+    Object? dateRetour = freezed,
     Object? lignes = null,
   }) {
     return _then(_value.copyWith(
@@ -447,6 +454,14 @@ class _$VenteHistoriqueCopyWithImpl<$Res, $Val extends VenteHistorique>
           ? _value.caissierNom
           : caissierNom // ignore: cast_nullable_to_non_nullable
               as String?,
+      statut: null == statut
+          ? _value.statut
+          : statut // ignore: cast_nullable_to_non_nullable
+              as String,
+      dateRetour: freezed == dateRetour
+          ? _value.dateRetour
+          : dateRetour // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       lignes: null == lignes
           ? _value.lignes
           : lignes // ignore: cast_nullable_to_non_nullable
@@ -475,6 +490,8 @@ abstract class _$$VenteHistoriqueImplCopyWith<$Res>
       @JsonKey(name: 'client_nom') String? clientNom,
       @JsonKey(name: 'caissier_id') String? caissierId,
       @JsonKey(name: 'caissier_nom') String? caissierNom,
+      String statut,
+      @JsonKey(name: 'date_retour') DateTime? dateRetour,
       List<LigneVenteHistorique> lignes});
 }
 
@@ -501,6 +518,8 @@ class __$$VenteHistoriqueImplCopyWithImpl<$Res>
     Object? clientNom = freezed,
     Object? caissierId = freezed,
     Object? caissierNom = freezed,
+    Object? statut = null,
+    Object? dateRetour = freezed,
     Object? lignes = null,
   }) {
     return _then(_$VenteHistoriqueImpl(
@@ -544,6 +563,14 @@ class __$$VenteHistoriqueImplCopyWithImpl<$Res>
           ? _value.caissierNom
           : caissierNom // ignore: cast_nullable_to_non_nullable
               as String?,
+      statut: null == statut
+          ? _value.statut
+          : statut // ignore: cast_nullable_to_non_nullable
+              as String,
+      dateRetour: freezed == dateRetour
+          ? _value.dateRetour
+          : dateRetour // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       lignes: null == lignes
           ? _value._lignes
           : lignes // ignore: cast_nullable_to_non_nullable
@@ -567,6 +594,8 @@ class _$VenteHistoriqueImpl implements _VenteHistorique {
       @JsonKey(name: 'client_nom') this.clientNom,
       @JsonKey(name: 'caissier_id') this.caissierId,
       @JsonKey(name: 'caissier_nom') this.caissierNom,
+      this.statut = 'ACTIVE',
+      @JsonKey(name: 'date_retour') this.dateRetour,
       final List<LigneVenteHistorique> lignes = const []})
       : _lignes = lignes;
 
@@ -602,6 +631,12 @@ class _$VenteHistoriqueImpl implements _VenteHistorique {
   @override
   @JsonKey(name: 'caissier_nom')
   final String? caissierNom;
+  @override
+  @JsonKey()
+  final String statut;
+  @override
+  @JsonKey(name: 'date_retour')
+  final DateTime? dateRetour;
   final List<LigneVenteHistorique> _lignes;
   @override
   @JsonKey()
@@ -613,7 +648,7 @@ class _$VenteHistoriqueImpl implements _VenteHistorique {
 
   @override
   String toString() {
-    return 'VenteHistorique(id: $id, boutiqueId: $boutiqueId, dateVente: $dateVente, montantTotal: $montantTotal, modePaiement: $modePaiement, signaleProprietaire: $signaleProprietaire, tierId: $tierId, clientNom: $clientNom, caissierId: $caissierId, caissierNom: $caissierNom, lignes: $lignes)';
+    return 'VenteHistorique(id: $id, boutiqueId: $boutiqueId, dateVente: $dateVente, montantTotal: $montantTotal, modePaiement: $modePaiement, signaleProprietaire: $signaleProprietaire, tierId: $tierId, clientNom: $clientNom, caissierId: $caissierId, caissierNom: $caissierNom, statut: $statut, dateRetour: $dateRetour, lignes: $lignes)';
   }
 
   @override
@@ -639,6 +674,9 @@ class _$VenteHistoriqueImpl implements _VenteHistorique {
                 other.caissierId == caissierId) &&
             (identical(other.caissierNom, caissierNom) ||
                 other.caissierNom == caissierNom) &&
+            (identical(other.statut, statut) || other.statut == statut) &&
+            (identical(other.dateRetour, dateRetour) ||
+                other.dateRetour == dateRetour) &&
             const DeepCollectionEquality().equals(other._lignes, _lignes));
   }
 
@@ -656,6 +694,8 @@ class _$VenteHistoriqueImpl implements _VenteHistorique {
       clientNom,
       caissierId,
       caissierNom,
+      statut,
+      dateRetour,
       const DeepCollectionEquality().hash(_lignes));
 
   /// Create a copy of VenteHistorique
@@ -688,6 +728,8 @@ abstract class _VenteHistorique implements VenteHistorique {
       @JsonKey(name: 'client_nom') final String? clientNom,
       @JsonKey(name: 'caissier_id') final String? caissierId,
       @JsonKey(name: 'caissier_nom') final String? caissierNom,
+      final String statut,
+      @JsonKey(name: 'date_retour') final DateTime? dateRetour,
       final List<LigneVenteHistorique> lignes}) = _$VenteHistoriqueImpl;
 
   factory _VenteHistorique.fromJson(Map<String, dynamic> json) =
@@ -722,6 +764,11 @@ abstract class _VenteHistorique implements VenteHistorique {
   @override
   @JsonKey(name: 'caissier_nom')
   String? get caissierNom;
+  @override
+  String get statut;
+  @override
+  @JsonKey(name: 'date_retour')
+  DateTime? get dateRetour;
   @override
   List<LigneVenteHistorique> get lignes;
 

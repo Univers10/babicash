@@ -19,6 +19,7 @@ class VentesApi {
     String? search,
     bool signaleSeulement = false,
     String? caissierId,
+    bool includeRetours = false,
     int limit = 50,
     int offset = 0,
   }) async {
@@ -34,6 +35,7 @@ class VentesApi {
         if (search != null && search.isNotEmpty) 'search': search,
         if (signaleSeulement) 'signale_seulement': true,
         if (caissierId != null) 'caissier_id': caissierId,
+        if (includeRetours) 'include_retours': true,
         'limit': limit,
         'offset': offset,
       },

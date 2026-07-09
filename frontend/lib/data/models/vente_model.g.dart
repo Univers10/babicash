@@ -45,6 +45,10 @@ _$VenteHistoriqueImpl _$$VenteHistoriqueImplFromJson(
       clientNom: json['client_nom'] as String?,
       caissierId: json['caissier_id'] as String?,
       caissierNom: json['caissier_nom'] as String?,
+      statut: json['statut'] as String? ?? 'ACTIVE',
+      dateRetour: json['date_retour'] == null
+          ? null
+          : DateTime.parse(json['date_retour'] as String),
       lignes: (json['lignes'] as List<dynamic>?)
               ?.map((e) =>
                   LigneVenteHistorique.fromJson(e as Map<String, dynamic>))
@@ -65,6 +69,8 @@ Map<String, dynamic> _$$VenteHistoriqueImplToJson(
       'client_nom': instance.clientNom,
       'caissier_id': instance.caissierId,
       'caissier_nom': instance.caissierNom,
+      'statut': instance.statut,
+      'date_retour': instance.dateRetour?.toIso8601String(),
       'lignes': instance.lignes.map((e) => e.toJson()).toList(),
     };
 

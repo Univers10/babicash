@@ -23,6 +23,7 @@ class _FiltresVentes {
     this.signaleSeulement = false,
     this.caissierId,
     this.caissierNom,
+    this.includeRetours = false,
   });
   final String? modePaiement;
   final DateTime? dateDebut;
@@ -31,6 +32,7 @@ class _FiltresVentes {
   final bool signaleSeulement;
   final String? caissierId;
   final String? caissierNom;
+  final bool includeRetours;
 
   _FiltresVentes copyWith({
     Object? modePaiement = _sentinel,
@@ -40,6 +42,7 @@ class _FiltresVentes {
     bool? signaleSeulement,
     Object? caissierId = _sentinel,
     Object? caissierNom = _sentinel,
+    bool? includeRetours,
   }) =>
       _FiltresVentes(
         modePaiement: modePaiement == _sentinel ? this.modePaiement : modePaiement as String?,
@@ -49,6 +52,7 @@ class _FiltresVentes {
         signaleSeulement: signaleSeulement ?? this.signaleSeulement,
         caissierId: caissierId == _sentinel ? this.caissierId : caissierId as String?,
         caissierNom: caissierNom == _sentinel ? this.caissierNom : caissierNom as String?,
+        includeRetours: includeRetours ?? this.includeRetours,
       );
 
   static const _sentinel = Object();
@@ -69,6 +73,7 @@ final _ventesProvider = FutureProvider.autoDispose<VenteListResponse>((ref) asyn
     search: filtres.search,
     signaleSeulement: filtres.signaleSeulement,
     caissierId: filtres.caissierId,
+    includeRetours: filtres.includeRetours,
     limit: 100,
   );
 });
@@ -251,6 +256,15 @@ class _HistoriqueScreenState extends ConsumerState<HistoriqueScreen> {
                         onTap: () => ref.read(_filtresProvider.notifier).state =
                             filtres.copyWith(
                                 signaleSeulement: !filtres.signaleSeulement),
+                      ),
+                      const SizedBox(width: 6),
+                      _FiltreChip(
+                        label: 'Retours',
+                        icon: Symbols.undo,
+                        selected: filtres.includeRetours,
+                        color: Colors.deepOrange,
+                        onTap: () => ref.read(_filtresProvider.notifier).state =
+                            filtres.copyWith(includeRetours: !filtres.includeRetours),
                       ),
                       const SizedBox(width: 6),
                       _FiltreChip(
@@ -459,6 +473,21 @@ class _VenteTileState extends ConsumerState<_VenteTile> {
     );
   }
 
+  Future<void> _imprimerRetour(BuildContext ctx) async {
+    final resume = _toResume();
+    final fmtDate = DateFormat('dd/MM/yyyy HH:mm');
+    final dateLabel = vente.dateRetour != null
+        ? fmtDate.format(vente.dateRetour!.toLocal())
+        : fmtDate.format(DateTime.now());
+    showDialog(
+      context: ctx,
+      builder: (dialogCtx) => RetourReceiptDialog(
+        resume: resume,
+        dateRetour: dateLabel,
+      ),
+    );
+  }
+
   Future<void> _confirmerRetour(BuildContext ctx) async {
     final confirm = await showDialog<bool>(
       context: ctx,
@@ -539,19 +568,25 @@ class _VenteTileState extends ConsumerState<_VenteTile> {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: vente.signaleProprietaire
-              ? AppColors.error.withValues(alpha: 0.1)
-              : AppColors.primaryContainer,
+          color: vente.statut == 'RETOURNEE'
+              ? Colors.deepOrange.withValues(alpha: 0.1)
+              : vente.signaleProprietaire
+                  ? AppColors.error.withValues(alpha: 0.1)
+                  : AppColors.primaryContainer,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(
-          vente.signaleProprietaire
-              ? Symbols.warning
-              : Symbols.receipt_long,
+          vente.statut == 'RETOURNEE'
+              ? Symbols.undo
+              : vente.signaleProprietaire
+                  ? Symbols.warning
+                  : Symbols.receipt_long,
           size: 20,
-          color: vente.signaleProprietaire
-              ? AppColors.error
-              : AppColors.primary,
+          color: vente.statut == 'RETOURNEE'
+              ? Colors.deepOrange
+              : vente.signaleProprietaire
+                  ? AppColors.error
+                  : AppColors.primary,
         ),
       ),
       title: Row(
@@ -565,21 +600,36 @@ class _VenteTileState extends ConsumerState<_VenteTile> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: _modeColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(4),
+          if (vente.statut == 'RETOURNEE')
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.deepOrange.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Text(
+                'Retourné',
+                style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.deepOrange),
+              ),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: _modeColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                _modeLabel,
+                style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: _modeColor),
+              ),
             ),
-            child: Text(
-              _modeLabel,
-              style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: _modeColor),
-            ),
-          ),
         ],
       ),
       subtitle: Text(
@@ -589,11 +639,20 @@ class _VenteTileState extends ConsumerState<_VenteTile> {
         style:
             AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
       ),
-      trailing: AmountText(
-        amount: vente.montantTotal,
-        style: AppTextStyles.labelLarge.copyWith(
-            color: AppColors.textPrimary, fontWeight: FontWeight.w700),
-      ),
+      trailing: vente.statut == 'RETOURNEE'
+          ? Text(
+              '-${vente.montantTotal.toStringAsFixed(0)} F',
+              style: AppTextStyles.labelLarge.copyWith(
+                  color: Colors.deepOrange,
+                  fontWeight: FontWeight.w700,
+                  decoration: TextDecoration.lineThrough,
+                  decorationColor: Colors.deepOrange),
+            )
+          : AmountText(
+              amount: vente.montantTotal,
+              style: AppTextStyles.labelLarge.copyWith(
+                  color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+            ),
       children: [
         ...vente.lignes.map((l) {
           return Padding(
@@ -624,43 +683,69 @@ class _VenteTileState extends ConsumerState<_VenteTile> {
         }),
         // ── Boutons d'action ─────────────────────────────────────────
         const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
+        if (vente.statut == 'RETOURNEE') ...
+          [
+            if (vente.dateRetour != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text(
+                  'Retourné le ${DateFormat('dd/MM/yyyy HH:mm').format(vente.dateRetour!.toLocal())}',
+                  style: AppTextStyles.caption.copyWith(color: Colors.deepOrange),
+                ),
+              ),
+            SizedBox(
+              width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: () => _reimprimer(context),
+                onPressed: () => _imprimerRetour(context),
                 icon: const Icon(Symbols.print, size: 16),
-                label: const Text('Réimprimer', style: TextStyle(fontSize: 12)),
+                label: const Text('Reçu de retour', style: TextStyle(fontSize: 12)),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.primary),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                  foregroundColor: Colors.deepOrange,
+                  side: const BorderSide(color: Colors.deepOrange),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   padding: const EdgeInsets.symmetric(vertical: 6),
                 ),
               ),
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: _loadingRetour ? null : () => _confirmerRetour(context),
-                icon: _loadingRetour
-                    ? const SizedBox(
-                        width: 14, height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Icon(Symbols.undo, size: 16),
-                label: const Text('Retour', style: TextStyle(fontSize: 12)),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.error,
-                  side: const BorderSide(color: AppColors.error),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  padding: const EdgeInsets.symmetric(vertical: 6),
+          ]
+        else
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _reimprimer(context),
+                  icon: const Icon(Symbols.print, size: 16),
+                  label: const Text('Réimprimer', style: TextStyle(fontSize: 12)),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _loadingRetour ? null : () => _confirmerRetour(context),
+                  icon: _loadingRetour
+                      ? const SizedBox(
+                          width: 14, height: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Icon(Symbols.undo, size: 16),
+                  label: const Text('Retour', style: TextStyle(fontSize: 12)),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.error,
+                    side: const BorderSide(color: AppColors.error),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                  ),
+                ),
+              ),
+            ],
+          ),
         const SizedBox(height: 4),
       ],
     );
@@ -787,6 +872,146 @@ class _DateChip extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ── Dialog reçu de retour ─────────────────────────────────────────────────────
+
+class RetourReceiptDialog extends StatelessWidget {
+  const RetourReceiptDialog({
+    super.key,
+    required this.resume,
+    required this.dateRetour,
+  });
+  final VenteResume resume;
+  final String dateRetour;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // En-tête
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: const BoxDecoration(
+              color: Colors.deepOrange,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Symbols.undo, color: Colors.white, size: 20),
+                const SizedBox(width: 10),
+                const Text('Reçu de retour',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700)),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Symbols.close, color: Colors.white, size: 18),
+                  onPressed: () => Navigator.pop(context),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+          ),
+          // Corps
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // En-tête boutique
+                  Center(
+                    child: Column(
+                      children: [
+                        Text(resume.nomBoutique,
+                            style: AppTextStyles.labelLarge.copyWith(
+                                color: Colors.deepOrange,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16)),
+                        const SizedBox(height: 2),
+                        const Text('BON DE RETOUR',
+                            style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.deepOrange,
+                                letterSpacing: 1.2)),
+                        const SizedBox(height: 2),
+                        Text(dateRetour,
+                            style: AppTextStyles.caption
+                                .copyWith(color: AppColors.textTertiary)),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 20),
+
+                  // Articles retournés
+                  ...resume.lignes.map((item) => Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Row(
+                          children: [
+                            const Icon(Symbols.undo,
+                                size: 12, color: Colors.deepOrange),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                  '${item.nom} × ${item.quantite}',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                      color: AppColors.textSecondary)),
+                            ),
+                            Text(
+                              '${(item.prixUnitaire * item.quantite).toStringAsFixed(0)} F',
+                              style: AppTextStyles.bodySmall
+                                  .copyWith(color: AppColors.textPrimary),
+                            ),
+                          ],
+                        ),
+                      )),
+
+                  const Divider(height: 16),
+                  // Total remboursé
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('MONTANT REMBOURSÉ',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 13)),
+                      Text(
+                        '${resume.total.toStringAsFixed(0)} F',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                            color: Colors.deepOrange),
+                      ),
+                    ],
+                  ),
+                  if (resume.clientNom != null) ...[
+                    const SizedBox(height: 8),
+                    Text('Client : ${resume.clientNom}',
+                        style: AppTextStyles.bodySmall
+                            .copyWith(color: AppColors.textSecondary)),
+                  ],
+                  const SizedBox(height: 16),
+                  Center(
+                    child: Text('Merci pour votre confiance.',
+                        style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textTertiary,
+                            fontStyle: FontStyle.italic)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
