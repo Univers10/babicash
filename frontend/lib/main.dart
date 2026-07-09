@@ -120,11 +120,7 @@ class _BabiCashAppState extends ConsumerState<BabiCashApp> {
                       ),
                     ),
                   )
-                : Image.asset(
-                    'assets/images/logo.png',
-                    width: 160,
-                    height: 160,
-                  ),
+                : const SizedBox.shrink(),
           ),
         ),
       );
