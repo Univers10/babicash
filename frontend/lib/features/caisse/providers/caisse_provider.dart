@@ -116,6 +116,12 @@ class CaisseNotifier extends Notifier<void> {
     final boutiqueId = await ref.read(currentBoutiqueIdProvider.future);
     if (user == null || boutiqueId == null) return false;
 
+    // Bloquer si aucune session ouverte
+    final sessionAsync = ref.read(sessionNotifierProvider);
+    if (sessionAsync.valueOrNull == null) {
+      throw Exception('SESSION_REQUISE');
+    }
+
     ref.read(caisseLoadingProvider.notifier).state = true;
 
     try {

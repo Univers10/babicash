@@ -19,6 +19,7 @@ import '../../../data/models/tier_model.dart';
 import 'ticket_screen.dart';
 import '../widgets/catalogue_grid.dart';
 import '../../../features/stock/providers/stock_provider.dart';
+import '../../../features/sessions/providers/sessions_provider.dart';
 import '../models/panier_item.dart';
 
 // ── POS Screen ────────────────────────────────────────────────────────────────
@@ -48,6 +49,7 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
     final total = sousTotal * (1 - remiseGlobale / 100);
     final quotaAsync = ref.watch(quotaProvider);
     final isTablet = MediaQuery.of(context).size.width > 720;
+    final sessionActive = ref.watch(sessionNotifierProvider).valueOrNull;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -62,6 +64,25 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
               onSearch: (v) => setState(() => _searchQuery = v),
               onRefresh: _refreshData,
             ),
+            // ── Alerte session ────────────────────────────────────────────
+            if (sessionActive == null)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                color: AppColors.warning.withValues(alpha: 0.15),
+                child: Row(
+                  children: [
+                    Icon(Symbols.warning, size: 18, color: AppColors.warning),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Aucune session ouverte. Ouvrez une session pour vendre.',
+                        style: TextStyle(fontSize: 12, color: AppColors.warning, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             // ── Body ────────────────────────────────────────────────────────
             Expanded(
               child: isTablet
@@ -1500,6 +1521,16 @@ class _PaiementDialogState extends ConsumerState<_PaiementDialog> {
           builder: (_) => _QuotaDepasseDialog(
             ventesUtilisees: e.ventesUtilisees,
             quota: e.quota,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted && e.toString().contains('SESSION_REQUISE')) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Ouvrez une session de caisse avant de vendre.'),
+            backgroundColor: AppColors.error,
           ),
         );
       }

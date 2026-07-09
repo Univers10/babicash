@@ -15,8 +15,10 @@ _$SessionModelImpl _$$SessionModelImplFromJson(Map<String, dynamic> json) =>
       dateFermeture: json['date_fermeture'] == null
           ? null
           : DateTime.parse(json['date_fermeture'] as String),
-      montantInitial: (json['montant_initial'] as num?)?.toDouble() ?? 0,
-      montantFinalDeclare: (json['montant_final_declare'] as num?)?.toDouble(),
+      montantInitial: json['montant_initial'] == null
+          ? 0
+          : parseDouble(json['montant_initial']),
+      montantFinalDeclare: parseDoubleNullable(json['montant_final_declare']),
       statut: json['statut'] as String,
     );
 
@@ -36,14 +38,23 @@ _$SessionResumeModelImpl _$$SessionResumeModelImplFromJson(
         Map<String, dynamic> json) =>
     _$SessionResumeModelImpl(
       session: SessionModel.fromJson(json['session'] as Map<String, dynamic>),
-      nbVentes: (json['nb_ventes'] as num?)?.toInt() ?? 0,
-      totalVentesEspeces:
-          (json['total_ventes_especes'] as num?)?.toDouble() ?? 0,
-      totalVentesAutres: (json['total_ventes_autres'] as num?)?.toDouble() ?? 0,
-      totalEntrees: (json['total_entrees'] as num?)?.toDouble() ?? 0,
-      totalSorties: (json['total_sorties'] as num?)?.toDouble() ?? 0,
-      montantTheorique: (json['montant_theorique'] as num?)?.toDouble() ?? 0,
-      ecart: (json['ecart'] as num?)?.toDouble(),
+      nbVentes: json['nb_ventes'] == null ? 0 : parseInt(json['nb_ventes']),
+      totalVentesEspeces: json['total_ventes_especes'] == null
+          ? 0
+          : parseDouble(json['total_ventes_especes']),
+      totalVentesAutres: json['total_ventes_autres'] == null
+          ? 0
+          : parseDouble(json['total_ventes_autres']),
+      totalEntrees: json['total_entrees'] == null
+          ? 0
+          : parseDouble(json['total_entrees']),
+      totalSorties: json['total_sorties'] == null
+          ? 0
+          : parseDouble(json['total_sorties']),
+      montantTheorique: json['montant_theorique'] == null
+          ? 0
+          : parseDouble(json['montant_theorique']),
+      ecart: parseDoubleNullable(json['ecart']),
       ecartSignale: json['ecart_signale'] as bool? ?? false,
     );
 

@@ -29,9 +29,9 @@ mixin _$SessionModel {
   DateTime get dateOuverture => throw _privateConstructorUsedError;
   @JsonKey(name: 'date_fermeture')
   DateTime? get dateFermeture => throw _privateConstructorUsedError;
-  @JsonKey(name: 'montant_initial')
+  @JsonKey(name: 'montant_initial', fromJson: parseDouble)
   double get montantInitial => throw _privateConstructorUsedError;
-  @JsonKey(name: 'montant_final_declare')
+  @JsonKey(name: 'montant_final_declare', fromJson: parseDoubleNullable)
   double? get montantFinalDeclare => throw _privateConstructorUsedError;
   String get statut => throw _privateConstructorUsedError;
 
@@ -57,8 +57,10 @@ abstract class $SessionModelCopyWith<$Res> {
       @JsonKey(name: 'utilisateur_nom') String utilisateurNom,
       @JsonKey(name: 'date_ouverture') DateTime dateOuverture,
       @JsonKey(name: 'date_fermeture') DateTime? dateFermeture,
-      @JsonKey(name: 'montant_initial') double montantInitial,
-      @JsonKey(name: 'montant_final_declare') double? montantFinalDeclare,
+      @JsonKey(name: 'montant_initial', fromJson: parseDouble)
+      double montantInitial,
+      @JsonKey(name: 'montant_final_declare', fromJson: parseDoubleNullable)
+      double? montantFinalDeclare,
       String statut});
 }
 
@@ -137,8 +139,10 @@ abstract class _$$SessionModelImplCopyWith<$Res>
       @JsonKey(name: 'utilisateur_nom') String utilisateurNom,
       @JsonKey(name: 'date_ouverture') DateTime dateOuverture,
       @JsonKey(name: 'date_fermeture') DateTime? dateFermeture,
-      @JsonKey(name: 'montant_initial') double montantInitial,
-      @JsonKey(name: 'montant_final_declare') double? montantFinalDeclare,
+      @JsonKey(name: 'montant_initial', fromJson: parseDouble)
+      double montantInitial,
+      @JsonKey(name: 'montant_final_declare', fromJson: parseDoubleNullable)
+      double? montantFinalDeclare,
       String statut});
 }
 
@@ -210,8 +214,10 @@ class _$SessionModelImpl implements _SessionModel {
       @JsonKey(name: 'utilisateur_nom') required this.utilisateurNom,
       @JsonKey(name: 'date_ouverture') required this.dateOuverture,
       @JsonKey(name: 'date_fermeture') this.dateFermeture,
-      @JsonKey(name: 'montant_initial') this.montantInitial = 0,
-      @JsonKey(name: 'montant_final_declare') this.montantFinalDeclare,
+      @JsonKey(name: 'montant_initial', fromJson: parseDouble)
+      this.montantInitial = 0,
+      @JsonKey(name: 'montant_final_declare', fromJson: parseDoubleNullable)
+      this.montantFinalDeclare,
       required this.statut});
 
   factory _$SessionModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -232,10 +238,10 @@ class _$SessionModelImpl implements _SessionModel {
   @JsonKey(name: 'date_fermeture')
   final DateTime? dateFermeture;
   @override
-  @JsonKey(name: 'montant_initial')
+  @JsonKey(name: 'montant_initial', fromJson: parseDouble)
   final double montantInitial;
   @override
-  @JsonKey(name: 'montant_final_declare')
+  @JsonKey(name: 'montant_final_declare', fromJson: parseDoubleNullable)
   final double? montantFinalDeclare;
   @override
   final String statut;
@@ -302,8 +308,10 @@ abstract class _SessionModel implements SessionModel {
       @JsonKey(name: 'utilisateur_nom') required final String utilisateurNom,
       @JsonKey(name: 'date_ouverture') required final DateTime dateOuverture,
       @JsonKey(name: 'date_fermeture') final DateTime? dateFermeture,
-      @JsonKey(name: 'montant_initial') final double montantInitial,
-      @JsonKey(name: 'montant_final_declare') final double? montantFinalDeclare,
+      @JsonKey(name: 'montant_initial', fromJson: parseDouble)
+      final double montantInitial,
+      @JsonKey(name: 'montant_final_declare', fromJson: parseDoubleNullable)
+      final double? montantFinalDeclare,
       required final String statut}) = _$SessionModelImpl;
 
   factory _SessionModel.fromJson(Map<String, dynamic> json) =
@@ -324,10 +332,10 @@ abstract class _SessionModel implements SessionModel {
   @JsonKey(name: 'date_fermeture')
   DateTime? get dateFermeture;
   @override
-  @JsonKey(name: 'montant_initial')
+  @JsonKey(name: 'montant_initial', fromJson: parseDouble)
   double get montantInitial;
   @override
-  @JsonKey(name: 'montant_final_declare')
+  @JsonKey(name: 'montant_final_declare', fromJson: parseDoubleNullable)
   double? get montantFinalDeclare;
   @override
   String get statut;
@@ -347,18 +355,19 @@ SessionResumeModel _$SessionResumeModelFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$SessionResumeModel {
   SessionModel get session => throw _privateConstructorUsedError;
-  @JsonKey(name: 'nb_ventes')
+  @JsonKey(name: 'nb_ventes', fromJson: parseInt)
   int get nbVentes => throw _privateConstructorUsedError;
-  @JsonKey(name: 'total_ventes_especes')
+  @JsonKey(name: 'total_ventes_especes', fromJson: parseDouble)
   double get totalVentesEspeces => throw _privateConstructorUsedError;
-  @JsonKey(name: 'total_ventes_autres')
+  @JsonKey(name: 'total_ventes_autres', fromJson: parseDouble)
   double get totalVentesAutres => throw _privateConstructorUsedError;
-  @JsonKey(name: 'total_entrees')
+  @JsonKey(name: 'total_entrees', fromJson: parseDouble)
   double get totalEntrees => throw _privateConstructorUsedError;
-  @JsonKey(name: 'total_sorties')
+  @JsonKey(name: 'total_sorties', fromJson: parseDouble)
   double get totalSorties => throw _privateConstructorUsedError;
-  @JsonKey(name: 'montant_theorique')
+  @JsonKey(name: 'montant_theorique', fromJson: parseDouble)
   double get montantTheorique => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: parseDoubleNullable)
   double? get ecart => throw _privateConstructorUsedError;
   @JsonKey(name: 'ecart_signale')
   bool get ecartSignale => throw _privateConstructorUsedError;
@@ -381,13 +390,18 @@ abstract class $SessionResumeModelCopyWith<$Res> {
   @useResult
   $Res call(
       {SessionModel session,
-      @JsonKey(name: 'nb_ventes') int nbVentes,
-      @JsonKey(name: 'total_ventes_especes') double totalVentesEspeces,
-      @JsonKey(name: 'total_ventes_autres') double totalVentesAutres,
-      @JsonKey(name: 'total_entrees') double totalEntrees,
-      @JsonKey(name: 'total_sorties') double totalSorties,
-      @JsonKey(name: 'montant_theorique') double montantTheorique,
-      double? ecart,
+      @JsonKey(name: 'nb_ventes', fromJson: parseInt) int nbVentes,
+      @JsonKey(name: 'total_ventes_especes', fromJson: parseDouble)
+      double totalVentesEspeces,
+      @JsonKey(name: 'total_ventes_autres', fromJson: parseDouble)
+      double totalVentesAutres,
+      @JsonKey(name: 'total_entrees', fromJson: parseDouble)
+      double totalEntrees,
+      @JsonKey(name: 'total_sorties', fromJson: parseDouble)
+      double totalSorties,
+      @JsonKey(name: 'montant_theorique', fromJson: parseDouble)
+      double montantTheorique,
+      @JsonKey(fromJson: parseDoubleNullable) double? ecart,
       @JsonKey(name: 'ecart_signale') bool ecartSignale});
 
   $SessionModelCopyWith<$Res> get session;
@@ -479,13 +493,18 @@ abstract class _$$SessionResumeModelImplCopyWith<$Res>
   @useResult
   $Res call(
       {SessionModel session,
-      @JsonKey(name: 'nb_ventes') int nbVentes,
-      @JsonKey(name: 'total_ventes_especes') double totalVentesEspeces,
-      @JsonKey(name: 'total_ventes_autres') double totalVentesAutres,
-      @JsonKey(name: 'total_entrees') double totalEntrees,
-      @JsonKey(name: 'total_sorties') double totalSorties,
-      @JsonKey(name: 'montant_theorique') double montantTheorique,
-      double? ecart,
+      @JsonKey(name: 'nb_ventes', fromJson: parseInt) int nbVentes,
+      @JsonKey(name: 'total_ventes_especes', fromJson: parseDouble)
+      double totalVentesEspeces,
+      @JsonKey(name: 'total_ventes_autres', fromJson: parseDouble)
+      double totalVentesAutres,
+      @JsonKey(name: 'total_entrees', fromJson: parseDouble)
+      double totalEntrees,
+      @JsonKey(name: 'total_sorties', fromJson: parseDouble)
+      double totalSorties,
+      @JsonKey(name: 'montant_theorique', fromJson: parseDouble)
+      double montantTheorique,
+      @JsonKey(fromJson: parseDoubleNullable) double? ecart,
       @JsonKey(name: 'ecart_signale') bool ecartSignale});
 
   @override
@@ -561,13 +580,18 @@ class __$$SessionResumeModelImplCopyWithImpl<$Res>
 class _$SessionResumeModelImpl implements _SessionResumeModel {
   const _$SessionResumeModelImpl(
       {required this.session,
-      @JsonKey(name: 'nb_ventes') this.nbVentes = 0,
-      @JsonKey(name: 'total_ventes_especes') this.totalVentesEspeces = 0,
-      @JsonKey(name: 'total_ventes_autres') this.totalVentesAutres = 0,
-      @JsonKey(name: 'total_entrees') this.totalEntrees = 0,
-      @JsonKey(name: 'total_sorties') this.totalSorties = 0,
-      @JsonKey(name: 'montant_theorique') this.montantTheorique = 0,
-      this.ecart,
+      @JsonKey(name: 'nb_ventes', fromJson: parseInt) this.nbVentes = 0,
+      @JsonKey(name: 'total_ventes_especes', fromJson: parseDouble)
+      this.totalVentesEspeces = 0,
+      @JsonKey(name: 'total_ventes_autres', fromJson: parseDouble)
+      this.totalVentesAutres = 0,
+      @JsonKey(name: 'total_entrees', fromJson: parseDouble)
+      this.totalEntrees = 0,
+      @JsonKey(name: 'total_sorties', fromJson: parseDouble)
+      this.totalSorties = 0,
+      @JsonKey(name: 'montant_theorique', fromJson: parseDouble)
+      this.montantTheorique = 0,
+      @JsonKey(fromJson: parseDoubleNullable) this.ecart,
       @JsonKey(name: 'ecart_signale') this.ecartSignale = false});
 
   factory _$SessionResumeModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -576,24 +600,25 @@ class _$SessionResumeModelImpl implements _SessionResumeModel {
   @override
   final SessionModel session;
   @override
-  @JsonKey(name: 'nb_ventes')
+  @JsonKey(name: 'nb_ventes', fromJson: parseInt)
   final int nbVentes;
   @override
-  @JsonKey(name: 'total_ventes_especes')
+  @JsonKey(name: 'total_ventes_especes', fromJson: parseDouble)
   final double totalVentesEspeces;
   @override
-  @JsonKey(name: 'total_ventes_autres')
+  @JsonKey(name: 'total_ventes_autres', fromJson: parseDouble)
   final double totalVentesAutres;
   @override
-  @JsonKey(name: 'total_entrees')
+  @JsonKey(name: 'total_entrees', fromJson: parseDouble)
   final double totalEntrees;
   @override
-  @JsonKey(name: 'total_sorties')
+  @JsonKey(name: 'total_sorties', fromJson: parseDouble)
   final double totalSorties;
   @override
-  @JsonKey(name: 'montant_theorique')
+  @JsonKey(name: 'montant_theorique', fromJson: parseDouble)
   final double montantTheorique;
   @override
+  @JsonKey(fromJson: parseDoubleNullable)
   final double? ecart;
   @override
   @JsonKey(name: 'ecart_signale')
@@ -660,16 +685,21 @@ class _$SessionResumeModelImpl implements _SessionResumeModel {
 
 abstract class _SessionResumeModel implements SessionResumeModel {
   const factory _SessionResumeModel(
-      {required final SessionModel session,
-      @JsonKey(name: 'nb_ventes') final int nbVentes,
-      @JsonKey(name: 'total_ventes_especes') final double totalVentesEspeces,
-      @JsonKey(name: 'total_ventes_autres') final double totalVentesAutres,
-      @JsonKey(name: 'total_entrees') final double totalEntrees,
-      @JsonKey(name: 'total_sorties') final double totalSorties,
-      @JsonKey(name: 'montant_theorique') final double montantTheorique,
-      final double? ecart,
-      @JsonKey(name: 'ecart_signale')
-      final bool ecartSignale}) = _$SessionResumeModelImpl;
+          {required final SessionModel session,
+          @JsonKey(name: 'nb_ventes', fromJson: parseInt) final int nbVentes,
+          @JsonKey(name: 'total_ventes_especes', fromJson: parseDouble)
+          final double totalVentesEspeces,
+          @JsonKey(name: 'total_ventes_autres', fromJson: parseDouble)
+          final double totalVentesAutres,
+          @JsonKey(name: 'total_entrees', fromJson: parseDouble)
+          final double totalEntrees,
+          @JsonKey(name: 'total_sorties', fromJson: parseDouble)
+          final double totalSorties,
+          @JsonKey(name: 'montant_theorique', fromJson: parseDouble)
+          final double montantTheorique,
+          @JsonKey(fromJson: parseDoubleNullable) final double? ecart,
+          @JsonKey(name: 'ecart_signale') final bool ecartSignale}) =
+      _$SessionResumeModelImpl;
 
   factory _SessionResumeModel.fromJson(Map<String, dynamic> json) =
       _$SessionResumeModelImpl.fromJson;
@@ -677,24 +707,25 @@ abstract class _SessionResumeModel implements SessionResumeModel {
   @override
   SessionModel get session;
   @override
-  @JsonKey(name: 'nb_ventes')
+  @JsonKey(name: 'nb_ventes', fromJson: parseInt)
   int get nbVentes;
   @override
-  @JsonKey(name: 'total_ventes_especes')
+  @JsonKey(name: 'total_ventes_especes', fromJson: parseDouble)
   double get totalVentesEspeces;
   @override
-  @JsonKey(name: 'total_ventes_autres')
+  @JsonKey(name: 'total_ventes_autres', fromJson: parseDouble)
   double get totalVentesAutres;
   @override
-  @JsonKey(name: 'total_entrees')
+  @JsonKey(name: 'total_entrees', fromJson: parseDouble)
   double get totalEntrees;
   @override
-  @JsonKey(name: 'total_sorties')
+  @JsonKey(name: 'total_sorties', fromJson: parseDouble)
   double get totalSorties;
   @override
-  @JsonKey(name: 'montant_theorique')
+  @JsonKey(name: 'montant_theorique', fromJson: parseDouble)
   double get montantTheorique;
   @override
+  @JsonKey(fromJson: parseDoubleNullable)
   double? get ecart;
   @override
   @JsonKey(name: 'ecart_signale')

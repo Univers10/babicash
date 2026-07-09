@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../core/utils/json_helpers.dart';
 
 part 'session_model.freezed.dart';
 part 'session_model.g.dart';
@@ -11,8 +12,8 @@ class SessionModel with _$SessionModel {
     @JsonKey(name: 'utilisateur_nom') required String utilisateurNom,
     @JsonKey(name: 'date_ouverture') required DateTime dateOuverture,
     @JsonKey(name: 'date_fermeture') DateTime? dateFermeture,
-    @JsonKey(name: 'montant_initial') @Default(0) double montantInitial,
-    @JsonKey(name: 'montant_final_declare') double? montantFinalDeclare,
+    @JsonKey(name: 'montant_initial', fromJson: parseDouble) @Default(0) double montantInitial,
+    @JsonKey(name: 'montant_final_declare', fromJson: parseDoubleNullable) double? montantFinalDeclare,
     required String statut,
   }) = _SessionModel;
 
@@ -24,13 +25,13 @@ class SessionModel with _$SessionModel {
 class SessionResumeModel with _$SessionResumeModel {
   const factory SessionResumeModel({
     required SessionModel session,
-    @JsonKey(name: 'nb_ventes') @Default(0) int nbVentes,
-    @JsonKey(name: 'total_ventes_especes') @Default(0) double totalVentesEspeces,
-    @JsonKey(name: 'total_ventes_autres') @Default(0) double totalVentesAutres,
-    @JsonKey(name: 'total_entrees') @Default(0) double totalEntrees,
-    @JsonKey(name: 'total_sorties') @Default(0) double totalSorties,
-    @JsonKey(name: 'montant_theorique') @Default(0) double montantTheorique,
-    double? ecart,
+    @JsonKey(name: 'nb_ventes', fromJson: parseInt) @Default(0) int nbVentes,
+    @JsonKey(name: 'total_ventes_especes', fromJson: parseDouble) @Default(0) double totalVentesEspeces,
+    @JsonKey(name: 'total_ventes_autres', fromJson: parseDouble) @Default(0) double totalVentesAutres,
+    @JsonKey(name: 'total_entrees', fromJson: parseDouble) @Default(0) double totalEntrees,
+    @JsonKey(name: 'total_sorties', fromJson: parseDouble) @Default(0) double totalSorties,
+    @JsonKey(name: 'montant_theorique', fromJson: parseDouble) @Default(0) double montantTheorique,
+    @JsonKey(fromJson: parseDoubleNullable) double? ecart,
     @JsonKey(name: 'ecart_signale') @Default(false) bool ecartSignale,
   }) = _SessionResumeModel;
 

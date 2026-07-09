@@ -101,9 +101,9 @@ class SessionNotifier extends AsyncNotifier<LocalSession?> {
     }
   }
 
-  Future<bool> fermer(double montantFinal) async {
+  Future<SessionResumeModel?> fermer(double montantFinal) async {
     final session = state.value;
-    if (session == null) return false;
+    if (session == null) return null;
 
     try {
       final api = ref.read(sessionsApiProvider);
@@ -123,9 +123,9 @@ class SessionNotifier extends AsyncNotifier<LocalSession?> {
       ));
 
       ref.invalidate(sessionActiveProvider);
-      return true;
+      return resume;
     } on AppException {
-      return false;
+      return null;
     }
   }
 }
