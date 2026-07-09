@@ -10,6 +10,33 @@ import '../../../features/stock/providers/stock_provider.dart';
 // Provider pour la catégorie sélectionnée
 final _selectedCategoryProvider = StateProvider<String?>((_) => null);
 
+// Palette de couleurs pour les catégories (style Odoo POS)
+const _categoryColors = [
+  Color(0xFF1B6B2F), // vert foncé
+  Color(0xFFE8A838), // doré
+  Color(0xFF2196F3), // bleu
+  Color(0xFFE91E63), // rose
+  Color(0xFF9C27B0), // violet
+  Color(0xFFFF5722), // orange
+  Color(0xFF00BCD4), // cyan
+  Color(0xFF795548), // marron
+  Color(0xFF607D8B), // gris bleu
+  Color(0xFF4CAF50), // vert clair
+];
+
+const _categoryBgColors = [
+  Color(0xFFE8F5E9), // vert clair bg
+  Color(0xFFFFF8E1), // doré bg
+  Color(0xFFE3F2FD), // bleu bg
+  Color(0xFFFCE4EC), // rose bg
+  Color(0xFFF3E5F5), // violet bg
+  Color(0xFFFBE9E7), // orange bg
+  Color(0xFFE0F7FA), // cyan bg
+  Color(0xFFEFEBE9), // marron bg
+  Color(0xFFECEFF1), // gris bleu bg
+  Color(0xFFE8F5E9), // vert clair bg
+];
+
 class CatalogueGrid extends ConsumerWidget {
   const CatalogueGrid({
     super.key,
@@ -33,35 +60,45 @@ class CatalogueGrid extends ConsumerWidget {
             ? 4
             : 3;
 
+    // Construire un map catId -> colorIndex
+    final categories = categoriesAsync.valueOrNull ?? [];
+    final catColorMap = <String, int>{};
+    for (int i = 0; i < categories.length; i++) {
+      catColorMap[categories[i].id] = i % _categoryColors.length;
+    }
+
     return Column(
       children: [
         // ── Barre de catégories ─────────────────────────────────────────
         categoriesAsync.when(
           loading: () => const SizedBox(height: 48),
           error: (_, __) => const SizedBox(height: 48),
-          data: (categories) {
-            if (categories.isEmpty) return const SizedBox.shrink();
+          data: (cats) {
+            if (cats.isEmpty) return const SizedBox.shrink();
             return Container(
               height: 48,
               color: AppColors.background,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                itemCount: categories.length + 1,
+                itemCount: cats.length + 1,
                 separatorBuilder: (_, __) => const SizedBox(width: 6),
                 itemBuilder: (_, i) {
                   if (i == 0) {
                     final isSelected = selectedCatId == null;
                     return _CategoryChip(
                       label: 'Tout',
+                      color: AppColors.primary,
                       isSelected: isSelected,
                       onTap: () => ref.read(_selectedCategoryProvider.notifier).state = null,
                     );
                   }
-                  final cat = categories[i - 1];
+                  final cat = cats[i - 1];
                   final isSelected = selectedCatId == cat.id;
+                  final colorIdx = (i - 1) % _categoryColors.length;
                   return _CategoryChip(
                     label: cat.nom,
+                    color: _categoryColors[colorIdx],
                     isSelected: isSelected,
                     onTap: () => ref.read(_selectedCategoryProvider.notifier).state =
                         isSelected ? null : cat.id,
@@ -129,10 +166,16 @@ class CatalogueGrid extends ConsumerWidget {
                   mainAxisSpacing: 8,
                 ),
                 itemCount: produits.length,
-                itemBuilder: (_, i) => _ProduitTile(
-                  produit: produits[i],
-                  onTap: () => onProduitTap(produits[i]),
-                ),
+                itemBuilder: (_, i) {
+                  final p = produits[i];
+                  final cIdx = catColorMap[p.categorieId] ?? 0;
+                  return _ProduitTile(
+                    produit: p,
+                    accentColor: _categoryColors[cIdx],
+                    bgColor: _categoryBgColors[cIdx],
+                    onTap: () => onProduitTap(p),
+                  );
+                },
               );
             },
           ),
@@ -147,10 +190,12 @@ class CatalogueGrid extends ConsumerWidget {
 class _CategoryChip extends StatelessWidget {
   const _CategoryChip({
     required this.label,
+    required this.color,
     required this.isSelected,
     required this.onTap,
   });
   final String label;
+  final Color color;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -162,19 +207,19 @@ class _CategoryChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.surfaceVariant,
+          color: isSelected ? color : color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-            width: 1,
+            color: isSelected ? color : color.withValues(alpha: 0.4),
+            width: 1.5,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : AppColors.textSecondary,
+            color: isSelected ? Colors.white : color,
             fontSize: 12,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
           ),
         ),
       ),
@@ -182,49 +227,31 @@ class _CategoryChip extends StatelessWidget {
   }
 }
 
-// Palette de couleurs pour les tiles (cycle) — charte BabiCash
-const _tileAccents = [
-  AppColors.primary,
-  AppColors.accent,
-  AppColors.primaryLight,
-  AppColors.accentDark,
-  AppColors.primaryDark,
-  AppColors.brown,
-  AppColors.success,
-  AppColors.warning,
-];
-const _tileBgs = [
-  AppColors.primaryContainer,
-  AppColors.accentContainer,
-  AppColors.primaryContainer,
-  AppColors.accentContainer,
-  AppColors.successContainer,
-  AppColors.warningContainer,
-  AppColors.successContainer,
-  AppColors.warningContainer,
-];
-
 class _ProduitTile extends StatelessWidget {
-  const _ProduitTile({required this.produit, required this.onTap});
+  const _ProduitTile({
+    required this.produit,
+    required this.accentColor,
+    required this.bgColor,
+    required this.onTap,
+  });
   final LocalProduit produit;
+  final Color accentColor;
+  final Color bgColor;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final enRupture = produit.stockActuel <= 0;
-    final colorIdx = produit.nom.codeUnitAt(0) % _tileAccents.length;
-    final accentColor =
-        enRupture ? AppColors.textDisabled : _tileAccents[colorIdx];
-    final bgColor =
-        enRupture ? AppColors.surfaceVariant : _tileBgs[colorIdx];
+    final effectiveAccent = enRupture ? AppColors.textDisabled : accentColor;
+    final effectiveBg = enRupture ? AppColors.surfaceVariant : bgColor;
 
     return Material(
-      color: bgColor,
+      color: effectiveBg,
       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       child: InkWell(
         onTap: enRupture ? null : onTap,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        splashColor: accentColor.withValues(alpha: 0.1),
+        splashColor: effectiveAccent.withValues(alpha: 0.1),
         child: Stack(
           children: [
             Padding(
@@ -237,13 +264,13 @@ class _ProduitTile extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: 0.15),
+                      color: effectiveAccent.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       Symbols.inventory_2,
                       size: 18,
-                      color: accentColor,
+                      color: effectiveAccent,
                     ),
                   ),
                   const Spacer(),
@@ -266,7 +293,7 @@ class _ProduitTile extends StatelessWidget {
                   Text(
                     '${produit.prixVenteSuggere.toStringAsFixed(0)} F',
                     style: TextStyle(
-                      color: accentColor,
+                      color: effectiveAccent,
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
                     ),
