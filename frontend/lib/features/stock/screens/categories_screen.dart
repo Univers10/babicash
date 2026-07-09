@@ -132,12 +132,131 @@ class CategoriesScreen extends ConsumerWidget {
                 color: color,
                 icon: icon,
                 productCount: count,
+                onTap: () => _showProduits(context, ref, c, color, icon),
                 onEdit: () => _showCategorieDialog(context, ref, categorie: c),
                 onDelete: () => _deleteCategorie(context, ref, c.id),
               );
             },
           );
         },
+      ),
+    );
+  }
+
+  void _showProduits(BuildContext context, WidgetRef ref,
+      LocalCategory categorie, Color color, IconData icon) {
+    final produits = (ref.read(stockProvider).valueOrNull ?? [])
+        .where((p) => p.categorieId == categorie.id)
+        .toList();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        maxChildSize: 0.9,
+        minChildSize: 0.3,
+        builder: (_, scrollCtrl) => Container(
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              // Poignée
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              // En-tête
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(icon, color: color, size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            categorie.nom,
+                            style: AppTextStyles.headlineSmall,
+                          ),
+                          Text(
+                            '${produits.length} produit${produits.length > 1 ? 's' : ''}',
+                            style: AppTextStyles.bodySmall.copyWith(color: AppColors.textTertiary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              // Liste des produits
+              Expanded(
+                child: produits.isEmpty
+                    ? Center(
+                        child: Text(
+                          'Aucun produit dans cette cat\u00e9gorie',
+                          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
+                        ),
+                      )
+                    : ListView.separated(
+                        controller: scrollCtrl,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        itemCount: produits.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        itemBuilder: (_, i) {
+                          final p = produits[i];
+                          return ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                            leading: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: color.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(Symbols.inventory_2, size: 20, color: color),
+                            ),
+                            title: Text(p.nom, style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                            subtitle: Text(
+                              'Stock : ${p.stockActuel}',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: p.stockActuel <= 0 ? AppColors.error : AppColors.textTertiary,
+                              ),
+                            ),
+                            trailing: Text(
+                              '${p.prixVenteSuggere.toStringAsFixed(0)} F',
+                              style: TextStyle(
+                                color: color,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -271,6 +390,7 @@ class _CategoryCard extends StatelessWidget {
     required this.color,
     required this.icon,
     required this.productCount,
+    required this.onTap,
     required this.onEdit,
     required this.onDelete,
   });
@@ -278,6 +398,7 @@ class _CategoryCard extends StatelessWidget {
   final Color color;
   final IconData icon;
   final int productCount;
+  final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -289,7 +410,7 @@ class _CategoryCard extends StatelessWidget {
       elevation: 2,
       shadowColor: color.withValues(alpha: 0.4),
       child: InkWell(
-        onTap: onEdit,
+        onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         splashColor: Colors.white24,
         child: Stack(
