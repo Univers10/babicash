@@ -33,17 +33,75 @@ void main() async {
   );
 }
 
-class BabiCashApp extends ConsumerWidget {
+class BabiCashApp extends ConsumerStatefulWidget {
   const BabiCashApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BabiCashApp> createState() => _BabiCashAppState();
+}
+
+class _BabiCashAppState extends ConsumerState<BabiCashApp> {
+  late final VideoPlayerController _ctrl;
+  bool _splashDone = false;
+  bool _videoReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = VideoPlayerController.asset('assets/images/anime_logo.mp4')
+      ..initialize().then((_) {
+        if (!mounted) return;
+        setState(() => _videoReady = true);
+        _ctrl.play();
+        // Attendre la fin de la vidéo pour quitter le splash
+        _ctrl.addListener(_onVideoProgress);
+      });
+  }
+
+  void _onVideoProgress() {
+    if (!mounted) return;
+    final pos = _ctrl.value.position;
+    final dur = _ctrl.value.duration;
+    if (dur > Duration.zero && pos >= dur - const Duration(milliseconds: 200)) {
+      _ctrl.removeListener(_onVideoProgress);
+      if (!_splashDone) setState(() => _splashDone = true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.removeListener(_onVideoProgress);
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(appRouterProvider);
     final authState = ref.watch(authStateProvider);
 
-    // Écran de chargement tant que l'état d'authentification n'est pas résolu
-    if (authState.isLoading) {
-      return const _SplashScreen();
+    // Afficher le splash tant que la vidéo n'est pas terminée OU que l'auth charge
+    final showSplash = !_splashDone || authState.isLoading;
+
+    if (showSplash) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: _videoReady
+                ? AspectRatio(
+                    aspectRatio: _ctrl.value.aspectRatio,
+                    child: VideoPlayer(_ctrl),
+                  )
+                : Image.asset(
+                    'assets/images/logo.png',
+                    width: 160,
+                    height: 160,
+                  ),
+          ),
+        ),
+      );
     }
 
     return MaterialApp.router(
@@ -52,66 +110,8 @@ class BabiCashApp extends ConsumerWidget {
       theme: AppTheme.light,
       routerConfig: router,
       builder: (context, child) {
-        // Déclenche la sync en arrière-plan dès qu'un utilisateur est connecté
         return _SyncInitializer(child: child!);
       },
-    );
-  }
-}
-
-class _SplashScreen extends StatefulWidget {
-  const _SplashScreen();
-
-  @override
-  State<_SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<_SplashScreen> {
-  late final VideoPlayerController _ctrl;
-  bool _initialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = VideoPlayerController.asset('assets/images/anime_logo.mp4')
-      ..initialize().then((_) {
-        if (mounted) {
-          setState(() => _initialized = true);
-          _ctrl.setLooping(true);
-          _ctrl.play();
-        }
-      });
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(
-          child: _initialized
-              ? SizedBox(
-                  width: 240,
-                  height: 240,
-                  child: AspectRatio(
-                    aspectRatio: _ctrl.value.aspectRatio,
-                    child: VideoPlayer(_ctrl),
-                  ),
-                )
-              : Image.asset(
-                  'assets/images/logo.png',
-                  width: 160,
-                  height: 160,
-                ),
-        ),
-      ),
     );
   }
 }
