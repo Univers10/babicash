@@ -60,6 +60,10 @@ class TiersApi {
     );
     return TierModel.fromJson(resp.data!);
   }
+
+  Future<void> deleteTier(String id) async {
+    await _dio.delete('$_baseUrl/tiers/$id');
+  }
 }
 
 final tiersApiProvider = Provider<TiersApi>((ref) {

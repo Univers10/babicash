@@ -104,6 +104,22 @@ async def update_tiers(
     return tier
 
 
+@router.delete("/{tier_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_tiers(
+    tier_id: uuid.UUID,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    tier = await _get_tiers_owned(db, current_user, tier_id)
+    if tier.solde_du > 0:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Impossible de supprimer : ce tiers a encore un solde dû de {tier.solde_du} F.",
+        )
+    await db.delete(tier)
+    await db.commit()
+
+
 @router.post("/{tier_id}/paiement", response_model=CompteTiersOut)
 async def enregistrer_paiement(
     tier_id: uuid.UUID,
