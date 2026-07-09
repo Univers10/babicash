@@ -42,10 +42,7 @@ class BabiCashApp extends ConsumerWidget {
 
     // Écran de chargement tant que l'état d'authentification n'est pas résolu
     if (authState.isLoading) {
-      return Material(
-        color: AppTheme.light.scaffoldBackgroundColor,
-        child: const Center(child: CircularProgressIndicator()),
-      );
+      return const _SplashScreen();
     }
 
     return MaterialApp.router(
@@ -57,6 +54,41 @@ class BabiCashApp extends ConsumerWidget {
         // Déclenche la sync en arrière-plan dès qu'un utilisateur est connecté
         return _SyncInitializer(child: child!);
       },
+    );
+  }
+}
+
+class _SplashScreen extends StatelessWidget {
+  const _SplashScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/images/logo.png',
+                width: 160,
+                height: 160,
+              ),
+              const SizedBox(height: 32),
+              const SizedBox(
+                width: 28,
+                height: 28,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1B6B2F)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

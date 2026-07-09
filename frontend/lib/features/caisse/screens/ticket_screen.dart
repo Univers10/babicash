@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:pdf/pdf.dart';
@@ -401,6 +402,8 @@ class _TicketDialogState extends State<TicketDialog> {
   Future<void> _imprimerPdf(BuildContext context) async {
     final doc = pw.Document();
     final fmt = DateFormat('dd/MM/yyyy HH:mm');
+    final logoBytes = await rootBundle.load('assets/images/logo.png');
+    final logoImage = pw.MemoryImage(logoBytes.buffer.asUint8List());
 
     doc.addPage(
       pw.Page(
@@ -414,6 +417,8 @@ class _TicketDialogState extends State<TicketDialog> {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               // En-tête
+              pw.Center(child: pw.Image(logoImage, width: 60, height: 60)),
+              pw.SizedBox(height: 4),
               pw.Center(
                 child: pw.Text(vente.nomBoutique,
                     style: pw.TextStyle(
@@ -535,6 +540,8 @@ class _TicketHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        Image.asset('assets/images/logo.png', width: 72, height: 72),
+        const SizedBox(height: 4),
         Text(nom,
             style: AppTextStyles.labelLarge.copyWith(
                 color: AppColors.primary,
