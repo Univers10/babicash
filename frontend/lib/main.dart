@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
@@ -41,37 +43,55 @@ class BabiCashApp extends ConsumerStatefulWidget {
 }
 
 class _BabiCashAppState extends ConsumerState<BabiCashApp> {
-  late final VideoPlayerController _ctrl;
+  VideoPlayerController? _ctrl;
   bool _splashDone = false;
   bool _videoReady = false;
 
   @override
   void initState() {
     super.initState();
-    _ctrl = VideoPlayerController.asset('assets/images/anime_logo.mp4')
-      ..initialize().then((_) {
-        if (!mounted) return;
-        setState(() => _videoReady = true);
-        _ctrl.play();
-        // Attendre la fin de la vidéo pour quitter le splash
-        _ctrl.addListener(_onVideoProgress);
-      });
+    _initVideo();
+  }
+
+  Future<void> _initVideo() async {
+    try {
+      // Copier l'asset dans un fichier temporaire (contourne le bug Android)
+      final byteData = await rootBundle.load('assets/images/anime_logo.mp4');
+      final tmpDir = await getTemporaryDirectory();
+      final tmpFile = File('${tmpDir.path}/anime_logo.mp4');
+      await tmpFile.writeAsBytes(byteData.buffer.asUint8List(), flush: true);
+
+      final ctrl = VideoPlayerController.file(tmpFile);
+      await ctrl.initialize();
+
+      if (!mounted) {
+        await ctrl.dispose();
+        return;
+      }
+      _ctrl = ctrl;
+      setState(() => _videoReady = true);
+      await ctrl.play();
+      ctrl.addListener(_onVideoProgress);
+    } catch (e) {
+      debugPrint('video_player init error: $e');
+      if (mounted && !_splashDone) setState(() => _splashDone = true);
+    }
   }
 
   void _onVideoProgress() {
-    if (!mounted) return;
-    final pos = _ctrl.value.position;
-    final dur = _ctrl.value.duration;
+    if (!mounted || _ctrl == null) return;
+    final pos = _ctrl!.value.position;
+    final dur = _ctrl!.value.duration;
     if (dur > Duration.zero && pos >= dur - const Duration(milliseconds: 200)) {
-      _ctrl.removeListener(_onVideoProgress);
+      _ctrl!.removeListener(_onVideoProgress);
       if (!_splashDone) setState(() => _splashDone = true);
     }
   }
 
   @override
   void dispose() {
-    _ctrl.removeListener(_onVideoProgress);
-    _ctrl.dispose();
+    _ctrl?.removeListener(_onVideoProgress);
+    _ctrl?.dispose();
     super.dispose();
   }
 
@@ -89,10 +109,10 @@ class _BabiCashAppState extends ConsumerState<BabiCashApp> {
         home: Scaffold(
           backgroundColor: Colors.white,
           body: Center(
-            child: _videoReady
+            child: _videoReady && _ctrl != null
                 ? AspectRatio(
-                    aspectRatio: _ctrl.value.aspectRatio,
-                    child: VideoPlayer(_ctrl),
+                    aspectRatio: _ctrl!.value.aspectRatio,
+                    child: VideoPlayer(_ctrl!),
                   )
                 : Image.asset(
                     'assets/images/logo.png',
