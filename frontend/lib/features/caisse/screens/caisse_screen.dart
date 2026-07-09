@@ -119,6 +119,7 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
 
   void _refreshData() {
     ref.invalidate(stockProvider);
+    ref.invalidate(categoriesProvider);
     ref.invalidate(quotaProvider);
     ref.invalidate(clientsProvider);
   }

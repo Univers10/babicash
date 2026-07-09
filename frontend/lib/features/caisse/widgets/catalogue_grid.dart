@@ -7,6 +7,9 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../data/local/database.dart';
 import '../../../features/stock/providers/stock_provider.dart';
 
+// Provider pour la catégorie sélectionnée
+final _selectedCategoryProvider = StateProvider<String?>((_) => null);
+
 class CatalogueGrid extends ConsumerWidget {
   const CatalogueGrid({
     super.key,
@@ -21,6 +24,8 @@ class CatalogueGrid extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stockAsync = ref.watch(stockProvider);
+    final categoriesAsync = ref.watch(categoriesProvider);
+    final selectedCatId = ref.watch(_selectedCategoryProvider);
     final screenW = MediaQuery.of(context).size.width;
     final crossCount = screenW > 900
         ? 5
@@ -28,58 +33,151 @@ class CatalogueGrid extends ConsumerWidget {
             ? 4
             : 3;
 
-    return stockAsync.when(
-      loading: () => const Center(
-          child: CircularProgressIndicator(color: Colors.white54)),
-      error: (e, _) => Center(
-          child: Text('Erreur de chargement',
-              style: AppTextStyles.bodyMedium
-                  .copyWith(color: Colors.white54))),
-      data: (tous) {
-        final produits = searchQuery.isEmpty
-            ? tous
-            : tous
-                .where((p) => p.nom
-                    .toLowerCase()
-                    .contains(searchQuery.toLowerCase()))
-                .toList();
+    return Column(
+      children: [
+        // ── Barre de catégories ─────────────────────────────────────────
+        categoriesAsync.when(
+          loading: () => const SizedBox(height: 48),
+          error: (_, __) => const SizedBox(height: 48),
+          data: (categories) {
+            if (categories.isEmpty) return const SizedBox.shrink();
+            return Container(
+              height: 48,
+              color: AppColors.background,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                itemCount: categories.length + 1,
+                separatorBuilder: (_, __) => const SizedBox(width: 6),
+                itemBuilder: (_, i) {
+                  if (i == 0) {
+                    final isSelected = selectedCatId == null;
+                    return _CategoryChip(
+                      label: 'Tout',
+                      isSelected: isSelected,
+                      onTap: () => ref.read(_selectedCategoryProvider.notifier).state = null,
+                    );
+                  }
+                  final cat = categories[i - 1];
+                  final isSelected = selectedCatId == cat.id;
+                  return _CategoryChip(
+                    label: cat.nom,
+                    isSelected: isSelected,
+                    onTap: () => ref.read(_selectedCategoryProvider.notifier).state =
+                        isSelected ? null : cat.id,
+                  );
+                },
+              ),
+            );
+          },
+        ),
+        // ── Grille produits ─────────────────────────────────────────────
+        Expanded(
+          child: stockAsync.when(
+            loading: () => const Center(
+                child: CircularProgressIndicator(color: Colors.white54)),
+            error: (e, _) => Center(
+                child: Text('Erreur de chargement',
+                    style: AppTextStyles.bodyMedium
+                        .copyWith(color: Colors.white54))),
+            data: (tous) {
+              var produits = tous.toList();
 
-        if (produits.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Symbols.search_off,
-                    size: 56,
-                    color: Colors.white.withValues(alpha: 0.2)),
-                const SizedBox(height: 12),
-                Text(
-                  searchQuery.isEmpty
-                      ? 'Aucun produit dans le catalogue'
-                      : 'Aucun résultat pour "$searchQuery"',
-                  style: AppTextStyles.bodyMedium
-                      .copyWith(color: Colors.white38),
+              // Filtre par catégorie
+              if (selectedCatId != null) {
+                produits = produits
+                    .where((p) => p.categorieId == selectedCatId)
+                    .toList();
+              }
+
+              // Filtre par recherche
+              if (searchQuery.isNotEmpty) {
+                produits = produits
+                    .where((p) => p.nom
+                        .toLowerCase()
+                        .contains(searchQuery.toLowerCase()))
+                    .toList();
+              }
+
+              if (produits.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Symbols.search_off,
+                          size: 56,
+                          color: Colors.white.withValues(alpha: 0.2)),
+                      const SizedBox(height: 12),
+                      Text(
+                        searchQuery.isEmpty
+                            ? 'Aucun produit dans cette catégorie'
+                            : 'Aucun résultat pour "$searchQuery"',
+                        style: AppTextStyles.bodyMedium
+                            .copyWith(color: Colors.white38),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return GridView.builder(
+                padding: EdgeInsets.fromLTRB(12, 8, 12, 12 + bottomPadding),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossCount,
+                  childAspectRatio: 0.8,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
                 ),
-              ],
-            ),
-          );
-        }
+                itemCount: produits.length,
+                itemBuilder: (_, i) => _ProduitTile(
+                  produit: produits[i],
+                  onTap: () => onProduitTap(produits[i]),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
 
-        return GridView.builder(
-          padding: EdgeInsets.fromLTRB(12, 12, 12, 12 + bottomPadding),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossCount,
-            childAspectRatio: 0.8,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
+// ── Chip catégorie ──────────────────────────────────────────────────────────
+
+class _CategoryChip extends StatelessWidget {
+  const _CategoryChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : AppColors.surfaceVariant,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.border,
+            width: 1,
           ),
-          itemCount: produits.length,
-          itemBuilder: (_, i) => _ProduitTile(
-            produit: produits[i],
-            onTap: () => onProduitTap(produits[i]),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : AppColors.textSecondary,
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
