@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:video_player/video_player.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
@@ -58,8 +59,35 @@ class BabiCashApp extends ConsumerWidget {
   }
 }
 
-class _SplashScreen extends StatelessWidget {
+class _SplashScreen extends StatefulWidget {
   const _SplashScreen();
+
+  @override
+  State<_SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<_SplashScreen> {
+  late final VideoPlayerController _ctrl;
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = VideoPlayerController.asset('assets/images/anime_logo.mp4')
+      ..initialize().then((_) {
+        if (mounted) {
+          setState(() => _initialized = true);
+          _ctrl.setLooping(true);
+          _ctrl.play();
+        }
+      });
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,25 +96,20 @@ class _SplashScreen extends StatelessWidget {
       home: Scaffold(
         backgroundColor: Colors.white,
         body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(
-                'assets/images/logo.png',
-                width: 160,
-                height: 160,
-              ),
-              const SizedBox(height: 32),
-              const SizedBox(
-                width: 28,
-                height: 28,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1B6B2F)),
+          child: _initialized
+              ? SizedBox(
+                  width: 240,
+                  height: 240,
+                  child: AspectRatio(
+                    aspectRatio: _ctrl.value.aspectRatio,
+                    child: VideoPlayer(_ctrl),
+                  ),
+                )
+              : Image.asset(
+                  'assets/images/logo.png',
+                  width: 160,
+                  height: 160,
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );

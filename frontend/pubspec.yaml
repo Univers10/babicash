@@ -51,6 +51,9 @@ dependencies:
   # Identifiants uniques locaux
   uuid: ^4.4.0
 
+  # Splash animé
+  video_player: ^2.9.2
+
   # UI utilitaires
   intl: ^0.19.0
   cached_network_image: ^3.3.1
