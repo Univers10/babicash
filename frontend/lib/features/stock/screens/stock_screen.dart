@@ -25,6 +25,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
   String _searchQuery = '';
   _StockFilter _filter = _StockFilter.tous;
   String? _selectedCatId;
+  bool _isGridView = false;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +38,11 @@ class _StockScreenState extends ConsumerState<StockScreen> {
         leading: const MenuButton(),
         title: const Text('Stock'),
         actions: [
+          IconButton(
+            icon: Icon(_isGridView ? Symbols.view_list : Symbols.grid_view),
+            onPressed: () => setState(() => _isGridView = !_isGridView),
+            tooltip: _isGridView ? 'Vue liste' : 'Vue grille',
+          ),
           IconButton(
             icon: const Icon(Symbols.category),
             onPressed: () => context.push(AppRoutes.categories),
@@ -237,7 +243,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                   },
                 ),
 
-                // ── Liste produits ────────────────────────────────────
+                // ── Produits (liste ou grille) ─────────────────────────
                 const SizedBox(height: 8),
                 Expanded(
                   child: produits.isEmpty
@@ -254,18 +260,125 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                             ],
                           ),
                         )
-                      : ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
-                          itemCount: produits.length,
-                          separatorBuilder: (_, __) => const VGap(AppSpacing.sm),
-                          itemBuilder: (_, i) => ProduitCard(produit: produits[i]),
-                        ),
+                      : _isGridView
+                          ? _buildGridView(produits)
+                          : ListView.separated(
+                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+                              itemCount: produits.length,
+                              separatorBuilder: (_, __) => const VGap(AppSpacing.sm),
+                              itemBuilder: (_, i) => ProduitCard(produit: produits[i]),
+                            ),
                 ),
               ],
             ),
           );
         },
       ),
+    );
+  }
+
+  Widget _buildGridView(List produits) {
+    final screenW = MediaQuery.of(context).size.width;
+    final crossCount = screenW > 900 ? 4 : screenW > 600 ? 3 : 2;
+
+    return GridView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossCount,
+        childAspectRatio: 0.85,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
+      itemCount: produits.length,
+      itemBuilder: (_, i) {
+        final p = produits[i];
+        final enRupture = p.stockActuel <= 0;
+        final enAlerte = !enRupture && p.stockActuel <= p.stockAlerte;
+        Color stockColor = AppColors.success;
+        if (enRupture) stockColor = AppColors.error;
+        else if (enAlerte) stockColor = AppColors.warning;
+
+        return Card(
+          clipBehavior: Clip.hardEdge,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          elevation: 1,
+          child: InkWell(
+            onTap: () => showDialog(
+              context: context,
+              builder: (_) => ProduitFormDialog(produit: p),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Icône + badge stock
+                  Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryContainer,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Symbols.inventory_2, color: AppColors.primary, size: 18),
+                      ),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: stockColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (enRupture || enAlerte)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 3),
+                                child: Icon(
+                                  enRupture ? Symbols.warning : Symbols.info,
+                                  size: 10,
+                                  color: stockColor,
+                                ),
+                              ),
+                            Text(
+                              '${p.stockActuel}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: stockColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  // Nom
+                  Text(
+                    p.nom,
+                    style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  // Prix
+                  Text(
+                    '${p.prixVenteSuggere.toStringAsFixed(0)} F',
+                    style: AppTextStyles.labelMedium.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
