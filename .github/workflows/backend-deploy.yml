@@ -22,22 +22,25 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
+            set -e
             cd /opt/babicash
 
-            # Pull latest code
+            echo "📥 Pulling latest code..."
             git pull origin main
 
-            # Rebuild & restart
+            echo "🔨 Building & restarting backend..."
             cd backend
             docker compose down
             docker compose build --no-cache api
             docker compose up -d db api
 
-            # Wait for healthy
-            sleep 10
+            echo "⏳ Waiting for API to be healthy..."
+            sleep 15
+
+            echo "🔄 Running migrations..."
             docker compose exec api alembic upgrade head
 
-            # Cleanup old images
+            echo "🧹 Cleaning up old images..."
             docker image prune -f
 
-            echo "✅ Deploy complete"
+            echo "✅ Backend deploy complete"

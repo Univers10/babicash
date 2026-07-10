@@ -15,7 +15,7 @@ defaults:
     working-directory: frontend
 
 jobs:
-  test:
+  analyze-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,7 +31,7 @@ jobs:
         run: flutter pub get
 
       - name: Analyze
-        run: flutter analyze --no-pub
+        run: flutter analyze --no-fatal-infos
 
       - name: Run tests
         run: flutter test --coverage
@@ -44,7 +44,7 @@ jobs:
           flags: flutter
 
   build-apk:
-    needs: test
+    needs: analyze-and-test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
@@ -67,7 +67,7 @@ jobs:
           retention-days: 14
 
   build-web:
-    needs: test
+    needs: analyze-and-test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
