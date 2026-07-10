@@ -1,0 +1,43 @@
+name: Backend Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /opt/babicash
+
+            # Pull latest code
+            git pull origin main
+
+            # Rebuild & restart
+            cd backend
+            docker compose down
+            docker compose build --no-cache api
+            docker compose up -d db api
+
+            # Wait for healthy
+            sleep 10
+            docker compose exec api alembic upgrade head
+
+            # Cleanup old images
+            docker image prune -f
+
+            echo "✅ Deploy complete"

@@ -1,0 +1,85 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "backend/**"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "backend/**"
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: babicash
+          POSTGRES_PASSWORD: babicash
+          POSTGRES_DB: babicash
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U babicash"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql+asyncpg://babicash:babicash@localhost:5432/babicash
+      SECRET_KEY: ci-test-secret-key-do-not-use-in-production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Lint — ruff
+        run: |
+          pip install ruff
+          ruff check .
+
+      - name: Type check — mypy
+        run: |
+          pip install mypy
+          mypy app/ --ignore-missing-imports
+
+      - name: Run migrations
+        run: alembic upgrade head
+
+      - name: Run tests
+        run: pytest -v --tb=short
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t babicash-api:${{ github.sha }} .
+
+      - name: Save image artifact
+        run: docker save babicash-api:${{ github.sha }} | gzip > /tmp/babicash-api.tar.gz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: /tmp/babicash-api.tar.gz
+          retention-days: 3
