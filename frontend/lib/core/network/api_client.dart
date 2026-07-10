@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../storage/secure_storage.dart';
 
-const String _baseUrl = 'http://192.168.1.29:8000'; // Réseau local
+const String _baseUrl = 'https://babicash.ecomotionafricaci.com';
+// Pour dev local : 'http://192.168.1.29:8000'
 // Pour émulateur Android : 'http://10.0.2.2:8000'
-// Pour prod : 'https://api.babicash.ci'
 
 class ApiClient {
   ApiClient._();
