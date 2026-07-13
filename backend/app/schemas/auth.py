@@ -15,6 +15,22 @@ class LoginPinRequest(BaseModel):
     code_pin: str = Field(pattern=r"^\d{4}$")
 
 
+class RegisterRequest(BaseModel):
+    """Inscription d'un nouveau propriétaire."""
+
+    nom: str = Field(min_length=1, max_length=255)
+    email: EmailStr
+    mot_de_passe: str = Field(min_length=6, max_length=128)
+    telephone: str | None = Field(default=None, max_length=30)
+
+
+class LoginIdRequest(BaseModel):
+    """Connexion par ID propriétaire (UUID)."""
+
+    id_proprietaire: str = Field(min_length=36, max_length=36)
+    mot_de_passe: str
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"

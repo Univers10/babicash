@@ -24,6 +24,28 @@ class LoginPinRequest with _$LoginPinRequest {
 }
 
 @freezed
+class RegisterRequest with _$RegisterRequest {
+  const factory RegisterRequest({
+    required String nom,
+    required String email,
+    @JsonKey(name: 'mot_de_passe') required String motDePasse,
+    String? telephone,
+  }) = _RegisterRequest;
+  factory RegisterRequest.fromJson(Map<String, dynamic> json) =>
+      _$RegisterRequestFromJson(json);
+}
+
+@freezed
+class LoginIdRequest with _$LoginIdRequest {
+  const factory LoginIdRequest({
+    @JsonKey(name: 'id_proprietaire') required String idProprietaire,
+    @JsonKey(name: 'mot_de_passe') required String motDePasse,
+  }) = _LoginIdRequest;
+  factory LoginIdRequest.fromJson(Map<String, dynamic> json) =>
+      _$LoginIdRequestFromJson(json);
+}
+
+@freezed
 class TokenResponse with _$TokenResponse {
   const factory TokenResponse({
     @JsonKey(name: 'access_token') required String accessToken,

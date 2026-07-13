@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/login_pin_screen.dart';
+import '../../features/auth/screens/register_screen.dart';
 import '../../features/caisse/screens/caisse_screen.dart';
 import '../../features/stock/screens/categories_screen.dart';
 import '../../features/stock/screens/stock_screen.dart';
@@ -18,6 +19,7 @@ import '../../shared/screens/shell_screen.dart';
 abstract final class AppRoutes {
   static const login = '/login';
   static const loginPin = '/login-pin';
+  static const register = '/register';
   static const caisse = '/caisse';
   static const stock = '/stock';
   static const categories = '/categories';
@@ -37,7 +39,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final isLoggedIn = authState.hasValue && authState.value != null;
       final isOnAuth = state.matchedLocation == AppRoutes.login ||
-          state.matchedLocation == AppRoutes.loginPin;
+          state.matchedLocation == AppRoutes.loginPin ||
+          state.matchedLocation == AppRoutes.register;
 
       if (!isLoggedIn && !isOnAuth) return AppRoutes.login;
       if (isLoggedIn && isOnAuth) {
@@ -54,6 +57,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.loginPin,
         builder: (_, __) => const LoginPinScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.register,
+        builder: (_, __) => const RegisterScreen(),
       ),
       ShellRoute(
         builder: (_, __, child) => ShellScreen(child: child),

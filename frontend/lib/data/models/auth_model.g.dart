@@ -32,6 +32,37 @@ Map<String, dynamic> _$$LoginPinRequestImplToJson(
       'code_pin': instance.codePin,
     };
 
+_$RegisterRequestImpl _$$RegisterRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$RegisterRequestImpl(
+      nom: json['nom'] as String,
+      email: json['email'] as String,
+      motDePasse: json['mot_de_passe'] as String,
+      telephone: json['telephone'] as String?,
+    );
+
+Map<String, dynamic> _$$RegisterRequestImplToJson(
+        _$RegisterRequestImpl instance) =>
+    <String, dynamic>{
+      'nom': instance.nom,
+      'email': instance.email,
+      'mot_de_passe': instance.motDePasse,
+      'telephone': instance.telephone,
+    };
+
+_$LoginIdRequestImpl _$$LoginIdRequestImplFromJson(Map<String, dynamic> json) =>
+    _$LoginIdRequestImpl(
+      idProprietaire: json['id_proprietaire'] as String,
+      motDePasse: json['mot_de_passe'] as String,
+    );
+
+Map<String, dynamic> _$$LoginIdRequestImplToJson(
+        _$LoginIdRequestImpl instance) =>
+    <String, dynamic>{
+      'id_proprietaire': instance.idProprietaire,
+      'mot_de_passe': instance.motDePasse,
+    };
+
 _$TokenResponseImpl _$$TokenResponseImplFromJson(Map<String, dynamic> json) =>
     _$TokenResponseImpl(
       accessToken: json['access_token'] as String,

@@ -363,6 +363,409 @@ abstract class _LoginPinRequest implements LoginPinRequest {
       throw _privateConstructorUsedError;
 }
 
+RegisterRequest _$RegisterRequestFromJson(Map<String, dynamic> json) {
+  return _RegisterRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$RegisterRequest {
+  String get nom => throw _privateConstructorUsedError;
+  String get email => throw _privateConstructorUsedError;
+  @JsonKey(name: 'mot_de_passe')
+  String get motDePasse => throw _privateConstructorUsedError;
+  String? get telephone => throw _privateConstructorUsedError;
+
+  /// Serializes this RegisterRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of RegisterRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $RegisterRequestCopyWith<RegisterRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $RegisterRequestCopyWith<$Res> {
+  factory $RegisterRequestCopyWith(
+          RegisterRequest value, $Res Function(RegisterRequest) then) =
+      _$RegisterRequestCopyWithImpl<$Res, RegisterRequest>;
+  @useResult
+  $Res call(
+      {String nom,
+      String email,
+      @JsonKey(name: 'mot_de_passe') String motDePasse,
+      String? telephone});
+}
+
+/// @nodoc
+class _$RegisterRequestCopyWithImpl<$Res, $Val extends RegisterRequest>
+    implements $RegisterRequestCopyWith<$Res> {
+  _$RegisterRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of RegisterRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? nom = null,
+    Object? email = null,
+    Object? motDePasse = null,
+    Object? telephone = freezed,
+  }) {
+    return _then(_value.copyWith(
+      nom: null == nom
+          ? _value.nom
+          : nom // ignore: cast_nullable_to_non_nullable
+              as String,
+      email: null == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      motDePasse: null == motDePasse
+          ? _value.motDePasse
+          : motDePasse // ignore: cast_nullable_to_non_nullable
+              as String,
+      telephone: freezed == telephone
+          ? _value.telephone
+          : telephone // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$RegisterRequestImplCopyWith<$Res>
+    implements $RegisterRequestCopyWith<$Res> {
+  factory _$$RegisterRequestImplCopyWith(_$RegisterRequestImpl value,
+          $Res Function(_$RegisterRequestImpl) then) =
+      __$$RegisterRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String nom,
+      String email,
+      @JsonKey(name: 'mot_de_passe') String motDePasse,
+      String? telephone});
+}
+
+/// @nodoc
+class __$$RegisterRequestImplCopyWithImpl<$Res>
+    extends _$RegisterRequestCopyWithImpl<$Res, _$RegisterRequestImpl>
+    implements _$$RegisterRequestImplCopyWith<$Res> {
+  __$$RegisterRequestImplCopyWithImpl(
+      _$RegisterRequestImpl _value, $Res Function(_$RegisterRequestImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of RegisterRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? nom = null,
+    Object? email = null,
+    Object? motDePasse = null,
+    Object? telephone = freezed,
+  }) {
+    return _then(_$RegisterRequestImpl(
+      nom: null == nom
+          ? _value.nom
+          : nom // ignore: cast_nullable_to_non_nullable
+              as String,
+      email: null == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      motDePasse: null == motDePasse
+          ? _value.motDePasse
+          : motDePasse // ignore: cast_nullable_to_non_nullable
+              as String,
+      telephone: freezed == telephone
+          ? _value.telephone
+          : telephone // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$RegisterRequestImpl implements _RegisterRequest {
+  const _$RegisterRequestImpl(
+      {required this.nom,
+      required this.email,
+      @JsonKey(name: 'mot_de_passe') required this.motDePasse,
+      this.telephone});
+
+  factory _$RegisterRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$RegisterRequestImplFromJson(json);
+
+  @override
+  final String nom;
+  @override
+  final String email;
+  @override
+  @JsonKey(name: 'mot_de_passe')
+  final String motDePasse;
+  @override
+  final String? telephone;
+
+  @override
+  String toString() {
+    return 'RegisterRequest(nom: $nom, email: $email, motDePasse: $motDePasse, telephone: $telephone)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$RegisterRequestImpl &&
+            (identical(other.nom, nom) || other.nom == nom) &&
+            (identical(other.email, email) || other.email == email) &&
+            (identical(other.motDePasse, motDePasse) ||
+                other.motDePasse == motDePasse) &&
+            (identical(other.telephone, telephone) ||
+                other.telephone == telephone));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, nom, email, motDePasse, telephone);
+
+  /// Create a copy of RegisterRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$RegisterRequestImplCopyWith<_$RegisterRequestImpl> get copyWith =>
+      __$$RegisterRequestImplCopyWithImpl<_$RegisterRequestImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$RegisterRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _RegisterRequest implements RegisterRequest {
+  const factory _RegisterRequest(
+      {required final String nom,
+      required final String email,
+      @JsonKey(name: 'mot_de_passe') required final String motDePasse,
+      final String? telephone}) = _$RegisterRequestImpl;
+
+  factory _RegisterRequest.fromJson(Map<String, dynamic> json) =
+      _$RegisterRequestImpl.fromJson;
+
+  @override
+  String get nom;
+  @override
+  String get email;
+  @override
+  @JsonKey(name: 'mot_de_passe')
+  String get motDePasse;
+  @override
+  String? get telephone;
+
+  /// Create a copy of RegisterRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$RegisterRequestImplCopyWith<_$RegisterRequestImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+LoginIdRequest _$LoginIdRequestFromJson(Map<String, dynamic> json) {
+  return _LoginIdRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$LoginIdRequest {
+  @JsonKey(name: 'id_proprietaire')
+  String get idProprietaire => throw _privateConstructorUsedError;
+  @JsonKey(name: 'mot_de_passe')
+  String get motDePasse => throw _privateConstructorUsedError;
+
+  /// Serializes this LoginIdRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of LoginIdRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $LoginIdRequestCopyWith<LoginIdRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $LoginIdRequestCopyWith<$Res> {
+  factory $LoginIdRequestCopyWith(
+          LoginIdRequest value, $Res Function(LoginIdRequest) then) =
+      _$LoginIdRequestCopyWithImpl<$Res, LoginIdRequest>;
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'id_proprietaire') String idProprietaire,
+      @JsonKey(name: 'mot_de_passe') String motDePasse});
+}
+
+/// @nodoc
+class _$LoginIdRequestCopyWithImpl<$Res, $Val extends LoginIdRequest>
+    implements $LoginIdRequestCopyWith<$Res> {
+  _$LoginIdRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of LoginIdRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? idProprietaire = null,
+    Object? motDePasse = null,
+  }) {
+    return _then(_value.copyWith(
+      idProprietaire: null == idProprietaire
+          ? _value.idProprietaire
+          : idProprietaire // ignore: cast_nullable_to_non_nullable
+              as String,
+      motDePasse: null == motDePasse
+          ? _value.motDePasse
+          : motDePasse // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$LoginIdRequestImplCopyWith<$Res>
+    implements $LoginIdRequestCopyWith<$Res> {
+  factory _$$LoginIdRequestImplCopyWith(_$LoginIdRequestImpl value,
+          $Res Function(_$LoginIdRequestImpl) then) =
+      __$$LoginIdRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'id_proprietaire') String idProprietaire,
+      @JsonKey(name: 'mot_de_passe') String motDePasse});
+}
+
+/// @nodoc
+class __$$LoginIdRequestImplCopyWithImpl<$Res>
+    extends _$LoginIdRequestCopyWithImpl<$Res, _$LoginIdRequestImpl>
+    implements _$$LoginIdRequestImplCopyWith<$Res> {
+  __$$LoginIdRequestImplCopyWithImpl(
+      _$LoginIdRequestImpl _value, $Res Function(_$LoginIdRequestImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of LoginIdRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? idProprietaire = null,
+    Object? motDePasse = null,
+  }) {
+    return _then(_$LoginIdRequestImpl(
+      idProprietaire: null == idProprietaire
+          ? _value.idProprietaire
+          : idProprietaire // ignore: cast_nullable_to_non_nullable
+              as String,
+      motDePasse: null == motDePasse
+          ? _value.motDePasse
+          : motDePasse // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$LoginIdRequestImpl implements _LoginIdRequest {
+  const _$LoginIdRequestImpl(
+      {@JsonKey(name: 'id_proprietaire') required this.idProprietaire,
+      @JsonKey(name: 'mot_de_passe') required this.motDePasse});
+
+  factory _$LoginIdRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$LoginIdRequestImplFromJson(json);
+
+  @override
+  @JsonKey(name: 'id_proprietaire')
+  final String idProprietaire;
+  @override
+  @JsonKey(name: 'mot_de_passe')
+  final String motDePasse;
+
+  @override
+  String toString() {
+    return 'LoginIdRequest(idProprietaire: $idProprietaire, motDePasse: $motDePasse)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$LoginIdRequestImpl &&
+            (identical(other.idProprietaire, idProprietaire) ||
+                other.idProprietaire == idProprietaire) &&
+            (identical(other.motDePasse, motDePasse) ||
+                other.motDePasse == motDePasse));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, idProprietaire, motDePasse);
+
+  /// Create a copy of LoginIdRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$LoginIdRequestImplCopyWith<_$LoginIdRequestImpl> get copyWith =>
+      __$$LoginIdRequestImplCopyWithImpl<_$LoginIdRequestImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$LoginIdRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _LoginIdRequest implements LoginIdRequest {
+  const factory _LoginIdRequest(
+      {@JsonKey(name: 'id_proprietaire') required final String idProprietaire,
+      @JsonKey(name: 'mot_de_passe')
+      required final String motDePasse}) = _$LoginIdRequestImpl;
+
+  factory _LoginIdRequest.fromJson(Map<String, dynamic> json) =
+      _$LoginIdRequestImpl.fromJson;
+
+  @override
+  @JsonKey(name: 'id_proprietaire')
+  String get idProprietaire;
+  @override
+  @JsonKey(name: 'mot_de_passe')
+  String get motDePasse;
+
+  /// Create a copy of LoginIdRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$LoginIdRequestImplCopyWith<_$LoginIdRequestImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 TokenResponse _$TokenResponseFromJson(Map<String, dynamic> json) {
   return _TokenResponse.fromJson(json);
 }

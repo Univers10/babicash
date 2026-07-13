@@ -82,6 +82,70 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
     }
   }
 
+  Future<void> loginId(String idProprietaire, String motDePasse) async {
+    state = const AsyncLoading();
+    final api = ref.read(authApiProvider);
+    final storage = ref.read(secureStorageProvider);
+    try {
+      final resp = await api.loginId(
+        LoginIdRequest(idProprietaire: idProprietaire, motDePasse: motDePasse),
+      );
+      await storage.saveSession(
+        token: resp.accessToken,
+        role: resp.role,
+        nom: resp.nom,
+        boutiqueId: resp.boutiqueId,
+      );
+      state = AsyncData(SessionUser(
+        token: resp.accessToken,
+        role: resp.role,
+        nom: resp.nom,
+        boutiqueId: resp.boutiqueId,
+      ));
+    } on DioException catch (e) {
+      state = AsyncError(mapDioError(e), StackTrace.current);
+    } catch (e) {
+      state = AsyncError(const UnknownException(), StackTrace.current);
+    }
+  }
+
+  Future<void> register(
+    String nom,
+    String email,
+    String motDePasse,
+    String? telephone,
+  ) async {
+    state = const AsyncLoading();
+    final api = ref.read(authApiProvider);
+    final storage = ref.read(secureStorageProvider);
+    try {
+      final resp = await api.register(
+        RegisterRequest(
+          nom: nom,
+          email: email,
+          motDePasse: motDePasse,
+          telephone: telephone,
+        ),
+      );
+      await storage.saveSession(
+        token: resp.accessToken,
+        role: resp.role,
+        nom: resp.nom,
+        boutiqueId: resp.boutiqueId,
+      );
+      state = AsyncData(SessionUser(
+        token: resp.accessToken,
+        role: resp.role,
+        nom: resp.nom,
+        boutiqueId: resp.boutiqueId,
+      ));
+    } on DioException catch (e) {
+      state = AsyncError(mapDioError(e), StackTrace.current);
+    } catch (e) {
+      state = AsyncError(const UnknownException(), StackTrace.current);
+    }
+  }
+
   Future<void> logout() async {
     await ref.read(secureStorageProvider).clearSession();
     state = const AsyncData(null);
