@@ -181,6 +181,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           foregroundColor: AppColors.primary,
                           textStyle: AppTextStyles.bodyMedium.copyWith(
                             fontWeight: FontWeight.w600,
+                            inherit: true,
                           ),
                         ),
                         child: const Text('Se connecter'),
