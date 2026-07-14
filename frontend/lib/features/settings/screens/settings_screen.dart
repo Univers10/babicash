@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import '../../../core/network/api_client.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -10,10 +9,13 @@ import '../../../data/models/abonnement_model.dart';
 import '../../../data/models/boutique_model.dart';
 import '../../../data/remote/abonnements_api.dart';
 import '../../../data/remote/boutiques_api.dart';
+import '../../../data/remote/users_api.dart';
 import '../../../data/models/auth_model.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/boutiques/providers/boutique_provider.dart';
 import '../../../features/sync/sync_service.dart';
+import '../../../features/users/providers/users_provider.dart';
+import '../../../features/users/screens/users_screen.dart';
 import '../../../shared/widgets/amount_text.dart';
 import '../../../shared/widgets/app_snackbar.dart';
 import '../../../shared/widgets/menu_button.dart';
@@ -99,11 +101,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _ProfileCard(user: user),
           const VGap(AppSpacing.sm),
           _SettingsTile(
+            icon: Symbols.edit,
+            title: 'Modifier mon profil',
+            onTap: () => _showEditProfileDialog(context),
+          ),
+          const VGap(AppSpacing.sm),
+          _SettingsTile(
             icon: Symbols.pin,
             title: 'Changer le code PIN',
             onTap: () => _showChangePinDialog(context),
           ),
           const VGap(AppSpacing.xl),
+
+          // ════════════════════════════════════════════════════════════════════
+          // ── 2. ÉQUIPE ──────────────────────────────────────────────────────
+          // ════════════════════════════════════════════════════════════════════
+          if (user?.isOwner == true || user?.isManager == true) ...[
+            const _SectionTitle('ÉQUIPE'),
+            _SettingsTile(
+              icon: Symbols.group,
+              title: 'Gérer les utilisateurs',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const UsersScreen(),
+                ),
+              ),
+            ),
+            const VGap(AppSpacing.xl),
+          ],
 
           // ════════════════════════════════════════════════════════════════════
           // ── 2. BOUTIQUE ────────────────────────────────────────────────────
@@ -179,6 +204,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   // ── Dialogs ──────────────────────────────────────────────────────────────────
 
+  void _showEditProfileDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => _EditProfileDialog(ref: ref),
+    );
+  }
+
   void _showChangePinDialog(BuildContext context) {
     final ctrl = TextEditingController();
     showDialog(
@@ -218,8 +250,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Future<void> _changePin(String pin) async {
     try {
-      final dio = ref.read(dioProvider);
-      await dio.put('/users/me/pin', data: {'code_pin': pin});
+      await ref.read(usersApiProvider).changePin(pin);
       if (mounted) AppSnackbar.success(context, 'Code PIN mis à jour.');
     } catch (_) {
       if (mounted) AppSnackbar.error(context, 'Erreur lors du changement de PIN.');
@@ -262,6 +293,152 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Dialog édition profil ──────────────────────────────────────────────────────
+
+class _EditProfileDialog extends ConsumerStatefulWidget {
+  const _EditProfileDialog({required this.ref});
+  final WidgetRef ref;
+
+  @override
+  ConsumerState<_EditProfileDialog> createState() => _EditProfileDialogState();
+}
+
+class _EditProfileDialogState extends ConsumerState<_EditProfileDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nom;
+  late final TextEditingController _telephone;
+  bool _loading = false;
+  bool _initializing = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _nom = TextEditingController();
+    _telephone = TextEditingController();
+    _loadProfile();
+  }
+
+  @override
+  void dispose() {
+    _nom.dispose();
+    _telephone.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final profile = await ref.read(usersApiProvider).getMyProfile();
+      if (mounted) {
+        _nom.text = profile.nom;
+        _telephone.text = profile.telephone ?? '';
+      }
+    } catch (_) {
+      // Pré-remplir avec le nom de la session si l'API échoue
+      final sessionNom = ref.read(authStateProvider).value?.nom ?? '';
+      if (mounted) _nom.text = sessionNom;
+    } finally {
+      if (mounted) setState(() => _initializing = false);
+    }
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _loading = true);
+    try {
+      final nom = _nom.text.trim();
+      final telephone = _telephone.text.trim();
+
+      await ref.read(usersApiProvider).updateMyProfile(
+            nom: nom,
+            telephone: telephone.isNotEmpty ? telephone : null,
+          );
+
+      // Met à jour le nom dans la session locale
+      await ref.read(authStateProvider.notifier).updateNom(nom);
+      ref.invalidate(myProfileProvider);
+
+      if (mounted) {
+        Navigator.pop(context);
+        AppSnackbar.success(context, 'Profil mis à jour.');
+      }
+    } catch (_) {
+      if (mounted) {
+        AppSnackbar.error(context, 'Erreur lors de la mise à jour du profil.');
+        setState(() => _loading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Row(
+        children: [
+          Icon(Symbols.manage_accounts, color: AppColors.primary),
+          SizedBox(width: 12),
+          Text('Mon profil'),
+        ],
+      ),
+      content: _initializing
+          ? const SizedBox(
+              width: 280,
+              height: 80,
+              child: Center(child: CircularProgressIndicator()),
+            )
+          : SizedBox(
+              width: 360,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: _nom,
+                      decoration: InputDecoration(
+                        labelText: 'Nom complet *',
+                        prefixIcon: const Icon(Symbols.person),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      textCapitalization: TextCapitalization.words,
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Requis' : null,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _telephone,
+                      decoration: InputDecoration(
+                        labelText: 'Téléphone',
+                        prefixIcon: const Icon(Symbols.phone),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      keyboardType: TextInputType.phone,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+      actions: [
+        TextButton(
+          onPressed: _loading ? null : () => Navigator.pop(context),
+          child: const Text('Annuler'),
+        ),
+        if (!_initializing)
+          FilledButton.icon(
+            icon: _loading
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  )
+                : const Icon(Symbols.check),
+            onPressed: _loading ? null : _submit,
+            label: const Text('Enregistrer'),
+          ),
+      ],
     );
   }
 }

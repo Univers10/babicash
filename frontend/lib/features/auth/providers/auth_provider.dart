@@ -150,4 +150,18 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
     await ref.read(secureStorageProvider).clearSession();
     state = const AsyncData(null);
   }
+
+  /// Met à jour le nom affiché après modification du profil.
+  Future<void> updateNom(String newNom) async {
+    final current = state.valueOrNull;
+    if (current == null) return;
+    final storage = ref.read(secureStorageProvider);
+    await storage.saveSession(
+      token: current.token,
+      role: current.role,
+      nom: newNom,
+      boutiqueId: current.boutiqueId,
+    );
+    state = AsyncData(current.copyWith(nom: newNom));
+  }
 }
