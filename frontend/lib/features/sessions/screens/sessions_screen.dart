@@ -93,7 +93,7 @@ class _OuvertureSessionState extends ConsumerState<_OuvertureSession> {
           Container(
             width: 80,
             height: 80,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.primaryContainer,
               borderRadius: AppSpacing.borderRadiusFull,
             ),
@@ -101,7 +101,7 @@ class _OuvertureSessionState extends ConsumerState<_OuvertureSession> {
                 size: 40, color: AppColors.primary),
           ),
           const VGap(AppSpacing.xl),
-          Text('Ouvrir la session', style: AppTextStyles.headlineLarge),
+          const Text('Ouvrir la session', style: AppTextStyles.headlineLarge),
           const VGap(AppSpacing.sm),
           Text(
             'Déclarez votre fond de caisse initial.',
@@ -190,7 +190,7 @@ class _SessionActiveState extends ConsumerState<_SessionActive> {
           Container(
             width: double.infinity,
             padding: AppSpacing.cardPadding,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.primaryContainer,
               borderRadius: AppSpacing.borderRadiusLg,
             ),
@@ -231,7 +231,7 @@ class _SessionActiveState extends ConsumerState<_SessionActive> {
           const VGap(AppSpacing.xl),
 
           // Fermeture
-          Text('Fermer la session', style: AppTextStyles.headlineSmall),
+          const Text('Fermer la session', style: AppTextStyles.headlineSmall),
           const VGap(AppSpacing.md),
           AppTextField(
             controller: _fondFinalCtrl,
@@ -272,7 +272,7 @@ class _SessionVentesList extends ConsumerWidget {
           children: [
             const Icon(Symbols.receipt_long, size: 20, color: AppColors.primary),
             const SizedBox(width: 8),
-            Text('Ventes de la session', style: AppTextStyles.headlineSmall),
+            const Text('Ventes de la session', style: AppTextStyles.headlineSmall),
             const Spacer(),
             IconButton(
               icon: const Icon(Symbols.refresh, size: 20),
@@ -310,7 +310,7 @@ class _SessionVentesList extends ConsumerWidget {
                 ),
                 child: Column(
                   children: [
-                    Icon(Symbols.point_of_sale, size: 32, color: AppColors.textDisabled),
+                    const Icon(Symbols.point_of_sale, size: 32, color: AppColors.textDisabled),
                     const SizedBox(height: 8),
                     Text('Aucune vente pour cette session',
                         style: AppTextStyles.bodySmall.copyWith(color: AppColors.textTertiary)),
@@ -541,7 +541,7 @@ class _RapportDialog extends StatelessWidget {
               child: const Icon(Symbols.check_circle, color: AppColors.success, size: 32),
             ),
             const SizedBox(height: 12),
-            Text('Session fermée', style: AppTextStyles.headlineMedium),
+            const Text('Session fermée', style: AppTextStyles.headlineMedium),
             const SizedBox(height: 4),
             Text(
               '${fmt.format(s.dateOuverture.toLocal())} → ${s.dateFermeture != null ? fmt.format(s.dateFermeture!.toLocal()) : 'Maintenant'}',

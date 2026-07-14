@@ -77,7 +77,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   const VGap(AppSpacing.xxxl),
 
                   // Titre
-                  Text(
+                  const Text(
                     'Créer un compte',
                     style: AppTextStyles.headlineLarge,
                   ),
@@ -208,7 +208,7 @@ class _BabiCashLogo extends StatelessWidget {
         Container(
           width: 52,
           height: 52,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.primaryContainer,
             borderRadius: AppSpacing.borderRadiusMd,
           ),

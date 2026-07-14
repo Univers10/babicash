@@ -104,7 +104,7 @@ class _ProduitFormDialogState extends ConsumerState<ProduitFormDialog> {
               const VGap(AppSpacing.md),
               categoriesAsync.when(
                 data: (cats) => DropdownButtonFormField<String?>(
-                  value: _categorieId,
+                  initialValue: _categorieId,
                   decoration: const InputDecoration(labelText: 'Catégorie'),
                   items: [
                     const DropdownMenuItem(

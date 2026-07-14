@@ -57,8 +57,8 @@ class _PanierLine extends ConsumerWidget {
           children: [
             // Avertissement vente à perte
             if (item.aVendreAPerte)
-              Padding(
-                padding: const EdgeInsets.only(right: AppSpacing.sm),
+              const Padding(
+                padding: EdgeInsets.only(right: AppSpacing.sm),
                 child: Icon(Symbols.warning,
                     size: 16, color: AppColors.error),
               ),
@@ -136,7 +136,7 @@ class _SmallBtn extends StatelessWidget {
       child: Container(
         width: 28,
         height: 28,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.surfaceVariant,
           borderRadius: AppSpacing.borderRadiusFull,
         ),

@@ -148,9 +148,10 @@ final syncInitProvider = FutureProvider<void>((ref) async {
   await service.pushPending();
 
   // Écoute reconnexion réseau → re-sync automatique
-  Connectivity().onConnectivityChanged.listen((results) async {
+  final subscription = Connectivity().onConnectivityChanged.listen((results) async {
     if (!results.contains(ConnectivityResult.none)) {
       await service.pushPending();
     }
   });
+  ref.onDispose(subscription.cancel);
 });

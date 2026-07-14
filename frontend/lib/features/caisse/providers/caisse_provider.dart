@@ -117,8 +117,8 @@ class CaisseNotifier extends Notifier<void> {
     if (user == null || boutiqueId == null) return false;
 
     // Bloquer si aucune session ouverte
-    final sessionAsync = ref.read(sessionNotifierProvider);
-    if (sessionAsync.valueOrNull == null) {
+    final session = ref.read(sessionNotifierProvider).valueOrNull;
+    if (session == null) {
       throw Exception('SESSION_REQUISE');
     }
 
@@ -129,16 +129,16 @@ class CaisseNotifier extends Notifier<void> {
       final idLocal = const Uuid().v4();
       final remiseGlobale = ref.read(remiseGlobaleProvider);
       final sousTotal = panier.fold(0.0, (sum, item) => sum + item.total);
-      final montantTotal = sousTotal * (1 - remiseGlobale / 100);
-      final sessionAsync = ref.read(sessionNotifierProvider);
-      final sessionId = sessionAsync.valueOrNull?.id;
+      final montantTotalCentimes = (sousTotal * 100 * (1 - remiseGlobale / 100)).round();
+      final montantTotal = montantTotalCentimes / 100;
+      final sessionId = session.id;
       final client = ref.read(clientSelectionneProvider);
 
       // 1. Écriture locale (offline-first)
       await db.insertVente(LocalVentesCompanion(
         idLocal: drift.Value(idLocal),
         boutiqueId: drift.Value(boutiqueId),
-        sessionId: sessionId != null ? drift.Value(sessionId) : const drift.Value.absent(),
+        sessionId: drift.Value(sessionId),
         tierId: client != null ? drift.Value(client.id) : const drift.Value.absent(),
         modePaiement: drift.Value(modePaiement),
         montantTotal: drift.Value(montantTotal),

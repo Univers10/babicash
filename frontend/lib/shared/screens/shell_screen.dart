@@ -21,7 +21,7 @@ class ShellScreen extends ConsumerWidget {
     final location = GoRouterState.of(context).matchedLocation;
 
     final menuGroups = [
-      _MenuGroup(
+      const _MenuGroup(
         label: 'Opérations',
         items: [
           _NavItem(label: 'Caisse', icon: Symbols.point_of_sale, route: AppRoutes.caisse),
@@ -29,7 +29,7 @@ class ShellScreen extends ConsumerWidget {
           _NavItem(label: 'Catégories', icon: Symbols.category, route: AppRoutes.categories),
         ],
       ),
-      _MenuGroup(
+      const _MenuGroup(
         label: 'Gestion',
         items: [
           _NavItem(label: 'Tiers', icon: Symbols.people, route: AppRoutes.tiers),
@@ -37,7 +37,7 @@ class ShellScreen extends ConsumerWidget {
           _NavItem(label: 'Sessions', icon: Symbols.receipt_long, route: AppRoutes.sessions),
         ],
       ),
-      _MenuGroup(
+      const _MenuGroup(
         label: 'Paramètres',
         items: [
           _NavItem(label: 'Profil', icon: Symbols.person, route: AppRoutes.settings),
@@ -47,7 +47,7 @@ class ShellScreen extends ConsumerWidget {
         ],
       ),
       if (isOwner)
-        _MenuGroup(
+        const _MenuGroup(
           label: 'Propriétaire',
           items: [
             _NavItem(label: 'Dashboard', icon: Symbols.dashboard, route: AppRoutes.dashboard),
@@ -57,16 +57,16 @@ class ShellScreen extends ConsumerWidget {
 
     final bottomItems = isOwner
         ? [
-            _NavItem(label: 'Dashboard', icon: Symbols.dashboard, route: AppRoutes.dashboard),
-            _NavItem(label: 'Caisse', icon: Symbols.point_of_sale, route: AppRoutes.caisse),
-            _NavItem(label: 'Historique', icon: Symbols.history, route: AppRoutes.historique),
-            _NavItem(label: 'Stock', icon: Symbols.inventory_2, route: AppRoutes.stock),
+            const _NavItem(label: 'Dashboard', icon: Symbols.dashboard, route: AppRoutes.dashboard),
+            const _NavItem(label: 'Caisse', icon: Symbols.point_of_sale, route: AppRoutes.caisse),
+            const _NavItem(label: 'Historique', icon: Symbols.history, route: AppRoutes.historique),
+            const _NavItem(label: 'Stock', icon: Symbols.inventory_2, route: AppRoutes.stock),
           ]
         : [
-            _NavItem(label: 'Caisse', icon: Symbols.point_of_sale, route: AppRoutes.caisse),
-            _NavItem(label: 'Stock', icon: Symbols.inventory_2, route: AppRoutes.stock),
-            _NavItem(label: 'Historique', icon: Symbols.history, route: AppRoutes.historique),
-            _NavItem(label: 'Sessions', icon: Symbols.receipt_long, route: AppRoutes.sessions),
+            const _NavItem(label: 'Caisse', icon: Symbols.point_of_sale, route: AppRoutes.caisse),
+            const _NavItem(label: 'Stock', icon: Symbols.inventory_2, route: AppRoutes.stock),
+            const _NavItem(label: 'Historique', icon: Symbols.history, route: AppRoutes.historique),
+            const _NavItem(label: 'Sessions', icon: Symbols.receipt_long, route: AppRoutes.sessions),
           ];
     final currentIndex = bottomItems.indexWhere((i) => location.startsWith(i.route));
 
@@ -84,7 +84,7 @@ class ShellScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 28,
                       backgroundColor: AppColors.onPrimary,
                       child: Icon(Symbols.store, color: AppColors.primary),
@@ -97,12 +97,12 @@ class ShellScreen extends ConsumerWidget {
                     if (user != null)
                       Text(
                         user.nom,
-                        style: AppTextStyles.bodyMedium.copyWith(color: AppColors.onPrimary.withOpacity(0.8)),
+                        style: AppTextStyles.bodyMedium.copyWith(color: AppColors.onPrimary.withValues(alpha: 0.8)),
                       ),
                     if (user != null)
                       Text(
                         user.isOwner ? 'Propriétaire' : 'Manager',
-                        style: AppTextStyles.bodySmall.copyWith(color: AppColors.onPrimary.withOpacity(0.7)),
+                        style: AppTextStyles.bodySmall.copyWith(color: AppColors.onPrimary.withValues(alpha: 0.7)),
                       ),
                   ],
                 ),
@@ -145,8 +145,8 @@ class ShellScreen extends ConsumerWidget {
                               ),
                             ),
                             selected: isSelected,
-                            selectedTileColor: AppColors.primaryContainer.withOpacity(0.5),
-                            shape: RoundedRectangleBorder(
+                            selectedTileColor: AppColors.primaryContainer.withValues(alpha: 0.5),
+                            shape: const RoundedRectangleBorder(
                               borderRadius: AppSpacing.borderRadiusLg,
                             ),
                             contentPadding: const EdgeInsets.symmetric(
@@ -182,7 +182,7 @@ class ShellScreen extends ConsumerWidget {
           color: AppColors.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 12,
               offset: const Offset(0, -2),
             ),

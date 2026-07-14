@@ -15,19 +15,13 @@ final tiersProvider = FutureProvider.family<List<LocalTier>, String>(
     final db = ref.watch(appDatabaseProvider);
     final user = ref.watch(authStateProvider).value;
     final boutiqueId = await ref.watch(currentBoutiqueIdProvider.future);
-    // ignore: avoid_print
-    print('[tiersProvider] user=$user boutiqueId=$boutiqueId type=$type');
     if (user == null || boutiqueId == null) return [];
 
     final connectivity = await Connectivity().checkConnectivity();
-    // ignore: avoid_print
-    print('[tiersProvider] connectivity=$connectivity');
     if (!connectivity.contains(ConnectivityResult.none)) {
       try {
         final api = ref.watch(tiersApiProvider);
         final tiers = await api.listTiers(boutiqueId, typeTiers: type);
-        // ignore: avoid_print
-        print('[tiersProvider] API retourne ${tiers.length} tiers');
         await db.batch((b) {
           b.insertAllOnConflictUpdate(
             db.localTiers,
@@ -42,15 +36,12 @@ final tiersProvider = FutureProvider.family<List<LocalTier>, String>(
             )).toList(),
           );
         });
-      } catch (e) {
-        // ignore: avoid_print
-        print('[tiersProvider] ERREUR API: $e');
+      } catch (_) {
+        // Silencieux — fallback sur cache local
       }
     }
 
     final local = await db.getTiersByBoutique(boutiqueId, type: type);
-    // ignore: avoid_print
-    print('[tiersProvider] DB locale retourne ${local.length} tiers');
     return local;
   },
 );

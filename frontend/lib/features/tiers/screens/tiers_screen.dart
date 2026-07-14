@@ -91,15 +91,15 @@ class _TiersScreenState extends ConsumerState<TiersScreen> {
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.border),
+                  borderSide: const BorderSide(color: AppColors.border),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.border),
+                  borderSide: const BorderSide(color: AppColors.border),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
                 ),
               ),
             ),
@@ -111,12 +111,12 @@ class _TiersScreenState extends ConsumerState<TiersScreen> {
           Expanded(
             child: tiersAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(
+              error: (e, _) => const Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Symbols.error, size: 48, color: AppColors.error),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     Text('Erreur de chargement', style: AppTextStyles.bodyMedium),
                   ],
                 ),
@@ -165,7 +165,7 @@ class _TiersScreenState extends ConsumerState<TiersScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Symbols.search_off, size: 48, color: AppColors.textDisabled),
+                        const Icon(Symbols.search_off, size: 48, color: AppColors.textDisabled),
                         const SizedBox(height: 12),
                         Text('Aucun résultat',
                             style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary)),
@@ -458,11 +458,11 @@ class _TiersScreenState extends ConsumerState<TiersScreen> {
       context: context,
       builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
+        title: const Row(
           children: [
             Icon(Symbols.payments, color: AppColors.success),
-            const SizedBox(width: 12),
-            const Text('Enregistrer paiement'),
+            SizedBox(width: 12),
+            Text('Enregistrer paiement'),
           ],
         ),
         content: Column(
@@ -476,9 +476,9 @@ class _TiersScreenState extends ConsumerState<TiersScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Symbols.account_balance, size: 18, color: AppColors.error),
+                  const Icon(Symbols.account_balance, size: 18, color: AppColors.error),
                   const SizedBox(width: 8),
-                  Text('Solde dû : ', style: AppTextStyles.bodySmall),
+                  const Text('Solde dû : ', style: AppTextStyles.bodySmall),
                   AmountText(
                     amount: tier.soldeDu,
                     style: AppTextStyles.labelLarge.copyWith(color: AppColors.error),
@@ -545,11 +545,11 @@ class _TiersScreenState extends ConsumerState<TiersScreen> {
       context: context,
       builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
+        title: const Row(
           children: [
             Icon(Symbols.warning, color: AppColors.error),
-            const SizedBox(width: 12),
-            const Text('Supprimer ?'),
+            SizedBox(width: 12),
+            Text('Supprimer ?'),
           ],
         ),
         content: Text(
@@ -756,7 +756,7 @@ class _TierCard extends StatelessWidget {
                   ),
                 )
               else
-                Icon(Symbols.chevron_right, size: 20, color: AppColors.textDisabled),
+                const Icon(Symbols.chevron_right, size: 20, color: AppColors.textDisabled),
             ],
           ),
         ),

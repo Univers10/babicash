@@ -176,8 +176,8 @@ class _HeroBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
           colors: [AppColors.primary, AppColors.primaryLight],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -273,7 +273,7 @@ class _BoutiqueCard extends StatelessWidget {
                 Container(
                   width: 36,
                   height: 36,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.primaryContainer,
                     borderRadius: AppSpacing.borderRadiusMd,
                   ),
@@ -365,7 +365,7 @@ class _PeriodeSelector extends StatelessWidget {
     final labels = {'jour': 'Jour', 'semaine': 'Sem.', 'mois': 'Mois'};
 
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.surfaceVariant,
         borderRadius: AppSpacing.borderRadiusFull,
       ),

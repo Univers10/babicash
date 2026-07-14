@@ -58,7 +58,7 @@ class _NumpadWidgetState extends State<NumpadWidget> {
                 _valeur.isEmpty ? '0' : _valeur,
                 style: AppTextStyles.amountHero,
               ),
-              Text('FCFA', style: AppTextStyles.caption),
+              const Text('FCFA', style: AppTextStyles.caption),
             ],
           ),
         ),

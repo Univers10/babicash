@@ -31,8 +31,8 @@ class _LoginPinScreenState extends ConsumerState<LoginPinScreen> {
   @override
   void dispose() {
     _telCtrl.dispose();
-    for (final c in _pinControllers) c.dispose();
-    for (final f in _pinFocusNodes) f.dispose();
+    for (final c in _pinControllers) { c.dispose(); }
+    for (final f in _pinFocusNodes) { f.dispose(); }
     super.dispose();
   }
 
@@ -81,7 +81,7 @@ class _LoginPinScreenState extends ConsumerState<LoginPinScreen> {
                   child: Container(
                     width: 72,
                     height: 72,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppColors.primaryContainer,
                       borderRadius: AppSpacing.borderRadiusFull,
                     ),
@@ -94,7 +94,7 @@ class _LoginPinScreenState extends ConsumerState<LoginPinScreen> {
                 ),
                 const VGap(AppSpacing.xl),
 
-                Center(
+                const Center(
                   child: Text('Gérant', style: AppTextStyles.headlineLarge),
                 ),
                 const VGap(AppSpacing.sm),
@@ -123,7 +123,7 @@ class _LoginPinScreenState extends ConsumerState<LoginPinScreen> {
                 const VGap(AppSpacing.xl),
 
                 // PIN 4 chiffres
-                Text('Code PIN', style: AppTextStyles.labelLarge),
+                const Text('Code PIN', style: AppTextStyles.labelLarge),
                 const VGap(AppSpacing.md),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -141,16 +141,16 @@ class _LoginPinScreenState extends ConsumerState<LoginPinScreen> {
                           keyboardType: TextInputType.number,
                           maxLength: 1,
                           style: AppTextStyles.headlineLarge,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             counterText: '',
                             contentPadding: EdgeInsets.zero,
                             border: OutlineInputBorder(
                               borderRadius: AppSpacing.borderRadiusMd,
-                              borderSide: const BorderSide(color: AppColors.border),
+                              borderSide: BorderSide(color: AppColors.border),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: AppSpacing.borderRadiusMd,
-                              borderSide: const BorderSide(
+                              borderSide: BorderSide(
                                   color: AppColors.primary, width: 2),
                             ),
                           ),

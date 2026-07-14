@@ -18,8 +18,8 @@ class ProduitCard extends StatelessWidget {
         !enRupture && produit.stockActuel <= produit.stockAlerte;
 
     Color stockColor = AppColors.success;
-    if (enRupture) stockColor = AppColors.error;
-    else if (enAlerte) stockColor = AppColors.warning;
+    if (enRupture) { stockColor = AppColors.error; }
+    else if (enAlerte) { stockColor = AppColors.warning; }
 
     return Card(
       clipBehavior: Clip.hardEdge,
@@ -36,7 +36,7 @@ class ProduitCard extends StatelessWidget {
             Container(
               width: 44,
               height: 44,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.primaryContainer,
                 borderRadius: AppSpacing.borderRadiusMd,
               ),
@@ -72,7 +72,7 @@ class ProduitCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.md, vertical: AppSpacing.xs),
               decoration: BoxDecoration(
-                color: stockColor.withOpacity(0.12),
+                color: stockColor.withValues(alpha: 0.12),
                 borderRadius: AppSpacing.borderRadiusFull,
               ),
               child: Row(

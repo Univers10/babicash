@@ -407,7 +407,7 @@ class _TicketDialogState extends State<TicketDialog> {
 
     doc.addPage(
       pw.Page(
-        pageFormat: PdfPageFormat(
+        pageFormat: const PdfPageFormat(
           58 * PdfPageFormat.mm,
           double.infinity,
           marginAll: 4 * PdfPageFormat.mm,
@@ -421,13 +421,13 @@ class _TicketDialogState extends State<TicketDialog> {
               pw.SizedBox(height: 4),
               pw.Center(
                 child: pw.Text(vente.nomBoutique,
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                         fontWeight: pw.FontWeight.bold, fontSize: 14)),
               ),
               if (vente.caissierNom != null)
                 pw.Center(
                   child: pw.Text('Vendeur : ${vente.caissierNom}',
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                           fontWeight: pw.FontWeight.bold, fontSize: 9)),
                 ),
               pw.Center(
@@ -454,7 +454,7 @@ class _TicketDialogState extends State<TicketDialog> {
                             '  ${item.quantite} x ${item.prixApresRemise.toStringAsFixed(0)} F',
                             style: const pw.TextStyle(fontSize: 8)),
                         pw.Text('${item.total.toStringAsFixed(0)} F',
-                            style: pw.TextStyle(
+                            style: const pw.TextStyle(
                                 fontSize: 9,
                                 fontWeight: pw.FontWeight.bold)),
                       ],
@@ -480,10 +480,10 @@ class _TicketDialogState extends State<TicketDialog> {
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text('TOTAL',
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                           fontWeight: pw.FontWeight.bold, fontSize: 11)),
                   pw.Text('${vente.total.toStringAsFixed(0)} F',
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                           fontWeight: pw.FontWeight.bold, fontSize: 11)),
                 ],
               ),
@@ -502,7 +502,7 @@ class _TicketDialogState extends State<TicketDialog> {
               pw.SizedBox(height: 4),
               pw.Center(
                 child: pw.Text('Merci pour votre achat !',
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                         fontSize: 8, fontStyle: pw.FontStyle.italic)),
               ),
             ],

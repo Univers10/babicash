@@ -171,7 +171,6 @@ class _PosTopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 56,
       decoration: BoxDecoration(
         color: AppColors.primary,
         boxShadow: [
@@ -182,7 +181,7 @@ class _PosTopBar extends StatelessWidget {
           )
         ],
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         children: [
           const MenuButton(),
@@ -198,36 +197,46 @@ class _PosTopBar extends StatelessWidget {
           // Barre de recherche
           Expanded(
             child: Container(
-              height: 36,
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
               ),
               child: TextField(
                 controller: searchCtrl,
                 onChanged: onSearch,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+                style: const TextStyle(
+                    color: Colors.white, fontSize: 15, height: 1.2,
+                    decoration: TextDecoration.none,
+                    decorationColor: Colors.transparent),
+                cursorColor: Colors.white,
                 decoration: InputDecoration(
                   hintText: 'Rechercher un produit...',
                   hintStyle: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6), fontSize: 14),
+                      color: Colors.white.withValues(alpha: 0.6), fontSize: 15),
                   prefixIcon: Icon(Symbols.search,
-                      color: Colors.white.withValues(alpha: 0.7), size: 18),
+                      color: Colors.white.withValues(alpha: 0.8), size: 20),
                   suffixIcon: searchCtrl.text.isNotEmpty
                       ? IconButton(
                           icon: Icon(Symbols.close,
-                              color: Colors.white.withValues(alpha: 0.7),
-                              size: 16),
+                              color: Colors.white.withValues(alpha: 0.8),
+                              size: 18),
                           onPressed: () {
                             searchCtrl.clear();
                             onSearch('');
                           },
                         )
                       : null,
+                  filled: true,
+                  fillColor: Colors.transparent,
                   border: InputBorder.none,
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  focusedErrorBorder: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                      vertical: 10, horizontal: 4),
                 ),
               ),
             ),
@@ -391,24 +400,25 @@ class _PanierPaneState extends ConsumerState<_PanierPane> {
           // Lignes panier
           Flexible(
             child: panier.isEmpty
-                ? ClipRect(
-                    child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Symbols.shopping_cart,
-                            size: 36, color: AppColors.textDisabled),
-                        const SizedBox(height: 6),
-                        Text('Panier vide',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                                color: AppColors.textTertiary)),
-                        const SizedBox(height: 2),
-                        Text('Sélectionnez un produit',
-                            style: AppTextStyles.bodySmall.copyWith(
-                                color: AppColors.textDisabled)),
-                      ],
-                    ),
+                ? Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Symbols.shopping_cart,
+                              size: 36, color: AppColors.textDisabled),
+                          const SizedBox(height: 6),
+                          Text('Panier vide',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                  color: AppColors.textTertiary)),
+                          const SizedBox(height: 2),
+                          Text('Sélectionnez un produit',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.textDisabled)),
+                        ],
+                      ),
                     ),
                   )
                 : ListView.builder(
@@ -634,7 +644,7 @@ class _PanierLigne extends ConsumerWidget {
                           ),
                           child: Text(
                             '-${item.remise.toStringAsFixed(0)}%',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               color: AppColors.accentDark,
@@ -881,15 +891,15 @@ class _EditField extends StatelessWidget {
         TextField(
           controller: controller,
           keyboardType: keyboardType,
-          style: TextStyle(
+          style: const TextStyle(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
               fontSize: 15),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: AppColors.textDisabled),
+            hintStyle: const TextStyle(color: AppColors.textDisabled),
             suffixText: suffix,
-            suffixStyle: TextStyle(color: AppColors.textSecondary),
+            suffixStyle: const TextStyle(color: AppColors.textSecondary),
             filled: true,
             fillColor: AppColors.surfaceVariant,
             contentPadding:
@@ -1361,7 +1371,7 @@ class _PaiementDialogState extends ConsumerState<_PaiementDialog> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Espèces',
+                            const Text('Espèces',
                                 style: AppTextStyles.bodySmall),
                             Text('${mEspeces.toStringAsFixed(0)} F',
                                 style: AppTextStyles.bodySmall.copyWith(
@@ -1372,7 +1382,7 @@ class _PaiementDialogState extends ConsumerState<_PaiementDialog> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Mobile Money',
+                            const Text('Mobile Money',
                                 style: AppTextStyles.bodySmall),
                             Text('${mMobile.toStringAsFixed(0)} F',
                                 style: AppTextStyles.bodySmall.copyWith(
@@ -1488,13 +1498,16 @@ class _PaiementDialogState extends ConsumerState<_PaiementDialog> {
       caissierNom: caissierNom,
     );
 
+    final nav = Navigator.of(context);
+    final rootCtx = Navigator.of(context, rootNavigator: true).context;
+    final messenger = ScaffoldMessenger.of(context);
+
     try {
       final ok = await ref
           .read(caisseProvider.notifier)
           .enregistrerVente(modePaiement: _modePaiement);
-      if (mounted) {
-        final rootCtx = Navigator.of(context, rootNavigator: true).context;
-        Navigator.of(context).pop();
+      if (context.mounted) {
+        nav.pop();
         if (ok) {
           showDialog(
             context: rootCtx,
@@ -1503,9 +1516,8 @@ class _PaiementDialogState extends ConsumerState<_PaiementDialog> {
         }
       }
     } on QuotaException catch (e) {
-      if (mounted) {
-        final rootCtx = Navigator.of(context, rootNavigator: true).context;
-        Navigator.of(context).pop();
+      if (context.mounted) {
+        nav.pop();
         showDialog(
           context: rootCtx,
           builder: (_) => _QuotaDepasseDialog(
@@ -1515,9 +1527,9 @@ class _PaiementDialogState extends ConsumerState<_PaiementDialog> {
         );
       }
     } catch (e) {
-      if (mounted && e.toString().contains('SESSION_REQUISE')) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
+      if (context.mounted && e.toString().contains('SESSION_REQUISE')) {
+        nav.pop();
+        messenger.showSnackBar(
           const SnackBar(
             content: Text('Ouvrez une session de caisse avant de vendre.'),
             backgroundColor: AppColors.error,
@@ -2140,7 +2152,7 @@ class _QuotaDepasseDialogState extends ConsumerState<_QuotaDepasseDialog> {
             const SizedBox(height: 10),
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Pas maintenant',
+              child: const Text('Pas maintenant',
                   style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
             ),
           ],

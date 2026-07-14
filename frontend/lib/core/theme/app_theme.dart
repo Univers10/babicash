@@ -7,7 +7,7 @@ import 'app_text_styles.dart';
 /// Thème Material 3 de BabiCash.
 abstract final class AppTheme {
   static ThemeData get light {
-    final colorScheme = ColorScheme(
+    const colorScheme = ColorScheme(
       brightness: Brightness.light,
       primary: AppColors.primary,
       onPrimary: AppColors.onPrimary,
@@ -19,7 +19,7 @@ abstract final class AppTheme {
       onSecondaryContainer: AppColors.brown,
       tertiary: AppColors.brown,
       onTertiary: AppColors.onPrimary,
-      tertiaryContainer: const Color(0xFFEDD5BC),
+      tertiaryContainer: Color(0xFFEDD5BC),
       onTertiaryContainer: AppColors.brown,
       error: AppColors.error,
       onError: AppColors.onError,
@@ -60,12 +60,12 @@ abstract final class AppTheme {
       ),
 
       // Cards
-      cardTheme: CardThemeData(
+      cardTheme: const CardThemeData(
         elevation: 0,
         color: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: AppSpacing.borderRadiusLg,
-          side: const BorderSide(color: AppColors.borderLight, width: 1),
+          side: BorderSide(color: AppColors.borderLight, width: 1),
         ),
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
@@ -117,25 +117,25 @@ abstract final class AppTheme {
         filled: true,
         fillColor: AppColors.surface,
         contentPadding: AppSpacing.inputPadding,
-        border: OutlineInputBorder(
+        border: const OutlineInputBorder(
           borderRadius: AppSpacing.borderRadiusMd,
-          borderSide: const BorderSide(color: AppColors.border, width: 1),
+          borderSide: BorderSide(color: AppColors.border, width: 1),
         ),
-        enabledBorder: OutlineInputBorder(
+        enabledBorder: const OutlineInputBorder(
           borderRadius: AppSpacing.borderRadiusMd,
-          borderSide: const BorderSide(color: AppColors.border, width: 1),
+          borderSide: BorderSide(color: AppColors.border, width: 1),
         ),
-        focusedBorder: OutlineInputBorder(
+        focusedBorder: const OutlineInputBorder(
           borderRadius: AppSpacing.borderRadiusMd,
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderSide: BorderSide(color: AppColors.primary, width: 2),
         ),
-        errorBorder: OutlineInputBorder(
+        errorBorder: const OutlineInputBorder(
           borderRadius: AppSpacing.borderRadiusMd,
-          borderSide: const BorderSide(color: AppColors.error, width: 1),
+          borderSide: BorderSide(color: AppColors.error, width: 1),
         ),
-        focusedErrorBorder: OutlineInputBorder(
+        focusedErrorBorder: const OutlineInputBorder(
           borderRadius: AppSpacing.borderRadiusMd,
-          borderSide: const BorderSide(color: AppColors.error, width: 2),
+          borderSide: BorderSide(color: AppColors.error, width: 2),
         ),
         labelStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
         hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
@@ -173,14 +173,14 @@ abstract final class AppTheme {
       ),
 
       // Chips
-      chipTheme: ChipThemeData(
+      chipTheme: const ChipThemeData(
         backgroundColor: AppColors.surfaceVariant,
         labelStyle: AppTextStyles.labelMedium,
-        padding: const EdgeInsets.symmetric(
+        padding: EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.xs,
         ),
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: AppSpacing.borderRadiusFull,
         ),
         side: BorderSide.none,
@@ -199,7 +199,7 @@ abstract final class AppTheme {
       // SnackBar
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: AppSpacing.borderRadiusMd),
+        shape: const RoundedRectangleBorder(borderRadius: AppSpacing.borderRadiusMd),
         backgroundColor: AppColors.textPrimary,
         contentTextStyle: AppTextStyles.bodyMedium.copyWith(
           color: AppColors.surface,
@@ -216,7 +216,7 @@ abstract final class AppTheme {
       ),
 
       // FloatingActionButton
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.accent,
         foregroundColor: AppColors.onAccent,
         elevation: 4,

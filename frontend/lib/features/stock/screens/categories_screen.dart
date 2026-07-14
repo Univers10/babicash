@@ -70,7 +70,7 @@ class CategoriesScreen extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Symbols.error, size: 48, color: AppColors.error),
+              const Icon(Symbols.error, size: 48, color: AppColors.error),
               const SizedBox(height: 12),
               Text('Erreur : $e', style: AppTextStyles.bodyMedium),
             ],
@@ -82,7 +82,7 @@ class CategoriesScreen extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Symbols.category, size: 64, color: AppColors.textDisabled),
+                  const Icon(Symbols.category, size: 64, color: AppColors.textDisabled),
                   const SizedBox(height: 16),
                   Text(
                     'Aucune catégorie',
@@ -330,11 +330,11 @@ class CategoriesScreen extends ConsumerWidget {
       context: context,
       builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
+        title: const Row(
           children: [
             Icon(Symbols.warning, color: AppColors.error),
-            const SizedBox(width: 12),
-            const Text('Supprimer ?'),
+            SizedBox(width: 12),
+            Text('Supprimer ?'),
           ],
         ),
         content: const Text(

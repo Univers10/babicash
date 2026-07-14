@@ -253,9 +253,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 final api = ref.read(boutiquesApiProvider);
                 await api.renameBoutique(boutique.id, nom);
                 ref.invalidate(boutiqueInfoProvider);
-                if (mounted) AppSnackbar.success(context, 'Boutique renommée.');
+                if (context.mounted) AppSnackbar.success(context, 'Boutique renommée.');
               } catch (_) {
-                if (mounted) AppSnackbar.error(context, 'Erreur lors du renommage.');
+                if (context.mounted) AppSnackbar.error(context, 'Erreur lors du renommage.');
               }
             },
             child: const Text('Enregistrer'),
@@ -477,7 +477,7 @@ class _QuotaCard extends StatelessWidget {
             children: [
               Icon(Symbols.speed, size: 18, color: color),
               const SizedBox(width: 8),
-              Text('Quota ventes ce mois', style: AppTextStyles.labelMedium),
+              const Text('Quota ventes ce mois', style: AppTextStyles.labelMedium),
               const Spacer(),
               Text(
                 quota.illimite
@@ -531,7 +531,7 @@ class _SettingsTile extends StatelessWidget {
         leading: Icon(icon, color: AppColors.primary, size: 22),
         title: Text(title, style: AppTextStyles.bodyMedium),
         trailing: trailing ?? const Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 20),
-        shape: RoundedRectangleBorder(borderRadius: AppSpacing.borderRadiusMd),
+        shape: const RoundedRectangleBorder(borderRadius: AppSpacing.borderRadiusMd),
         onTap: onTap,
       ),
     );
@@ -563,7 +563,7 @@ class _ErrorTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.errorContainer,
         borderRadius: AppSpacing.borderRadiusLg,
       ),

@@ -74,7 +74,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Symbols.error, size: 48, color: AppColors.error),
+              const Icon(Symbols.error, size: 48, color: AppColors.error),
               const SizedBox(height: 12),
               Text('Erreur : $e', style: AppTextStyles.bodyMedium),
             ],
@@ -86,7 +86,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Symbols.inventory_2, size: 64, color: AppColors.textDisabled),
+                  const Icon(Symbols.inventory_2, size: 64, color: AppColors.textDisabled),
                   const VGap(AppSpacing.lg),
                   Text('Aucun produit',
                       style: AppTextStyles.headlineMedium
@@ -192,15 +192,15 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: AppColors.border),
+                        borderSide: const BorderSide(color: AppColors.border),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: AppColors.border),
+                        borderSide: const BorderSide(color: AppColors.border),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+                        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
                       ),
                     ),
                   ),
@@ -251,7 +251,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Symbols.search_off, size: 48, color: AppColors.textDisabled),
+                              const Icon(Symbols.search_off, size: 48, color: AppColors.textDisabled),
                               const SizedBox(height: 12),
                               Text(
                                 'Aucun résultat',
@@ -295,8 +295,8 @@ class _StockScreenState extends ConsumerState<StockScreen> {
         final enRupture = p.stockActuel <= 0;
         final enAlerte = !enRupture && p.stockActuel <= p.stockAlerte;
         Color stockColor = AppColors.success;
-        if (enRupture) stockColor = AppColors.error;
-        else if (enAlerte) stockColor = AppColors.warning;
+        if (enRupture) { stockColor = AppColors.error; }
+        else if (enAlerte) { stockColor = AppColors.warning; }
 
         return Card(
           clipBehavior: Clip.hardEdge,
