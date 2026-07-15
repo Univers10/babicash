@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: babicash_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-babicash}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-babicash}
+      POSTGRES_DB: ${POSTGRES_DB:-babicash}
+    ports:
+      - "5432:5432"
+    volumes:
+      - babicash_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-babicash}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build: .
+    container_name: babicash_api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${API_PORT:-8000}:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-babicash}:${POSTGRES_PASSWORD:-babicash}@db:5432/${POSTGRES_DB:-babicash}
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
+      WORKERS: ${WORKERS:-2}
+
+volumes:
+  babicash_pgdata:
