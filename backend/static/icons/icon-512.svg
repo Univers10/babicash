@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#1a1a2e"/>
+  <text x="256" y="310" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="bold" font-size="128" fill="#3b82f6">B</text>
+  <text x="256" y="410" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="bold" font-size="48" fill="#94a3b8">ADMIN</text>
+</svg>
