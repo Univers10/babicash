@@ -12,10 +12,12 @@ _$AbonnementOutImpl _$$AbonnementOutImplFromJson(Map<String, dynamic> json) =>
       plan: json['plan'] as String,
       quotaVentesParBoutique:
           (json['quota_ventes_par_boutique'] as num).toInt(),
-      prixBase: (json['prix_base'] as num?)?.toDouble() ?? 5000,
+      prixBase:
+          json['prix_base'] == null ? 5000 : parseDouble(json['prix_base']),
       nbBoutiques: (json['nb_boutiques'] as num?)?.toInt() ?? 1,
-      prixTotalMensuel:
-          (json['prix_total_mensuel'] as num?)?.toDouble() ?? 5000,
+      prixTotalMensuel: json['prix_total_mensuel'] == null
+          ? 5000
+          : parseDouble(json['prix_total_mensuel']),
       dateFin: json['date_fin'] == null
           ? null
           : DateTime.parse(json['date_fin'] as String),

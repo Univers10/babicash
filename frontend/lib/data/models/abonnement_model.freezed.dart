@@ -24,13 +24,15 @@ mixin _$AbonnementOut {
   String get proprietaireId => throw _privateConstructorUsedError;
   String get plan => throw _privateConstructorUsedError;
   @JsonKey(name: 'quota_ventes_par_boutique')
-  int get quotaVentesParBoutique => throw _privateConstructorUsedError;
-  @JsonKey(name: 'prix_base')
+  int get quotaVentesParBoutique =>
+      throw _privateConstructorUsedError; // Le backend (Pydantic v2) sérialise les Decimal en chaînes ("5000.00")
+  @JsonKey(name: 'prix_base', fromJson: parseDouble)
   double get prixBase => throw _privateConstructorUsedError;
   @JsonKey(name: 'nb_boutiques')
   int get nbBoutiques => throw _privateConstructorUsedError;
-  @JsonKey(name: 'prix_total_mensuel')
+  @JsonKey(name: 'prix_total_mensuel', fromJson: parseDouble)
   double get prixTotalMensuel => throw _privateConstructorUsedError;
+  @JsonKey(name: 'date_fin')
   DateTime? get dateFin => throw _privateConstructorUsedError;
   bool get actif => throw _privateConstructorUsedError;
 
@@ -54,10 +56,11 @@ abstract class $AbonnementOutCopyWith<$Res> {
       {@JsonKey(name: 'proprietaire_id') String proprietaireId,
       String plan,
       @JsonKey(name: 'quota_ventes_par_boutique') int quotaVentesParBoutique,
-      @JsonKey(name: 'prix_base') double prixBase,
+      @JsonKey(name: 'prix_base', fromJson: parseDouble) double prixBase,
       @JsonKey(name: 'nb_boutiques') int nbBoutiques,
-      @JsonKey(name: 'prix_total_mensuel') double prixTotalMensuel,
-      DateTime? dateFin,
+      @JsonKey(name: 'prix_total_mensuel', fromJson: parseDouble)
+      double prixTotalMensuel,
+      @JsonKey(name: 'date_fin') DateTime? dateFin,
       bool actif});
 }
 
@@ -134,10 +137,11 @@ abstract class _$$AbonnementOutImplCopyWith<$Res>
       {@JsonKey(name: 'proprietaire_id') String proprietaireId,
       String plan,
       @JsonKey(name: 'quota_ventes_par_boutique') int quotaVentesParBoutique,
-      @JsonKey(name: 'prix_base') double prixBase,
+      @JsonKey(name: 'prix_base', fromJson: parseDouble) double prixBase,
       @JsonKey(name: 'nb_boutiques') int nbBoutiques,
-      @JsonKey(name: 'prix_total_mensuel') double prixTotalMensuel,
-      DateTime? dateFin,
+      @JsonKey(name: 'prix_total_mensuel', fromJson: parseDouble)
+      double prixTotalMensuel,
+      @JsonKey(name: 'date_fin') DateTime? dateFin,
       bool actif});
 }
 
@@ -208,10 +212,11 @@ class _$AbonnementOutImpl implements _AbonnementOut {
       required this.plan,
       @JsonKey(name: 'quota_ventes_par_boutique')
       required this.quotaVentesParBoutique,
-      @JsonKey(name: 'prix_base') this.prixBase = 5000,
+      @JsonKey(name: 'prix_base', fromJson: parseDouble) this.prixBase = 5000,
       @JsonKey(name: 'nb_boutiques') this.nbBoutiques = 1,
-      @JsonKey(name: 'prix_total_mensuel') this.prixTotalMensuel = 5000,
-      this.dateFin,
+      @JsonKey(name: 'prix_total_mensuel', fromJson: parseDouble)
+      this.prixTotalMensuel = 5000,
+      @JsonKey(name: 'date_fin') this.dateFin,
       this.actif = true});
 
   factory _$AbonnementOutImpl.fromJson(Map<String, dynamic> json) =>
@@ -225,16 +230,18 @@ class _$AbonnementOutImpl implements _AbonnementOut {
   @override
   @JsonKey(name: 'quota_ventes_par_boutique')
   final int quotaVentesParBoutique;
+// Le backend (Pydantic v2) sérialise les Decimal en chaînes ("5000.00")
   @override
-  @JsonKey(name: 'prix_base')
+  @JsonKey(name: 'prix_base', fromJson: parseDouble)
   final double prixBase;
   @override
   @JsonKey(name: 'nb_boutiques')
   final int nbBoutiques;
   @override
-  @JsonKey(name: 'prix_total_mensuel')
+  @JsonKey(name: 'prix_total_mensuel', fromJson: parseDouble)
   final double prixTotalMensuel;
   @override
+  @JsonKey(name: 'date_fin')
   final DateTime? dateFin;
   @override
   @JsonKey()
@@ -300,10 +307,11 @@ abstract class _AbonnementOut implements AbonnementOut {
       required final String plan,
       @JsonKey(name: 'quota_ventes_par_boutique')
       required final int quotaVentesParBoutique,
-      @JsonKey(name: 'prix_base') final double prixBase,
+      @JsonKey(name: 'prix_base', fromJson: parseDouble) final double prixBase,
       @JsonKey(name: 'nb_boutiques') final int nbBoutiques,
-      @JsonKey(name: 'prix_total_mensuel') final double prixTotalMensuel,
-      final DateTime? dateFin,
+      @JsonKey(name: 'prix_total_mensuel', fromJson: parseDouble)
+      final double prixTotalMensuel,
+      @JsonKey(name: 'date_fin') final DateTime? dateFin,
       final bool actif}) = _$AbonnementOutImpl;
 
   factory _AbonnementOut.fromJson(Map<String, dynamic> json) =
@@ -316,17 +324,18 @@ abstract class _AbonnementOut implements AbonnementOut {
   String get plan;
   @override
   @JsonKey(name: 'quota_ventes_par_boutique')
-  int get quotaVentesParBoutique;
+  int get quotaVentesParBoutique; // Le backend (Pydantic v2) sérialise les Decimal en chaînes ("5000.00")
   @override
-  @JsonKey(name: 'prix_base')
+  @JsonKey(name: 'prix_base', fromJson: parseDouble)
   double get prixBase;
   @override
   @JsonKey(name: 'nb_boutiques')
   int get nbBoutiques;
   @override
-  @JsonKey(name: 'prix_total_mensuel')
+  @JsonKey(name: 'prix_total_mensuel', fromJson: parseDouble)
   double get prixTotalMensuel;
   @override
+  @JsonKey(name: 'date_fin')
   DateTime? get dateFin;
   @override
   bool get actif;
@@ -617,6 +626,7 @@ UpgradePlanRequest _$UpgradePlanRequestFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$UpgradePlanRequest {
   String get plan => throw _privateConstructorUsedError;
+  @JsonKey(name: 'date_fin')
   DateTime? get dateFin => throw _privateConstructorUsedError;
 
   /// Serializes this UpgradePlanRequest to a JSON map.
@@ -635,7 +645,7 @@ abstract class $UpgradePlanRequestCopyWith<$Res> {
           UpgradePlanRequest value, $Res Function(UpgradePlanRequest) then) =
       _$UpgradePlanRequestCopyWithImpl<$Res, UpgradePlanRequest>;
   @useResult
-  $Res call({String plan, DateTime? dateFin});
+  $Res call({String plan, @JsonKey(name: 'date_fin') DateTime? dateFin});
 }
 
 /// @nodoc
@@ -677,7 +687,7 @@ abstract class _$$UpgradePlanRequestImplCopyWith<$Res>
       __$$UpgradePlanRequestImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String plan, DateTime? dateFin});
+  $Res call({String plan, @JsonKey(name: 'date_fin') DateTime? dateFin});
 }
 
 /// @nodoc
@@ -712,7 +722,8 @@ class __$$UpgradePlanRequestImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$UpgradePlanRequestImpl implements _UpgradePlanRequest {
-  const _$UpgradePlanRequestImpl({required this.plan, this.dateFin});
+  const _$UpgradePlanRequestImpl(
+      {required this.plan, @JsonKey(name: 'date_fin') this.dateFin});
 
   factory _$UpgradePlanRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$UpgradePlanRequestImplFromJson(json);
@@ -720,6 +731,7 @@ class _$UpgradePlanRequestImpl implements _UpgradePlanRequest {
   @override
   final String plan;
   @override
+  @JsonKey(name: 'date_fin')
   final DateTime? dateFin;
 
   @override
@@ -759,8 +771,9 @@ class _$UpgradePlanRequestImpl implements _UpgradePlanRequest {
 
 abstract class _UpgradePlanRequest implements UpgradePlanRequest {
   const factory _UpgradePlanRequest(
-      {required final String plan,
-      final DateTime? dateFin}) = _$UpgradePlanRequestImpl;
+          {required final String plan,
+          @JsonKey(name: 'date_fin') final DateTime? dateFin}) =
+      _$UpgradePlanRequestImpl;
 
   factory _UpgradePlanRequest.fromJson(Map<String, dynamic> json) =
       _$UpgradePlanRequestImpl.fromJson;
@@ -768,6 +781,7 @@ abstract class _UpgradePlanRequest implements UpgradePlanRequest {
   @override
   String get plan;
   @override
+  @JsonKey(name: 'date_fin')
   DateTime? get dateFin;
 
   /// Create a copy of UpgradePlanRequest
