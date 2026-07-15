@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../core/utils/json_helpers.dart';
+
 part 'abonnement_model.freezed.dart';
 part 'abonnement_model.g.dart';
 
@@ -9,10 +11,11 @@ class AbonnementOut with _$AbonnementOut {
     @JsonKey(name: 'proprietaire_id') required String proprietaireId,
     required String plan,
     @JsonKey(name: 'quota_ventes_par_boutique') required int quotaVentesParBoutique,
-    @JsonKey(name: 'prix_base') @Default(5000) double prixBase,
+    // Le backend (Pydantic v2) sérialise les Decimal en chaînes ("5000.00")
+    @JsonKey(name: 'prix_base', fromJson: parseDouble) @Default(5000) double prixBase,
     @JsonKey(name: 'nb_boutiques') @Default(1) int nbBoutiques,
-    @JsonKey(name: 'prix_total_mensuel') @Default(5000) double prixTotalMensuel,
-    DateTime? dateFin,
+    @JsonKey(name: 'prix_total_mensuel', fromJson: parseDouble) @Default(5000) double prixTotalMensuel,
+    @JsonKey(name: 'date_fin') DateTime? dateFin,
     @Default(true) bool actif,
   }) = _AbonnementOut;
 
@@ -39,7 +42,7 @@ class QuotaInfo with _$QuotaInfo {
 class UpgradePlanRequest with _$UpgradePlanRequest {
   const factory UpgradePlanRequest({
     required String plan,
-    DateTime? dateFin,
+    @JsonKey(name: 'date_fin') DateTime? dateFin,
   }) = _UpgradePlanRequest;
 
   factory UpgradePlanRequest.fromJson(Map<String, dynamic> json) =>
