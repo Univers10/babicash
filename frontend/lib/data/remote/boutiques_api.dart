@@ -23,18 +23,39 @@ class BoutiquesApi {
         .toList();
   }
 
-  Future<BoutiqueModel> createBoutique(Map<String, dynamic> body) async {
+  Future<BoutiqueModel> createBoutique({
+    required String nom,
+    String? adresse,
+    String? telephone,
+    String? typeCommerce,
+  }) async {
     final resp = await _dio.post<Map<String, dynamic>>(
       '$_baseUrl/boutiques/',
-      data: body,
+      data: {
+        'nom': nom,
+        if (adresse != null && adresse.isNotEmpty) 'adresse': adresse,
+        if (telephone != null && telephone.isNotEmpty) 'telephone': telephone,
+        if (typeCommerce != null && typeCommerce.isNotEmpty) 'type_commerce': typeCommerce,
+      },
     );
     return BoutiqueModel.fromJson(resp.data!);
   }
 
-  Future<BoutiqueModel> renameBoutique(String boutiqueId, String nom) async {
+  Future<BoutiqueModel> updateBoutique(
+    String boutiqueId, {
+    String? nom,
+    String? adresse,
+    String? telephone,
+    String? typeCommerce,
+  }) async {
+    final data = <String, dynamic>{};
+    if (nom != null) data['nom'] = nom;
+    if (adresse != null) data['adresse'] = adresse;
+    if (telephone != null) data['telephone'] = telephone;
+    if (typeCommerce != null) data['type_commerce'] = typeCommerce;
     final resp = await _dio.patch<Map<String, dynamic>>(
       '$_baseUrl/boutiques/$boutiqueId',
-      data: {'nom': nom},
+      data: data,
     );
     return BoutiqueModel.fromJson(resp.data!);
   }

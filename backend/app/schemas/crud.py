@@ -7,10 +7,16 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 # ----- Boutique -----
 class BoutiqueCreate(BaseModel):
     nom: str = Field(min_length=1, max_length=255)
+    adresse: str | None = Field(default=None, max_length=255)
+    telephone: str | None = Field(default=None, max_length=30)
+    type_commerce: str | None = Field(default=None, max_length=100)
 
 
 class BoutiqueUpdate(BaseModel):
     nom: str | None = Field(default=None, min_length=1, max_length=255)
+    adresse: str | None = Field(default=None, max_length=255)
+    telephone: str | None = Field(default=None, max_length=30)
+    type_commerce: str | None = Field(default=None, max_length=100)
 
 
 # ----- Catégorie -----

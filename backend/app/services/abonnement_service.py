@@ -81,6 +81,27 @@ async def compter_ventes_mois(
     return int(count)
 
 
+async def peut_creer_boutique(
+    db: AsyncSession, proprietaire_id: str
+) -> tuple[bool, Abonnement, int]:
+    """Vérifie si le propriétaire peut créer une boutique supplémentaire.
+
+    La 1ère boutique est incluse dans tous les plans. À partir de la 2e,
+    un abonnement PRO actif (et non expiré) est requis.
+    Retourne (autorise, abonnement, nb_boutiques_actuelles).
+    """
+    abo = await get_or_create_abonnement(db, proprietaire_id)
+    nb_boutiques = await compter_boutiques_owner(db, proprietaire_id)
+
+    if nb_boutiques == 0:
+        return True, abo, nb_boutiques
+
+    pro_actif = abo.plan == "PRO" and abo.actif and (
+        abo.date_fin is None or abo.date_fin > datetime.now(timezone.utc)
+    )
+    return pro_actif, abo, nb_boutiques
+
+
 async def verifier_quota(
     db: AsyncSession,
     boutique_id: uuid.UUID,

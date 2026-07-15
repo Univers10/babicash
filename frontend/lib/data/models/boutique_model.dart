@@ -9,6 +9,9 @@ class BoutiqueModel with _$BoutiqueModel {
     required String id,
     required String nom,
     @JsonKey(name: 'proprietaire_id') required String proprietaireId,
+    String? adresse,
+    String? telephone,
+    @JsonKey(name: 'type_commerce') String? typeCommerce,
     @JsonKey(name: 'date_creation') required DateTime dateCreation,
   }) = _BoutiqueModel;
   factory BoutiqueModel.fromJson(Map<String, dynamic> json) =>

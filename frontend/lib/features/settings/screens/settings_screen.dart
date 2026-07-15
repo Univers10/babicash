@@ -8,11 +8,11 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/abonnement_model.dart';
 import '../../../data/models/boutique_model.dart';
 import '../../../data/remote/abonnements_api.dart';
-import '../../../data/remote/boutiques_api.dart';
 import '../../../data/remote/users_api.dart';
 import '../../../data/models/auth_model.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/boutiques/providers/boutique_provider.dart';
+import '../../../features/boutiques/screens/boutiques_screen.dart';
 import '../../../features/sync/sync_service.dart';
 import '../../../features/users/providers/users_provider.dart';
 import '../../../features/users/screens/users_screen.dart';
@@ -21,14 +21,6 @@ import '../../../shared/widgets/app_snackbar.dart';
 import '../../../shared/widgets/menu_button.dart';
 
 // ── Providers ──────────────────────────────────────────────────────────────────
-
-final boutiqueInfoProvider = FutureProvider<BoutiqueModel?>((ref) async {
-  final boutiqueId = await ref.watch(currentBoutiqueIdProvider.future);
-  if (boutiqueId == null) return null;
-  final api = ref.watch(boutiquesApiProvider);
-  final list = await api.listBoutiques();
-  return list.where((b) => b.id == boutiqueId).firstOrNull;
-});
 
 final abonnementInfoProvider = FutureProvider<AbonnementOut?>((ref) async {
   try {
@@ -141,14 +133,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ? _BoutiqueCard(boutique: boutique)
                 : const _ErrorTile(message: 'Aucune boutique trouvée'),
           ),
-          if (user?.isOwner == true) ...[
-            const VGap(AppSpacing.sm),
-            _SettingsTile(
-              icon: Symbols.edit,
-              title: 'Renommer la boutique',
-              onTap: () => _showRenameBoutiqueDialog(context, boutiqueAsync.valueOrNull),
+          const VGap(AppSpacing.sm),
+          _SettingsTile(
+            icon: Symbols.storefront,
+            title: user?.isOwner == true ? 'Gérer mes boutiques' : 'Modifier ma boutique',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const BoutiquesScreen(),
+              ),
             ),
-          ],
+          ),
           const VGap(AppSpacing.xl),
 
           // ════════════════════════════════════════════════════════════════════
@@ -257,44 +251,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  void _showRenameBoutiqueDialog(BuildContext context, BoutiqueModel? boutique) {
-    if (boutique == null) return;
-    final ctrl = TextEditingController(text: boutique.nom);
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Renommer la boutique'),
-        content: TextField(
-          controller: ctrl,
-          decoration: InputDecoration(
-            hintText: 'Nom de la boutique',
-            prefixIcon: const Icon(Symbols.store),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
-          FilledButton(
-            onPressed: () async {
-              final nom = ctrl.text.trim();
-              if (nom.isEmpty) return;
-              Navigator.pop(ctx);
-              try {
-                final api = ref.read(boutiquesApiProvider);
-                await api.renameBoutique(boutique.id, nom);
-                ref.invalidate(boutiqueInfoProvider);
-                if (context.mounted) AppSnackbar.success(context, 'Boutique renommée.');
-              } catch (_) {
-                if (context.mounted) AppSnackbar.error(context, 'Erreur lors du renommage.');
-              }
-            },
-            child: const Text('Enregistrer'),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 // ── Dialog édition profil ──────────────────────────────────────────────────────
@@ -550,6 +506,12 @@ class _BoutiqueCard extends StatelessWidget {
               children: [
                 Text(boutique.nom, style: AppTextStyles.headlineSmall),
                 const SizedBox(height: 2),
+                if (boutique.typeCommerce != null && boutique.typeCommerce!.isNotEmpty)
+                  Text(boutique.typeCommerce!, style: AppTextStyles.bodySmall),
+                if (boutique.adresse != null && boutique.adresse!.isNotEmpty)
+                  Text(boutique.adresse!, style: AppTextStyles.caption),
+                if (boutique.telephone != null && boutique.telephone!.isNotEmpty)
+                  Text(boutique.telephone!, style: AppTextStyles.caption),
                 Text(
                   'Créée le ${fmt.format(boutique.dateCreation.toLocal())}',
                   style: AppTextStyles.caption,

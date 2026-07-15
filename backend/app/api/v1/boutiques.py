@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,6 +11,7 @@ from app.models import Boutique
 from app.schemas.auth import CurrentUser
 from app.schemas.boutique import BoutiqueOut
 from app.schemas.crud import BoutiqueCreate, BoutiqueUpdate
+from app.services import abonnement_service
 
 router = APIRouter()
 
@@ -41,7 +42,29 @@ async def create_boutique(
     current_user: CurrentUser = Depends(require_owner),
     db: AsyncSession = Depends(get_db),
 ) -> Boutique:
-    boutique = Boutique(nom=payload.nom, proprietaire_id=current_user.id)
+    """Crée une boutique. La 1ère est incluse dans tous les plans ; à partir
+    de la 2e, un abonnement PRO actif est requis."""
+    autorise, abo, nb_boutiques = await abonnement_service.peut_creer_boutique(
+        db, current_user.id
+    )
+    if not autorise:
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail={
+                "code": "ABONNEMENT_REQUIS",
+                "message": "Passez au plan PRO pour créer une boutique supplémentaire.",
+                "nb_boutiques": nb_boutiques,
+                "plan": abo.plan,
+            },
+        )
+
+    boutique = Boutique(
+        nom=payload.nom,
+        proprietaire_id=current_user.id,
+        adresse=payload.adresse,
+        telephone=payload.telephone,
+        type_commerce=payload.type_commerce,
+    )
     db.add(boutique)
     await db.commit()
     await db.refresh(boutique)
@@ -61,12 +84,21 @@ async def get_boutique(
 async def update_boutique(
     boutique_id: uuid.UUID,
     payload: BoutiqueUpdate,
-    current_user: CurrentUser = Depends(require_owner),
+    current_user: CurrentUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> Boutique:
+    """Modifie une boutique. OWNER et MANAGER peuvent tous deux gérer les
+    informations de leur boutique ; `get_authorized_boutique` verrouille
+    chacun sur son propre périmètre."""
     boutique = await get_authorized_boutique(db, current_user, boutique_id)
     if payload.nom is not None:
         boutique.nom = payload.nom
+    if payload.adresse is not None:
+        boutique.adresse = payload.adresse
+    if payload.telephone is not None:
+        boutique.telephone = payload.telephone
+    if payload.type_commerce is not None:
+        boutique.type_commerce = payload.type_commerce
     await db.commit()
     await db.refresh(boutique)
     return boutique

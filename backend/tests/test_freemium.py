@@ -40,22 +40,64 @@ async def test_abonnement_cree_automatiquement(client, seeded):
 
 @pytest.mark.asyncio
 async def test_prix_multi_boutique(client, seeded):
-    """2 boutiques → 5000 + 3750 = 8750 FCFA/mois."""
+    """2 boutiques → 5000 + 3750 = 8750 FCFA/mois (nécessite le plan PRO)."""
     token = await login(client, seeded["owner_email"], "boss1234")
     headers = {"Authorization": f"Bearer {token}"}
 
+    # Passer en PRO pour pouvoir créer une 2e boutique
+    await client.post("/api/v1/abonnements/upgrade", json={"plan": "PRO"}, headers=headers)
+
     # Créer une 2ème boutique
-    await client.post(
+    r = await client.post(
         "/api/v1/boutiques/",
         json={"nom": "Boutique 2"},
         headers=headers,
     )
+    assert r.status_code == 201, r.text
 
     r = await client.get("/api/v1/abonnements/mon-plan", headers=headers)
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["nb_boutiques"] == 2
     assert float(body["prix_total_mensuel"]) == pytest.approx(8750.0, abs=0.01)
+
+
+@pytest.mark.asyncio
+async def test_boutique_supplementaire_necessite_pro(client, seeded):
+    """La 1ère boutique (créée par le seed) est gratuite ; la 2e exige le plan PRO."""
+    token = await login(client, seeded["owner_email"], "boss1234")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # FREE : la création d'une 2e boutique est bloquée
+    r = await client.post("/api/v1/boutiques/", json={"nom": "Boutique 2"}, headers=headers)
+    assert r.status_code == 402, r.text
+    assert r.json()["detail"]["code"] == "ABONNEMENT_REQUIS"
+
+    # Après upgrade PRO : autorisé
+    await client.post("/api/v1/abonnements/upgrade", json={"plan": "PRO"}, headers=headers)
+    r = await client.post("/api/v1/boutiques/", json={"nom": "Boutique 2"}, headers=headers)
+    assert r.status_code == 201, r.text
+
+
+@pytest.mark.asyncio
+async def test_manager_ne_peut_pas_creer_boutique(client, seeded):
+    token = await login(client, seeded["manager_email"], "gerant1234")
+    headers = {"Authorization": f"Bearer {token}"}
+    r = await client.post("/api/v1/boutiques/", json={"nom": "Boutique manager"}, headers=headers)
+    assert r.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_manager_peut_modifier_sa_boutique(client, seeded):
+    token = await login(client, seeded["manager_email"], "gerant1234")
+    headers = {"Authorization": f"Bearer {token}"}
+    r = await client.patch(
+        f"/api/v1/boutiques/{seeded['boutique_id']}",
+        json={"adresse": "Adjamé, Abidjan", "telephone": "0708000000"},
+        headers=headers,
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["adresse"] == "Adjamé, Abidjan"
 
 
 @pytest.mark.asyncio

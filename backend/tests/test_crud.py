@@ -10,6 +10,9 @@ async def test_owner_cree_boutique_et_produit(client, seeded):
     token = await login(client, seeded["owner_email"], "boss1234")
     headers = {"Authorization": f"Bearer {token}"}
 
+    # Passe en PRO : la boutique du seed compte déjà comme la 1ère
+    await client.post("/api/v1/abonnements/upgrade", json={"plan": "PRO"}, headers=headers)
+
     # Crée une nouvelle boutique
     r = await client.post("/api/v1/boutiques/", json={"nom": "Boutique 2"}, headers=headers)
     assert r.status_code == 201, r.text

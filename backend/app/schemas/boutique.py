@@ -10,4 +10,7 @@ class BoutiqueOut(BaseModel):
     id: uuid.UUID
     nom: str
     proprietaire_id: str
+    adresse: str | None
+    telephone: str | None
+    type_commerce: str | None
     date_creation: datetime

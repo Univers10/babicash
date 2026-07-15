@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../data/models/boutique_model.dart';
 import '../../../data/remote/boutiques_api.dart';
 import '../../auth/providers/auth_provider.dart';
 
@@ -20,4 +21,23 @@ final currentBoutiqueIdProvider = FutureProvider<String?>((ref) async {
   }
 
   return null;
+});
+
+/// Liste des boutiques visibles pour l'utilisateur courant.
+/// - OWNER : toutes ses boutiques.
+/// - MANAGER : uniquement sa boutique (déjà filtré côté backend).
+final mesBoutiquesProvider = FutureProvider<List<BoutiqueModel>>((ref) async {
+  final user = ref.watch(authStateProvider).value;
+  if (user == null) return [];
+  final api = ref.watch(boutiquesApiProvider);
+  return api.listBoutiques();
+});
+
+/// Boutique active pour le contexte courant (résumé affiché dans les paramètres).
+final boutiqueInfoProvider = FutureProvider<BoutiqueModel?>((ref) async {
+  final boutiqueId = await ref.watch(currentBoutiqueIdProvider.future);
+  if (boutiqueId == null) return null;
+  final api = ref.watch(boutiquesApiProvider);
+  final list = await api.listBoutiques();
+  return list.where((b) => b.id == boutiqueId).firstOrNull;
 });

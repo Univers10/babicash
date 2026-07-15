@@ -53,6 +53,9 @@ class Boutique(Base):
     )
     nom: Mapped[str] = mapped_column(String(255), nullable=False)
     proprietaire_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    adresse: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    telephone: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    type_commerce: Mapped[str | None] = mapped_column(String(100), nullable=True)
     date_creation: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
