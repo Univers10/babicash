@@ -1,18 +1,20 @@
-fastapi>=0.115.6
-uvicorn[standard]>=0.34.0
-sqlalchemy>=2.0.41
-greenlet>=3.2.3
-asyncpg>=0.30.0
-alembic>=1.15.2
-pydantic>=2.11.0
-pydantic-settings>=2.9.0
-PyJWT>=2.9.0
-bcrypt>=4.3.0
-python-multipart>=0.0.20
-email-validator>=2.2.0
+# Versions épinglées = celles du venv local validé (57/57 tests verts, 2026-07-15).
+# Pour mettre à jour : bump ici + réinstaller + relancer pytest avant de déployer.
+fastapi==0.139.0
+uvicorn[standard]==0.49.0
+sqlalchemy==2.0.51
+greenlet==3.5.3
+asyncpg==0.31.0
+alembic==1.18.5
+pydantic==2.13.4
+pydantic-settings==2.14.2
+PyJWT==2.13.0
+bcrypt==5.0.0
+python-multipart==0.0.32
+email-validator==2.3.0
 
 # Dev / tests
-pytest>=8.2.2
-pytest-asyncio>=0.23.7
-httpx>=0.27.0
-aiosqlite>=0.20.0
+pytest==9.1.1
+pytest-asyncio==1.4.0
+httpx==0.28.1
+aiosqlite==0.22.1
