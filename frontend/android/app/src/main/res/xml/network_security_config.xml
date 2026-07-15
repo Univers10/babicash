@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Configuration de sécurité réseau pour BabiCash.
+  Pin les certificats SSL pour prévenir les attaques Man-in-the-Middle.
+-->
+<network-security-config>
+    <!-- Configuration par défaut : HTTPS uniquement -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Configuration spécifique pour le serveur API -->
+    <domain-config>
+        <domain includeSubdomains="true">babicash.ecomotionafricaci.com</domain>
+        <pin-set>
+            <!-- Certificat principal - Let's Encrypt (SHA-256) -->
+            <pin digest="SHA-256">8809EB8129A32832A3D4343C369C40C1967A12F4C35B846E502369ED9F8AD5C3=</pin>
+            <!-- Backup: certificat racine Let's Encrypt (SHA-256) -->
+            <pin digest="SHA-256">0B9FE19377AB3082CDE698E3CAB797C8AB284DAF5C7D63FEB92CFE5389317AE0=</pin>
+        </pin-set>
+        <!-- Timeout de validation du pin (en secondes) -->
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>
