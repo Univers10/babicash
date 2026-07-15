@@ -151,13 +151,13 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
     // Effacer la base locale avant de déconnecter
     try {
       final db = ref.read(appDatabaseProvider);
-      await db.delete(localProduits).go();
-      await db.delete(localCategories).go();
-      await db.delete(localVentes).go();
-      await db.delete(localLignesVente).go();
-      await db.delete(localDepenses).go();
-      await db.delete(localSessions).go();
-      await db.delete(localTiers).go();
+      await db.delete(db.localLignesVente).go();
+      await db.delete(db.localVentes).go();
+      await db.delete(db.localProduits).go();
+      await db.delete(db.localCategories).go();
+      await db.delete(db.localDepenses).go();
+      await db.delete(db.localSessions).go();
+      await db.delete(db.localTiers).go();
     } catch (_) {
       // Ignorer les erreurs de nettoyage
     }

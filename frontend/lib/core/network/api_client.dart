@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../storage/secure_storage.dart';
-import 'cert_pinning.dart';
 
 const String _baseUrl = 'https://babicash.ecomotionafricaci.com';
 // Pour dev local : 'http://192.168.1.29:8000'
@@ -23,13 +22,6 @@ class ApiClient {
         },
       ),
     );
-
-    // Certificate pinning (désactivé en debug pour le dev local)
-    assert(() {
-      // En debug, on n'applique pas le pinning pour permettre le dev local
-      return true;
-    }());
-    dio.interceptors.add(BabiCashCertificatePinning.createPinner());
 
     // Intercepteur d'authentification JWT
     dio.interceptors.add(
