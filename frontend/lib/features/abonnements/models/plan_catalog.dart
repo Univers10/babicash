@@ -3,7 +3,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import '../../../data/models/abonnement_model.dart';
 
 /// Numéro WhatsApp BabiCash (format international sans '+').
-const kWhatsAppNumber = '2250555745936';
+const kWhatsAppNumber = '2250714998984';
 
 /// Définition d'un plan d'abonnement (catalogue de présentation, côté client).
 class PlanDef {
