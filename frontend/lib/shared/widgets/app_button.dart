@@ -41,6 +41,7 @@ class AppButton extends StatelessWidget {
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.onPrimary,
               minimumSize: Size(minWidth, height),
+              textStyle: AppTextStyles.button,
             ),
             child: _child(AppColors.onPrimary),
           ),
@@ -56,6 +57,7 @@ class AppButton extends StatelessWidget {
               backgroundColor: AppColors.accent,
               foregroundColor: AppColors.onAccent,
               minimumSize: Size(minWidth, height),
+              textStyle: AppTextStyles.button,
             ),
             child: _child(AppColors.onAccent),
           ),
@@ -67,6 +69,10 @@ class AppButton extends StatelessWidget {
           height: height,
           child: OutlinedButton(
             onPressed: isLoading ? null : onPressed,
+            style: OutlinedButton.styleFrom(
+              minimumSize: Size(minWidth, height),
+              textStyle: AppTextStyles.button,
+            ),
             child: _child(AppColors.primary),
           ),
         );
@@ -81,6 +87,7 @@ class AppButton extends StatelessWidget {
               backgroundColor: AppColors.error,
               foregroundColor: AppColors.onError,
               minimumSize: Size(minWidth, height),
+              textStyle: AppTextStyles.button,
             ),
             child: _child(AppColors.onError),
           ),
