@@ -73,18 +73,26 @@ def _est_expire(abo: Abonnement) -> bool:
 
 
 def est_pro_actif(abo: Abonnement) -> bool:
-    """Plan payant actif et non expiré (tous plans sauf FREE)."""
-    return abo.plan != "FREE" and abo.plan in _VALID_PLANS and abo.actif and not _est_expire(abo)
+    """Plan payant actif et non expiré avec ventes illimitées (BOUTIQUE+)."""
+    if abo.plan == "FREE" or abo.plan not in _VALID_PLANS or not abo.actif:
+        return False
+    if _est_expire(abo):
+        return False
+    cfg = PLAN_CATALOG.get(abo.plan, {})
+    return cfg.get("quota_ventes", 0) == _UNLIMITED
 
 
 async def _revertir_si_expire(db: AsyncSession, abo: Abonnement) -> Abonnement:
-    """Révertit automatiquement un abonnement PRO expiré vers FREE.
-    Retourne l'abonnement potentiellement modifié (et flush si changement)."""
-    if _est_expire(abo):
-        abo.plan = "FREE"
-        abo.quota_ventes_par_boutique = _QUOTA_FREE
-        abo.actif = True
-        await db.flush()
+    """Marque l'abonnement comme inactif s'il a expiré.
+
+    Le plan est conservé (pour l'affichage) mais toutes les opérations
+    d'écriture (ventes, création de boutiques/gerants) sont bloquées.
+    L'owner peut toujours consulter ses données et renouveler."""
+    if not _est_expire(abo):
+        return abo
+
+    abo.actif = False
+    await db.flush()
     return abo
 
 
@@ -173,7 +181,7 @@ async def peut_creer_boutique(
     abo = await get_or_create_abonnement(db, proprietaire_id)
     nb_boutiques = await compter_boutiques_owner(db, proprietaire_id)
 
-    if nb_boutiques == 0:
+    if nb_boutiques == 0 and abo.actif:
         return True, abo, nb_boutiques
 
     pro_actif = est_pro_actif(abo)
@@ -221,62 +229,44 @@ async def upgrader_plan(
 
     abo = await get_or_create_abonnement(db, proprietaire_id)
     cfg = PLAN_CATALOG[plan]
+    nb_boutiques = await compter_boutiques_owner(db, proprietaire_id)
 
-    # Protection downgrade : vérifier si le downgrade est possible
-    if plan == "FREE" and abo.plan != "FREE":
-        nb_boutiques = await compter_boutiques_owner(db, proprietaire_id)
-        if nb_boutiques > cfg["nb_boutiques_max"]:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail={
-                    "code": "DOWNGRADE_BLOQUE",
-                    "message": (
-                        f"Vous avez {nb_boutiques} boutiques. "
-                        f"Le plan {plan} limite à {cfg['nb_boutiques_max']} boutique(s). "
-                        "Supprimez les boutiques supplémentaires avant de redescendre."
-                    ),
-                    "nb_boutiques": nb_boutiques,
-                },
+    # ── Vérification boutiques : s'applique à TOUTE transition ──────
+    if nb_boutiques > cfg["nb_boutiques_max"]:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "code": "DOWNGRADE_BLOQUE",
+                "message": (
+                    f"Vous avez {nb_boutiques} boutiques. "
+                    f"Le plan {plan} limite à {cfg['nb_boutiques_max']} boutique(s). "
+                    "Supprimez les boutiques supplémentaires ou choisissez un plan supérieur."
+                ),
+                "nb_boutiques": nb_boutiques,
+            },
+        )
+
+    # ── Vérification quota ventes : downgrade vers plan à quota limité ──
+    if cfg["quota_ventes"] != _UNLIMITED and abo.plan != plan:
+        boutiques = (
+            await db.execute(
+                select(Boutique.id).where(Boutique.proprietaire_id == proprietaire_id)
             )
-        if cfg["quota_ventes"] != _UNLIMITED:
-            boutiques = (
-                await db.execute(
-                    select(Boutique.id).where(Boutique.proprietaire_id == proprietaire_id)
-                )
-            ).scalars().all()
-            for bid in boutiques:
-                count = await compter_ventes_mois(db, bid)
-                if count > cfg["quota_ventes"]:
-                    raise HTTPException(
-                        status_code=status.HTTP_409_CONFLICT,
-                        detail={
-                            "code": "DOWNGRADE_VENTES",
-                            "message": (
-                                f"Une de vos boutiques a déjà {count} ventes ce mois. "
-                                f"Le plan {plan} limite à {cfg['quota_ventes']} ventes/mois. "
-                                "Attendez le prochain mois ou choisissez un plan supérieur."
-                            ),
-                            "ventes_mois": count,
-                            "quota_plan": cfg["quota_ventes"],
-                        },
-                    )
-
-    # Protection downgrade inter-plans payants
-    if plan != "FREE" and abo.plan != "FREE" and plan != abo.plan:
-        old_idx = list(_VALID_PLANS).index(abo.plan)
-        new_idx = list(_VALID_PLANS).index(plan)
-        if new_idx < old_idx:
-            nb_boutiques = await compter_boutiques_owner(db, proprietaire_id)
-            if nb_boutiques > cfg["nb_boutiques_max"]:
+        ).scalars().all()
+        for bid in boutiques:
+            count = await compter_ventes_mois(db, bid)
+            if count > cfg["quota_ventes"]:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail={
-                        "code": "DOWNGRADE_BLOQUE",
+                        "code": "DOWNGRADE_VENTES",
                         "message": (
-                            f"Vous avez {nb_boutiques} boutiques. "
-                            f"Le plan {plan} limite à {cfg['nb_boutiques_max']} boutique(s)."
+                            f"Une de vos boutiques a déjà {count} ventes ce mois. "
+                            f"Le plan {plan} limite à {cfg['quota_ventes']} ventes/mois. "
+                            "Attendez le prochain mois ou choisissez un plan supérieur."
                         ),
-                        "nb_boutiques": nb_boutiques,
+                        "ventes_mois": count,
+                        "quota_plan": cfg["quota_ventes"],
                     },
                 )
 

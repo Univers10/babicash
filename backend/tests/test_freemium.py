@@ -36,7 +36,7 @@ async def test_abonnement_cree_automatiquement(client, seeded):
     assert body["quota_ventes_par_boutique"] == 20
     assert body["actif"] is True
     assert body["nb_boutiques"] == 1
-    assert float(body["prix_total_mensuel"]) == 5000.0
+    assert float(body["prix_base"]) == 0.0
 
 
 @pytest.mark.asyncio
@@ -45,8 +45,8 @@ async def test_prix_multi_boutique(client, seeded):
     token = await login(client, seeded["owner_email"], "boss1234")
     headers = {"Authorization": f"Bearer {token}"}
 
-    # Passer en PRO pour pouvoir créer une 2e boutique
-    await client.post("/api/v1/abonnements/upgrade", json={"plan": "PRO"}, headers=headers)
+    # Passer en BOUTIQUE pour pouvoir créer une 2e boutique
+    await client.post("/api/v1/abonnements/upgrade", json={"plan": "BOUTIQUE"}, headers=headers)
 
     # Créer une 2ème boutique
     r = await client.post(
@@ -74,8 +74,8 @@ async def test_boutique_supplementaire_necessite_pro(client, seeded):
     assert r.status_code == 402, r.text
     assert r.json()["detail"]["code"] == "ABONNEMENT_REQUIS"
 
-    # Après upgrade PRO : autorisé
-    await client.post("/api/v1/abonnements/upgrade", json={"plan": "PRO"}, headers=headers)
+    # Après upgrade BOUTIQUE : autorisé
+    await client.post("/api/v1/abonnements/upgrade", json={"plan": "BOUTIQUE"}, headers=headers)
     r = await client.post("/api/v1/boutiques/", json={"nom": "Boutique 2"}, headers=headers)
     assert r.status_code == 201, r.text
 
@@ -173,11 +173,11 @@ async def test_upgrade_pro_leve_le_quota(client, seeded):
 
     r = await client.post(
         "/api/v1/abonnements/upgrade",
-        json={"plan": "PRO"},
+        json={"plan": "BOUTIQUE"},
         headers=headers,
     )
     assert r.status_code == 200, r.text
-    assert r.json()["plan"] == "PRO"
+    assert r.json()["plan"] == "BOUTIQUE"
 
     # Sync illimité maintenant
     resp = await client.post(
@@ -201,7 +201,7 @@ async def test_upgrade_reserve_owner(client, seeded):
 
     r = await client.post(
         "/api/v1/abonnements/upgrade",
-        json={"plan": "PRO"},
+        json={"plan": "BOUTIQUE"},
         headers=headers,
     )
     assert r.status_code == 403
@@ -227,8 +227,8 @@ async def test_downgrade_protege_trop_boutiques(client, seeded):
     token = await login(client, seeded["owner_email"], "boss1234")
     headers = {"Authorization": f"Bearer {token}"}
 
-    # Passer PRO + créer 2e boutique
-    await client.post("/api/v1/abonnements/upgrade", json={"plan": "PRO"}, headers=headers)
+    # Passer BOUTIQUE + créer 2e boutique
+    await client.post("/api/v1/abonnements/upgrade", json={"plan": "BOUTIQUE"}, headers=headers)
     r = await client.post("/api/v1/boutiques/", json={"nom": "Boutique 2"}, headers=headers)
     assert r.status_code == 201, r.text
 
@@ -248,8 +248,8 @@ async def test_downgrade_protege_trop_ventes(client, seeded):
     token = await login(client, seeded["owner_email"], "boss1234")
     headers = {"Authorization": f"Bearer {token}"}
 
-    # Passer PRO pour pouvoir pousser > 20 ventes
-    await client.post("/api/v1/abonnements/upgrade", json={"plan": "PRO"}, headers=headers)
+    # Passer BOUTIQUE pour pouvoir pousser > 20 ventes
+    await client.post("/api/v1/abonnements/upgrade", json={"plan": "BOUTIQUE"}, headers=headers)
 
     # Pousser 21 ventes
     for i in range(21):
@@ -276,8 +276,8 @@ async def test_downgrade_autorise_sans_surplus(client, seeded):
     token = await login(client, seeded["owner_email"], "boss1234")
     headers = {"Authorization": f"Bearer {token}"}
 
-    # Passer PRO (1 seule boutique, 0 ventes)
-    await client.post("/api/v1/abonnements/upgrade", json={"plan": "PRO"}, headers=headers)
+    # Passer BOUTIQUE (1 seule boutique, 0 ventes)
+    await client.post("/api/v1/abonnements/upgrade", json={"plan": "BOUTIQUE"}, headers=headers)
 
     # Downgrade → autorisé
     r = await client.post(
@@ -292,31 +292,31 @@ async def test_downgrade_autorise_sans_surplus(client, seeded):
 
 @pytest.mark.asyncio
 async def test_abonnement_expire_revert_auto(client, seeded):
-    """Un abonnement PRO avec date_fin dépassée revient automatiquement à FREE."""
+    """Un abonnement BOUTIQUE expiré est conservé mais marqué inactif."""
     token = await login(client, seeded["owner_email"], "boss1234")
     headers = {"Authorization": f"Bearer {token}"}
 
-    # Passer PRO avec date_fin dans le passé
+    # Passer BOUTIQUE avec date_fin dans le passé
     hier = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
     r = await client.post(
         "/api/v1/abonnements/upgrade",
-        json={"plan": "PRO", "date_fin": hier},
+        json={"plan": "BOUTIQUE", "date_fin": hier},
         headers=headers,
     )
     assert r.status_code == 200, r.text
-    assert r.json()["plan"] == "PRO"  # encore PRO immédiatement après upgrade
+    assert r.json()["plan"] == "BOUTIQUE"  # encore BOUTIQUE immédiatement après upgrade
 
-    # Vérifier le plan → l'auto-revert doit se déclencher
+    # Vérifier le plan → le plan est conservé mais actif=False
     r = await client.get("/api/v1/abonnements/mon-plan", headers=headers)
     assert r.status_code == 200, r.text
     body = r.json()
-    assert body["plan"] == "FREE", "Le plan PRO expiré doit revenir à FREE"
-    assert body["quota_ventes_par_boutique"] == 20
+    assert body["plan"] == "BOUTIQUE", "Le plan BOUTIQUE expiré doit être conservé"
+    assert body["actif"] is False, "L'abonnement doit être marqué inactif"
 
-    # Le quota doit aussi refléter FREE
+    # Le quota doit refléter que le plan n'est plus actif
     r = await client.get(
         f"/api/v1/abonnements/quota/{seeded['boutique_id']}", headers=headers
     )
     assert r.status_code == 200, r.text
-    assert r.json()["plan"] == "FREE"
+    assert r.json()["plan"] == "BOUTIQUE"
     assert r.json()["illimite"] is False

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Abonnements - BabiCash Admin{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-bold mb-6">Abonnements</h2>
+
+<!-- Filtres -->
+<div class="flex flex-wrap gap-2 mb-4">
+    <a href="/admin/abonnements" class="btn btn-sm {% if not filtre_plan %}btn-primary{% else %}btn-ghost{% endif %}">Tous</a>
+    {% for plan in all_plans %}
+    <a href="/admin/abonnements?filtre_plan={{ plan }}"
+       class="btn btn-sm {% if filtre_plan == plan %}btn-primary{% else %}btn-ghost{% endif %}">
+        {{ plan }}
+    </a>
+    {% endfor %}
+</div>
+<div class="flex gap-2 mb-6">
+    <a href="/admin/abonnements?{% if filtre_plan %}filtre_plan={{ filtre_plan }}&{% endif %}"
+       class="btn btn-sm {% if not filtre_statut %}btn-primary{% else %}btn-ghost{% endif %}">Tous</a>
+    <a href="/admin/abonnements?{% if filtre_plan %}filtre_plan={{ filtre_plan }}&{% endif %}filtre_statut=ACTIF"
+       class="btn btn-sm {% if filtre_statut == 'ACTIF' %}btn-success{% else %}btn-ghost{% endif %}">Actifs</a>
+    <a href="/admin/abonnements?{% if filtre_plan %}filtre_plan={{ filtre_plan }}&{% endif %}filtre_statut=INACTIF"
+       class="btn btn-sm {% if filtre_statut == 'INACTIF' %}btn-warning{% else %}btn-ghost{% endif %}">Inactifs</a>
+    <a href="/admin/abonnements?{% if filtre_plan %}filtre_plan={{ filtre_plan }}&{% endif %}filtre_statut=EXPIRE"
+       class="btn btn-sm {% if filtre_statut == 'EXPIRE' %}btn-error{% else %}btn-ghost{% endif %}">Expirés</a>
+</div>
+
+<div class="card bg-base-100 shadow">
+    <div class="overflow-x-auto">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Owner</th>
+                    <th>Plan</th>
+                    <th class="text-right">Prix</th>
+                    <th class="text-center">Boutiques</th>
+                    <th>Date fin</th>
+                    <th class="text-center">Statut</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in abos_data %}
+                <tr>
+                    <td>
+                        <div class="font-medium text-sm">{{ item.owner.nom if item.owner else '—' }}</div>
+                        <div class="text-xs opacity-50">{{ item.owner.email if item.owner else '' }}</div>
+                    </td>
+                    <td><span class="badge badge-outline badge-sm">{{ item.abo.plan }}</span></td>
+                    <td class="text-right font-mono text-sm">{{ item.abo.prix_base }}</td>
+                    <td class="text-center font-mono">{{ item.nb_boutiques }}</td>
+                    <td class="text-sm">{{ item.abo.date_fin.strftime('%d/%m/%Y') if item.abo.date_fin else '—' }}</td>
+                    <td class="text-center">
+                        {% if item.statut == 'ACTIF' %}
+                        <span class="badge badge-success badge-sm">Actif</span>
+                        {% elif item.statut == 'INACTIF' %}
+                        <span class="badge badge-warning badge-sm">Inactif</span>
+                        {% else %}
+                        <span class="badge badge-error badge-sm">Expiré</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="/admin/owners/{{ item.abo.proprietaire_id }}" class="btn btn-ghost btn-xs">Voir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

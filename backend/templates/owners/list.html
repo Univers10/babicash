@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Owners - BabiCash Admin{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-bold">Owners</h2>
+    <input type="text" id="search" placeholder="Rechercher..."
+           class="input input-bordered input-sm w-64" onkeyup="filterTable()">
+</div>
+
+<div class="card bg-base-100 shadow">
+    <div class="overflow-x-auto">
+        <table class="table table-hover" id="owners-table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Plan</th>
+                    <th class="text-center">Boutiques</th>
+                    <th class="text-center">Statut</th>
+                    <th>Inscrit le</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in owners_data %}
+                <tr>
+                    <td class="font-medium">{{ item.user.nom }}</td>
+                    <td class="text-sm">{{ item.user.email or '—' }}</td>
+                    <td class="text-sm">{{ item.user.telephone or '—' }}</td>
+                    <td>
+                        <span class="badge badge-sm badge-outline">{{ item.abo.plan if item.abo else 'FREE' }}</span>
+                    </td>
+                    <td class="text-center font-mono">{{ item.nb_boutiques }}</td>
+                    <td class="text-center">
+                        {% if item.user.actif %}
+                        <span class="badge badge-sm badge-success">Actif</span>
+                        {% else %}
+                        <span class="badge badge-sm badge-error">Inactif</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-sm">{{ item.user.date_creation.strftime('%d/%m/%Y') if item.user.date_creation else '—' }}</td>
+                    <td>
+                        <a href="/admin/owners/{{ item.user.id }}" class="btn btn-ghost btn-xs">Voir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function filterTable() {
+    const query = document.getElementById('search').value.toLowerCase();
+    const rows = document.querySelectorAll('#owners-table tbody tr');
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

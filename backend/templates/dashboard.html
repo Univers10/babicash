@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - BabiCash Admin{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-bold mb-6">Dashboard</h2>
+
+<!-- Stats cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="stat bg-base-100 rounded-box shadow">
+        <div class="stat-title">Owners</div>
+        <div class="stat-value text-primary">{{ stats.nb_owners }}</div>
+        <div class="stat-desc">Comptes propriétaires</div>
+    </div>
+    <div class="stat bg-base-100 rounded-box shadow">
+        <div class="stat-title">Boutiques</div>
+        <div class="stat-value text-secondary">{{ stats.nb_boutiques }}</div>
+        <div class="stat-desc">Boutiques actives</div>
+    </div>
+    <div class="stat bg-base-100 rounded-box shadow">
+        <div class="stat-title">Abonnements actifs</div>
+        <div class="stat-value text-accent">{{ stats.nb_abos_actifs }}</div>
+        <div class="stat-desc">Plans payants en cours</div>
+    </div>
+    <div class="stat bg-base-100 rounded-box shadow">
+        <div class="stat-title">Revenu estimé</div>
+        <div class="stat-value text-success">{{ "%.0f"|format(stats.revenu_total) }} FCFA</div>
+        <div class="stat-desc">Ce mois</div>
+    </div>
+</div>
+
+<!-- Répartition des plans -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <h3 class="card-title text-lg">Répartition des plans</h3>
+            <div class="overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                        <tr><th>Plan</th><th class="text-right">Nombre</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for plan, count in stats.plans.items() %}
+                        <tr>
+                            <td>
+                                <span class="badge badge-outline">{{ plan }}</span>
+                            </td>
+                            <td class="text-right font-mono">{{ count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <h3 class="card-title text-lg">Derniers owners inscrits</h3>
+            <div class="overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                        <tr><th>Nom</th><th>Email</th><th>Inscrit le</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for o in stats.last_owners %}
+                        <tr>
+                            <td class="font-medium">{{ o.nom }}</td>
+                            <td class="text-sm opacity-70">{{ o.email or '—' }}</td>
+                            <td class="text-sm">{{ o.date_creation.strftime('%d/%m/%Y') if o.date_creation else '—' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

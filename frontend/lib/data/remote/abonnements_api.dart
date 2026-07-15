@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/errors/app_exception.dart';
 import '../../core/network/api_client.dart';
 import '../models/abonnement_model.dart';
 
@@ -17,23 +18,35 @@ class AbonnementsApi {
   }
 
   Future<AbonnementOut> monPlan() async {
-    final resp = await _dio.get<Map<String, dynamic>>('$_baseUrl/abonnements/mon-plan');
-    return AbonnementOut.fromJson(resp.data!);
+    try {
+      final resp = await _dio.get<Map<String, dynamic>>('$_baseUrl/abonnements/mon-plan');
+      return AbonnementOut.fromJson(resp.data!);
+    } on DioException catch (e) {
+      throw mapDioError(e);
+    }
   }
 
   Future<QuotaInfo> quotaBoutique(String boutiqueId) async {
-    final resp = await _dio.get<Map<String, dynamic>>(
-      '$_baseUrl/abonnements/quota/$boutiqueId',
-    );
-    return QuotaInfo.fromJson(resp.data!);
+    try {
+      final resp = await _dio.get<Map<String, dynamic>>(
+        '$_baseUrl/abonnements/quota/$boutiqueId',
+      );
+      return QuotaInfo.fromJson(resp.data!);
+    } on DioException catch (e) {
+      throw mapDioError(e);
+    }
   }
 
   Future<AbonnementOut> upgrade(UpgradePlanRequest request) async {
-    final resp = await _dio.post<Map<String, dynamic>>(
-      '$_baseUrl/abonnements/upgrade',
-      data: request.toJson(),
-    );
-    return AbonnementOut.fromJson(resp.data!);
+    try {
+      final resp = await _dio.post<Map<String, dynamic>>(
+        '$_baseUrl/abonnements/upgrade',
+        data: request.toJson(),
+      );
+      return AbonnementOut.fromJson(resp.data!);
+    } on DioException catch (e) {
+      throw mapDioError(e);
+    }
   }
 }
 

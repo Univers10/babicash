@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BabiCash Admin{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4/dist/full.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-base-200 min-h-screen">
+    <div class="drawer lg:drawer-open">
+        <input id="sidebar-toggle" type="checkbox" class="drawer-toggle">
+        <!-- Sidebar (drawer-side) -->
+        <div class="drawer-side z-50">
+            <label for="sidebar-toggle" class="drawer-overlay" aria-label="Fermer le menu"></label>
+            <aside class="bg-base-100 w-60 min-h-screen p-4 flex flex-col">
+                <div class="mb-8">
+                    <h1 class="text-xl font-bold text-primary">BabiCash</h1>
+                    <p class="text-xs text-base-content/50">Backoffice Admin</p>
+                </div>
+                <ul class="menu gap-1 flex-1">
+                    <li>
+                        <a href="/admin/" class="{% if request.url.path == '/admin/' %}active{% endif %}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/owners" class="{% if '/owners' in request.url.path %}active{% endif %}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+                            Owners
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/abonnements" class="{% if '/abonnements' in request.url.path %}active{% endif %}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+                            Abonnements
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/boutiques" class="{% if '/boutiques' in request.url.path %}active{% endif %}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016A3.001 3.001 0 0021 9.349m-18 0V6.75a2.25 2.25 0 012.25-2.25h15a2.25 2.25 0 012.25 2.25v2.594"/></svg>
+                            Boutiques
+                        </a>
+                    </li>
+                </ul>
+                <div class="mt-auto">
+                    <div class="divider"></div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm truncate">{{ user.nom }}</span>
+                        <a href="/admin/logout" class="btn btn-ghost btn-xs">Déconnexion</a>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Main Content (drawer-content) -->
+        <div class="drawer-content flex flex-col">
+            <!-- Top bar mobile -->
+            <div class="navbar bg-base-100 shadow-sm lg:hidden sticky top-0 z-40">
+                <div class="flex-none">
+                    <label for="sidebar-toggle" class="btn btn-square btn-ghost" aria-label="Ouvrir le menu">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </label>
+                </div>
+                <div class="flex-1">
+                    <span class="text-lg font-bold text-primary">BabiCash</span>
+                </div>
+                <div class="flex-none">
+                    <a href="/admin/logout" class="btn btn-ghost btn-xs">Déconnexion</a>
+                </div>
+            </div>
+            <!-- Page content -->
+            <main class="p-4 lg:p-6">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../data/models/abonnement_model.dart';
@@ -13,8 +14,13 @@ final quotaProvider = FutureProvider.autoDispose<QuotaInfo?>((ref) async {
   try {
     final api = ref.watch(abonnementsApiProvider);
     return await api.quotaBoutique(boutiqueId);
+  } on DioException catch (e) {
+    final appEx = mapDioError(e);
+    if (appEx is QuotaException || appEx is ForbiddenException) {
+      rethrow;
+    }
+    return null;
   } on AppException catch (e) {
-    // QuotaException = 402 QUOTA_DEPASSE, ForbiddenException = abonnement requis
     if (e is QuotaException || e is ForbiddenException) {
       rethrow;
     }
@@ -29,7 +35,12 @@ final monPlanProvider = FutureProvider.autoDispose<AbonnementOut?>((ref) async {
   try {
     final api = ref.watch(abonnementsApiProvider);
     return await api.monPlan();
+  } on DioException catch (e) {
+    if (e.response?.statusCode == 401) return null;
+    return null;
   } on AppException {
+    return null;
+  } catch (_) {
     return null;
   }
 });

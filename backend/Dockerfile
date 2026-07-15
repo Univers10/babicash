@@ -28,6 +28,9 @@ COPY --from=builder /install /usr/local
 COPY alembic.ini .
 COPY alembic/ alembic/
 COPY app/ app/
+COPY templates/ templates/
+COPY static/ static/
+COPY scripts/ scripts/
 
 # Entrypoint script
 COPY entrypoint.sh .

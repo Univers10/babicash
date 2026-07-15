@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BabiCash Admin - Connexion</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4/dist/full.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-base-200 min-h-screen flex items-center justify-center">
+    <div class="card w-full max-w-sm bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title text-2xl font-bold text-primary justify-center mb-4">BabiCash Admin</h2>
+
+            {% if error %}
+            <div class="alert alert-error mb-4">
+                <span>Email ou mot de passe incorrect.</span>
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/admin/login">
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Email</span>
+                    </label>
+                    <input type="email" name="email" placeholder="admin@babicash.com"
+                           class="input input-bordered w-full" required autofocus>
+                </div>
+                <div class="form-control mb-6">
+                    <label class="label">
+                        <span class="label-text">Mot de passe</span>
+                    </label>
+                    <input type="password" name="mot_de_passe" placeholder="••••••••"
+                           class="input input-bordered w-full" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Se connecter</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

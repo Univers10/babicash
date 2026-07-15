@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}{{ owner.nom }} - BabiCash Admin{% endblock %}
+{% block content %}
+<div class="mb-6">
+    <a href="/admin/owners" class="btn btn-ghost btn-sm mb-2">&larr; Retour</a>
+    <h2 class="text-2xl font-bold">{{ owner.nom }}</h2>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Infos owner -->
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <h3 class="card-title text-lg">Informations</h3>
+            <div class="space-y-2 text-sm">
+                <p><span class="font-medium">Email :</span> {{ owner.email or '—' }}</p>
+                <p><span class="font-medium">Téléphone :</span> {{ owner.telephone or '—' }}</p>
+                <p><span class="font-medium">Inscrit le :</span> {{ owner.date_creation.strftime('%d/%m/%Y %H:%M') if owner.date_creation else '—' }}</p>
+                <p>
+                    <span class="font-medium">Statut :</span>
+                    {% if owner.actif %}
+                    <span class="badge badge-success badge-sm">Actif</span>
+                    {% else %}
+                    <span class="badge badge-error badge-sm">Inactif</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="divider"></div>
+            <form method="POST" action="/admin/owners/{{ owner.id }}/toggle">
+                {% if owner.actif %}
+                <button type="submit" class="btn btn-error btn-sm w-full"
+                        onclick="return confirm('Désactiver ce compte ?')">
+                    Désactiver
+                </button>
+                {% else %}
+                <button type="submit" class="btn btn-success btn-sm w-full"
+                        onclick="return confirm('Activer ce compte ?')">
+                    Activer
+                </button>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <!-- Abonnement -->
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <h3 class="card-title text-lg">Abonnement</h3>
+            {% if abo %}
+            <div class="space-y-2 text-sm">
+                <p>
+                    <span class="font-medium">Plan :</span>
+                    <span class="badge badge-primary">{{ abo.plan }}</span>
+                </p>
+                <p><span class="font-medium">Prix base :</span> {{ abo.prix_base }} FCFA</p>
+                <p><span class="font-medium">Date début :</span> {{ abo.date_debut.strftime('%d/%m/%Y') if abo.date_debut else '—' }}</p>
+                <p><span class="font-medium">Date fin :</span> {{ abo.date_fin.strftime('%d/%m/%Y') if abo.date_fin else '—' }}</p>
+                <p>
+                    <span class="font-medium">Actif :</span>
+                    {% if abo.actif %}
+                    <span class="badge badge-success badge-sm">Oui</span>
+                    {% else %}
+                    <span class="badge badge-error badge-sm">Non</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="divider"></div>
+            <form method="POST" action="/admin/owners/{{ owner.id }}/plan">
+                <label class="label"><span class="label-text text-sm">Changer le plan</span></label>
+                <select name="plan" class="select select-bordered select-sm w-full mb-2">
+                    {% for plan_name in plans %}
+                    <option value="{{ plan_name }}" {% if abo and abo.plan == plan_name %}selected{% endif %}>
+                        {{ plan_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm w-full">Appliquer</button>
+            </form>
+            {% else %}
+            <p class="text-sm opacity-50">Aucun abonnement trouvé.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Boutiques -->
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <h3 class="card-title text-lg">Boutiques ({{ boutiques|length }})</h3>
+            {% if boutiques %}
+            <div class="space-y-2">
+                {% for b in boutiques %}
+                <div class="p-3 bg-base-200 rounded-lg">
+                    <p class="font-medium text-sm">{{ b.nom }}</p>
+                    <p class="text-xs opacity-70">{{ b.adresse or 'Pas d\'adresse' }}</p>
+                    <p class="text-xs opacity-70">{{ b.telephone or '' }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-sm opacity-50">Aucune boutique.</p>
+            {% endif %}
+            <div class="divider"></div>
+            <p class="text-sm"><span class="font-medium">Total ventes ce mois :</span> <span class="font-mono">{{ nb_ventes }}</span></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
