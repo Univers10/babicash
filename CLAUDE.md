@@ -6,11 +6,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 BabiCash is a multi-tenant POS (point-of-sale) and commercial management Flutter app targeting small businesses in West Africa. It follows an **offline-first architecture**: all writes go to local SQLite (Drift) immediately, then sync to the backend when connectivity is available.
 
-The Flutter frontend lives in `frontend/`. The backend is separate (Django/DRF, not in this repo).
+The Flutter frontend lives in `frontend/`. The backend lives in `backend/` (FastAPI + SQLAlchemy 2 async + Alembic, PostgreSQL in production, SQLite/aiosqlite in tests).
 
 ## Common Commands
 
-All commands run from `frontend/`:
+### Backend (from `backend/`)
+
+```bash
+# Virtualenv: backend/.venv (hidden directory)
+.venv/Scripts/python.exe -m pytest tests/     # run tests (Windows)
+
+# Migrations
+.venv/Scripts/python.exe -m alembic upgrade head
+
+# Dev server
+.venv/Scripts/python.exe -m uvicorn app.main:app --reload
+```
+
+> **Deploy**: push to `main` auto-deploys the backend (SSH + Docker via GitHub Actions). The frontend has no auto-deploy.
+
+### Frontend (from `frontend/`)
 
 ```bash
 # Install dependencies

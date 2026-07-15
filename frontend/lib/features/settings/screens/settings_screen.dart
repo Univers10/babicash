@@ -7,10 +7,10 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/abonnement_model.dart';
 import '../../../data/models/boutique_model.dart';
-import '../../../data/remote/abonnements_api.dart';
 import '../../../data/remote/users_api.dart';
 import '../../../data/models/auth_model.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/abonnements/providers/quota_provider.dart';
 import '../../../features/boutiques/providers/boutique_provider.dart';
 import '../../../features/boutiques/screens/boutiques_screen.dart';
 import '../../../features/sync/sync_service.dart';
@@ -20,27 +20,7 @@ import '../../../shared/widgets/amount_text.dart';
 import '../../../shared/widgets/app_snackbar.dart';
 import '../../../shared/widgets/menu_button.dart';
 
-// ── Providers ──────────────────────────────────────────────────────────────────
-
-final abonnementInfoProvider = FutureProvider<AbonnementOut?>((ref) async {
-  try {
-    final api = ref.watch(abonnementsApiProvider);
-    return await api.monPlan();
-  } catch (_) {
-    return null;
-  }
-});
-
-final quotaInfoProvider = FutureProvider<QuotaInfo?>((ref) async {
-  final boutiqueId = await ref.watch(currentBoutiqueIdProvider.future);
-  if (boutiqueId == null) return null;
-  try {
-    final api = ref.watch(abonnementsApiProvider);
-    return await api.quotaBoutique(boutiqueId);
-  } catch (_) {
-    return null;
-  }
-});
+// ── Providers (réutilise quota_provider.dart pour éviter les doublons) ────────
 
 // ── Screen ─────────────────────────────────────────────────────────────────────
 
@@ -74,8 +54,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final user = ref.watch(authStateProvider).value;
     final boutiqueAsync = ref.watch(boutiqueInfoProvider);
-    final abonnementAsync = ref.watch(abonnementInfoProvider);
-    final quotaAsync = ref.watch(quotaInfoProvider);
+    final abonnementAsync = ref.watch(monPlanProvider);
+    final quotaAsync = ref.watch(quotaProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -531,7 +511,7 @@ class _AbonnementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isPro = abonnement.plan.toUpperCase() != 'GRATUIT';
+    final isPro = abonnement.plan.toUpperCase() != 'FREE';
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

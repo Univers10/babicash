@@ -36,7 +36,7 @@ class PlanDef {
 
 const kPlansCatalog = [
   PlanDef(
-    id: 'GRATUIT',
+    id: 'FREE',
     nom: 'Gratuit',
     tagline: 'Pour découvrir BabiCash',
     prixMensuel: 0,
@@ -131,7 +131,7 @@ const kPlansCatalog = [
 
 /// Retrouve la carte du catalogue correspondant à l'abonnement backend.
 ///
-/// Le backend ne connaît aujourd'hui que 'GRATUIT' et 'PRO' ; un plan 'PRO'
+/// Le backend ne connaît aujourd'hui que 'FREE' et 'PRO' ; un plan 'PRO'
 /// est rattaché à la carte payante dont le prix correspond à [AbonnementOut.prixBase]
 /// (Boutique par défaut). Les codes futurs ('KIOSQUE', 'EMPIRE', …) matchent par id.
 PlanDef? planFromAbonnement(AbonnementOut abonnement) {

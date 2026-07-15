@@ -146,9 +146,12 @@ async def register(
     await db.flush()
 
     # Créer l'abonnement FREE
+    from decimal import Decimal
     abonnement = Abonnement(
         proprietaire_id=str(user.id),
         plan="FREE",
+        prix_base=Decimal("5000.00"),
+        quota_ventes_par_boutique=20,
     )
     db.add(abonnement)
 
