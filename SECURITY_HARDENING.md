@@ -87,16 +87,13 @@
 - La création d'un manager vérifie maintenant `nb_gerants_max` du plan actif
 - Renvoie 403 si la limite est atteinte
 
-### H11 — Certificate pinning (`dio_certificate_pinner`)
-- **Avant :** Validation SSL uniquement au niveau OS
-- **Après :** Pinning SHA-256 via `dio_certificate_pinner` + Android `network_security_config.xml`
-- **Fichiers :**
-  - `lib/core/network/cert_pinning.dart` — Configuration des empreintes SHA-256
-  - `lib/core/network/api_client.dart` — Intercepteur Dio ajouté
-  - `android/app/src/main/res/xml/network_security_config.xml` — Pin Android
-  - `android/app/src/main/AndroidManifest.xml` — `networkSecurityConfig` activé
-- **Empreinte :** `8809EB8129A32832A3D4343C369C40C1967A12F4C35B846E502369ED9F8AD5C3` (Let's Encrypt, expire 08/10/2026)
-- **Note :** Mettre à jour les empreintes lors du renouvellement du certificat Let's Encrypt
+### H11 — Certificate pinning : RETIRÉ (implémentation défectueuse)
+- **Statut : non implémenté.** La version initiale a été retirée car :
+  1. Le package `dio_certificate_pinner` **n'existe pas** sur pub.dev — `flutter pub get` échouait, `main` ne compilait plus.
+  2. Les pins Android étaient des empreintes **hex** alors que `<pin-set>` exige le SHA-256 du **SPKI en base64** — aucun pin ne pouvait matcher, Android aurait refusé toutes les connexions à l'API en release.
+  3. Le serveur utilise **Let's Encrypt** : certificats et clés tournent tous les ~60-90 jours — un pin figé aurait bloqué l'app à chaque renouvellement.
+- **Conservé :** `network_security_config.xml` en HTTPS-only (`cleartextTrafficPermitted="false"`, trust anchors système) + `networkSecurityConfig` dans le manifest.
+- **Si le pinning redevient souhaité un jour :** épingler le SPKI d'une clé contrôlée et stable (pas le certificat feuille LE), prévoir un pin de backup et une stratégie de rotation. À ne faire qu'avec un canal de mise à jour d'app fiable.
 
 ---
 

@@ -29,7 +29,7 @@ void main() {
       'quota_ventes_par_boutique': 20,
     });
 
-    expect(abo.prixBase, 5000.0);
+    expect(abo.prixBase, 0.0); // défaut du modèle (FREE = 0 FCFA)
     expect(abo.nbBoutiques, 1);
     expect(abo.dateFin, isNull);
     expect(abo.actif, isTrue);
