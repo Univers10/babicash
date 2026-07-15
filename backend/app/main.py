@@ -7,10 +7,16 @@ from app.core.config import settings
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
+# CORS — refuser "*" avec credentials en production
+cors_origins = settings.cors_origins
+allow_credentials = True
+if cors_origins == ["*"]:
+    allow_credentials = False  # le navigateur rejette "*" + credentials
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
-    allow_credentials=True,
+    allow_origins=cors_origins,
+    allow_credentials=allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )

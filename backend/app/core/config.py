@@ -20,7 +20,8 @@ class Settings(BaseSettings):
 
     SECRET_KEY: str = _INSECURE_DEFAULT
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 43200  # 30 days
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 heures
+    SECURE_COOKIES: bool = True  # False en dev local (HTTP)
 
     # CORS : liste séparée par des virgules, ex: "https://app.babicash.ci,https://dashboard.babicash.ci"
     # Laisser vide ou mettre "*" pour tout autoriser (dev uniquement)
@@ -30,12 +31,12 @@ class Settings(BaseSettings):
     @classmethod
     def secret_key_must_be_changed(cls, v: str) -> str:
         if v == _INSECURE_DEFAULT:
-            import warnings
-            warnings.warn(
-                "SECRET_KEY utilise la valeur par défaut non sécurisée. "
-                "Définissez SECRET_KEY dans votre fichier .env avant de déployer en production.",
-                stacklevel=2,
+            raise ValueError(
+                "SECRET_KEY doit être défini dans .env (valeur par défaut interdite). "
+                "Générez une clé avec : python -c \"import secrets; print(secrets.token_urlsafe(64))\""
             )
+        if len(v) < 32:
+            raise ValueError("SECRET_KEY doit faire au moins 32 caractères.")
         return v
 
     @property

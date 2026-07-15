@@ -24,6 +24,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy installed packages from builder
 COPY --from=builder /install /usr/local
 
+# Create non-root user
+RUN groupadd -r babicash && useradd -r -g babicash -d /app -s /sbin/nologin babicash
+
 # Copy application code
 COPY alembic.ini .
 COPY alembic/ alembic/
@@ -35,6 +38,11 @@ COPY scripts/ scripts/
 # Entrypoint script
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
+
+# Fix ownership for non-root user
+RUN chown -R babicash:babicash /app
+
+USER babicash
 
 EXPOSE 8000
 

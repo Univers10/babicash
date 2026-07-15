@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
+from app.core.rate_limit import login_rate_limiter, pin_rate_limiter
 from app.core.security import create_access_token, hash_password, verify_password, verify_pin
 from app.deps import get_current_user
 from app.models import Abonnement, Boutique, User
@@ -24,10 +25,7 @@ def _token_for(user: User) -> Token:
     token = create_access_token(
         subject=str(user.id),
         role=user.role,
-        nom=user.nom,
-        email=user.email,
-        telephone=user.telephone,
-        boutique_id=boutique_id,
+        token_version=user.token_version,
     )
     return Token(
         access_token=token,
@@ -39,6 +37,14 @@ def _token_for(user: User) -> Token:
 
 @router.post("/login", response_model=Token)
 async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)) -> Token:
+    rate_key = f"login:email:{payload.email}"
+
+    if login_rate_limiter.is_locked(rate_key):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Trop de tentatives. Réessayez plus tard.",
+        )
+
     user = (
         await db.execute(select(User).where(User.email == payload.email))
     ).scalar_one_or_none()
@@ -49,11 +55,13 @@ async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)) -> To
         or user.mot_de_passe_hash is None
         or not verify_password(payload.mot_de_passe, user.mot_de_passe_hash)
     ):
+        login_rate_limiter.record_failure(rate_key)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Email ou mot de passe incorrect",
         )
 
+    login_rate_limiter.record_success(rate_key)
     return _token_for(user)
 
 
@@ -62,6 +70,14 @@ async def login_pin(
     payload: LoginPinRequest, db: AsyncSession = Depends(get_db)
 ) -> Token:
     """Connexion simplifiée par téléphone + code PIN (gérants surtout)."""
+    rate_key = f"login:pin:{payload.telephone}"
+
+    if pin_rate_limiter.is_locked(rate_key):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Trop de tentatives. Réessayez plus tard.",
+        )
+
     user = (
         await db.execute(
             select(User).where(User.telephone == payload.telephone)
@@ -74,11 +90,13 @@ async def login_pin(
         or user.code_pin_hash is None
         or not verify_pin(payload.code_pin, user.code_pin_hash)
     ):
+        pin_rate_limiter.record_failure(rate_key)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Numéro ou code PIN incorrect",
         )
 
+    pin_rate_limiter.record_success(rate_key)
     return _token_for(user)
 
 
@@ -87,6 +105,14 @@ async def login_id(
     payload: LoginIdRequest, db: AsyncSession = Depends(get_db)
 ) -> Token:
     """Connexion par ID propriétaire (UUID)."""
+    rate_key = f"login:id:{payload.id_proprietaire}"
+
+    if login_rate_limiter.is_locked(rate_key):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Trop de tentatives. Réessayez plus tard.",
+        )
+
     try:
         user_id = uuid.UUID(payload.id_proprietaire)
     except ValueError:
@@ -103,11 +129,13 @@ async def login_id(
         or user.mot_de_passe_hash is None
         or not verify_password(payload.mot_de_passe, user.mot_de_passe_hash)
     ):
+        login_rate_limiter.record_failure(rate_key)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="ID propriétaire ou mot de passe incorrect",
         )
 
+    login_rate_limiter.record_success(rate_key)
     return _token_for(user)
 
 

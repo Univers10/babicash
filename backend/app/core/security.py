@@ -29,10 +29,7 @@ def verify_pin(plain_pin: str, hashed_pin: str) -> bool:
 def create_access_token(
     subject: str,
     role: str,
-    nom: str,
-    email: str | None = None,
-    telephone: str | None = None,
-    boutique_id: str | None = None,
+    token_version: int = 0,
 ) -> str:
     expire = datetime.now(timezone.utc) + timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
@@ -40,10 +37,7 @@ def create_access_token(
     payload: dict[str, Any] = {
         "sub": subject,
         "role": role,
-        "nom": nom,
-        "email": email,
-        "telephone": telephone,
-        "boutique_id": boutique_id,
+        "tv": token_version,
         "exp": expire,
     }
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)

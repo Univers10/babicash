@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/storage/secure_storage.dart';
+import '../../../data/local/database.dart';
 import '../../../data/models/auth_model.dart';
 import '../../../data/remote/auth_api.dart';
 import 'package:dio/dio.dart';
@@ -147,6 +148,19 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
   }
 
   Future<void> logout() async {
+    // Effacer la base locale avant de déconnecter
+    try {
+      final db = ref.read(appDatabaseProvider);
+      await db.delete(localProduits).go();
+      await db.delete(localCategories).go();
+      await db.delete(localVentes).go();
+      await db.delete(localLignesVente).go();
+      await db.delete(localDepenses).go();
+      await db.delete(localSessions).go();
+      await db.delete(localTiers).go();
+    } catch (_) {
+      // Ignorer les erreurs de nettoyage
+    }
     await ref.read(secureStorageProvider).clearSession();
     state = const AsyncData(null);
   }

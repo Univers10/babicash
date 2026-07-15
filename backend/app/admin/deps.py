@@ -1,8 +1,12 @@
 """Dependencies admin : authentification par cookie."""
 from fastapi import Cookie, Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.db import get_db
 from app.core.security import decode_access_token
+from app.models import User
 from app.schemas.auth import CurrentUser
 
 
@@ -10,7 +14,10 @@ def _token_from_cookie(request: Request) -> str | None:
     return request.cookies.get("admin_token")
 
 
-def require_admin(request: Request) -> CurrentUser:
+async def require_admin(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> CurrentUser:
     """Exige un token admin valide via le cookie 'admin_token'.
 
     Si absent ou invalide → redirect vers /admin/login.
@@ -35,11 +42,29 @@ def require_admin(request: Request) -> CurrentUser:
             headers={"Location": "/admin/login"},
         )
 
+    # Vérifier que l'utilisateur existe toujours et que le token n'a pas été révoqué
+    user = (
+        await db.execute(select(User).where(User.id == payload["sub"]))
+    ).scalar_one_or_none()
+
+    if user is None or not user.actif or user.role != "ADMIN":
+        raise HTTPException(
+            status_code=status.HTTP_307_TEMPORARY_REDIRECT,
+            headers={"Location": "/admin/login"},
+        )
+
+    token_version = payload.get("tv", 0)
+    if token_version != user.token_version:
+        raise HTTPException(
+            status_code=status.HTTP_307_TEMPORARY_REDIRECT,
+            headers={"Location": "/admin/login"},
+        )
+
     return CurrentUser(
-        id=payload["sub"],
-        nom=payload.get("nom", ""),
-        email=payload.get("email"),
-        telephone=payload.get("telephone"),
-        role=payload.get("role", ""),
-        boutique_id=payload.get("boutique_id"),
+        id=str(user.id),
+        nom=user.nom,
+        email=user.email,
+        telephone=user.telephone,
+        role=user.role,
+        boutique_id=str(user.boutique_id) if user.boutique_id else None,
     )

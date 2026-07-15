@@ -72,7 +72,7 @@ class CategoriesScreen extends ConsumerWidget {
             children: [
               const Icon(Symbols.error, size: 48, color: AppColors.error),
               const SizedBox(height: 12),
-              Text('Erreur : $e', style: AppTextStyles.bodyMedium),
+              Text('Erreur de chargement', style: AppTextStyles.bodyMedium),
             ],
           ),
         ),

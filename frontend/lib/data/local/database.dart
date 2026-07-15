@@ -208,6 +208,11 @@ LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dir = await getApplicationDocumentsDirectory();
     final file = File(p.join(dir.path, 'babicash.db'));
+    // TODO(H9): Chiffrer la DB avec sqlcipher_flutter
+    // Pour l'instant, la DB est en clair.
+    // Pour activer le chiffrement, remplacer par :
+    //   final factory = sqlcipherFactory(password: encryptionKey);
+    //   return SqfliteDatabaseFactory.inDatabaseFactory(factory).openDatabase(file.path);
     return NativeDatabase.createInBackground(file);
   });
 }

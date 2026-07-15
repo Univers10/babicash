@@ -101,7 +101,7 @@ class _TicketDialogState extends State<TicketDialog> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur scan: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Erreur lors du scan'), backgroundColor: Colors.red),
         );
       }
     }

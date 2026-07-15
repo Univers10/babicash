@@ -26,6 +26,7 @@
             </div>
             <div class="divider"></div>
             <form method="POST" action="/admin/owners/{{ owner.id }}/toggle">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 {% if owner.actif %}
                 <button type="submit" class="btn btn-error btn-sm w-full"
                         onclick="return confirm('Désactiver ce compte ?')">
@@ -65,6 +66,7 @@
             </div>
             <div class="divider"></div>
             <form method="POST" action="/admin/owners/{{ owner.id }}/plan">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <label class="label"><span class="label-text text-sm">Changer le plan</span></label>
                 <select name="plan" class="select select-bordered select-sm w-full mb-2">
                     {% for plan_name in plans %}

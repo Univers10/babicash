@@ -10,6 +10,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.admin.deps import require_admin
+from app.core.csrf import verify_csrf_token
 from app.core.db import get_db
 from app.core.security import hash_password
 from app.models import Abonnement, Boutique, User
@@ -178,6 +179,10 @@ async def owner_detail(
     if user is None:
         return RedirectResponse(url="/admin/owners", status_code=303)
 
+    from app.core.csrf import generate_csrf_token
+    session_id = request.cookies.get("admin_session_id", "")
+    csrf_token = generate_csrf_token(session_id)
+
     return templates.TemplateResponse(request, "owners/detail.html", {
         "user": current_user,
         "owner": user,
@@ -185,15 +190,22 @@ async def owner_detail(
         "boutiques": boutiques,
         "nb_ventes": nb_ventes,
         "plans": _PLAN_CATALOG,
+        "csrf_token": csrf_token,
     })
 
 
 @router.post("/owners/{owner_id}/toggle")
 async def owner_toggle(
     owner_id: str,
+    request: Request,
+    csrf_token: str = Form(""),
     current_user: CurrentUser = Depends(require_admin),
     db: AsyncSession = Depends(get_db),
 ):
+    session_id = request.cookies.get("admin_session_id", "")
+    if not verify_csrf_token(csrf_token, session_id):
+        return RedirectResponse(url=f"/admin/owners/{owner_id}", status_code=303)
+
     user = await _get_user_by_id(db, owner_id)
     if user and user.role == "OWNER":
         user.actif = not user.actif
@@ -204,10 +216,16 @@ async def owner_toggle(
 @router.post("/owners/{owner_id}/plan")
 async def owner_change_plan(
     owner_id: str,
+    request: Request,
     plan: str = Form(...),
+    csrf_token: str = Form(""),
     current_user: CurrentUser = Depends(require_admin),
     db: AsyncSession = Depends(get_db),
 ):
+    session_id = request.cookies.get("admin_session_id", "")
+    if not verify_csrf_token(csrf_token, session_id):
+        return RedirectResponse(url=f"/admin/owners/{owner_id}", status_code=303)
+
     await abonnement_service.upgrader_plan(db, owner_id, plan)
     return RedirectResponse(url=f"/admin/owners/{owner_id}", status_code=303)
 
