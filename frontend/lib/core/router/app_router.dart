@@ -4,6 +4,7 @@ import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/login_pin_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
+import '../../features/abonnements/screens/pricing_screen.dart';
 import '../../features/caisse/screens/caisse_screen.dart';
 import '../../features/stock/screens/categories_screen.dart';
 import '../../features/stock/screens/stock_screen.dart';
@@ -27,6 +28,7 @@ abstract final class AppRoutes {
   static const sessions = '/sessions';
   static const dashboard = '/dashboard';
   static const historique = '/historique';
+  static const abonnement = '/abonnement';
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -95,6 +97,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.historique,
             builder: (_, __) => const HistoriqueScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.abonnement,
+            builder: (_, __) => const PricingScreen(),
           ),
         ],
       ),

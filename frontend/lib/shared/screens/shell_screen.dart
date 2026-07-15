@@ -37,13 +37,14 @@ class ShellScreen extends ConsumerWidget {
           _NavItem(label: 'Sessions', icon: Symbols.receipt_long, route: AppRoutes.sessions),
         ],
       ),
-      const _MenuGroup(
+      _MenuGroup(
         label: 'Paramètres',
         items: [
-          _NavItem(label: 'Profil', icon: Symbols.person, route: AppRoutes.settings),
-          _NavItem(label: 'Boutiques', icon: Symbols.store, route: AppRoutes.settings),
-          _NavItem(label: 'Abonnement', icon: Symbols.card_membership, route: AppRoutes.settings),
-          _NavItem(label: 'Paramètres', icon: Symbols.settings, route: AppRoutes.settings),
+          const _NavItem(label: 'Profil', icon: Symbols.person, route: AppRoutes.settings),
+          const _NavItem(label: 'Boutiques', icon: Symbols.store, route: AppRoutes.settings),
+          if (isOwner)
+            const _NavItem(label: 'Abonnement', icon: Symbols.card_membership, route: AppRoutes.abonnement),
+          const _NavItem(label: 'Paramètres', icon: Symbols.settings, route: AppRoutes.settings),
         ],
       ),
       if (isOwner)
