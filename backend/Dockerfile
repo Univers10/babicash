@@ -18,11 +18,14 @@ WORKDIR /app
 
 # Runtime deps only
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 curl && \
+    libpq5 libpq-dev postgresql-client curl cron && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy installed packages from builder
 COPY --from=builder /install /usr/local
+
+# Create non-root user
+RUN groupadd -r babicash && useradd -r -g babicash -d /app -s /sbin/nologin babicash
 
 # Copy application code
 COPY alembic.ini .
@@ -34,7 +37,14 @@ COPY scripts/ scripts/
 
 # Entrypoint script
 COPY entrypoint.sh .
-RUN chmod +x entrypoint.sh
+RUN chmod +x entrypoint.sh /app/scripts/*.sh
+
+# Fix ownership for non-root user
+RUN chown -R babicash:babicash /app && \
+    mkdir -p /backups /app/logs && \
+    chown -R babicash:babicash /backups /app/logs
+
+USER babicash
 
 EXPOSE 8000
 

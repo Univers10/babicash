@@ -12,13 +12,18 @@
         <div class="card-body">
             <h2 class="card-title text-2xl font-bold text-primary justify-center mb-4">BabiCash Admin</h2>
 
-            {% if error %}
+            {% if error == '1' %}
             <div class="alert alert-error mb-4">
                 <span>Email ou mot de passe incorrect.</span>
+            </div>
+            {% elif error == '2' %}
+            <div class="alert alert-error mb-4">
+                <span>Trop de tentatives. Réessayez dans 15 minutes.</span>
             </div>
             {% endif %}
 
             <form method="POST" action="/admin/login">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <div class="form-control mb-4">
                     <label class="label">
                         <span class="label-text">Email</span>

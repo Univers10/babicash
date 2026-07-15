@@ -40,7 +40,7 @@ class SessionsScreen extends ConsumerWidget {
       ),
       body: sessionAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => const Center(child: Text('Erreur de chargement')),
         data: (session) => session == null
             ? const _OuvertureSession()
             : _SessionActive(session: session),

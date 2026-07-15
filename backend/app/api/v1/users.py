@@ -67,6 +67,7 @@ async def update_my_profile(
         user.telephone = payload.telephone
     if payload.mot_de_passe is not None:
         user.mot_de_passe_hash = hash_password(payload.mot_de_passe)
+        user.token_version = user.token_version + 1
     try:
         await db.commit()
     except IntegrityError:
@@ -165,6 +166,42 @@ async def create_manager(
 
     await get_authorized_boutique(db, current_user, effective_id)
 
+    # Vérifier la limite de gérants
+    from app.models import Abonnement, Boutique
+    from app.services.abonnement_service import PLAN_CATALOG
+    from sqlalchemy import func
+
+    owner_id = None
+    boutique = await db.get(Boutique, effective_id)
+    if boutique:
+        owner_id = boutique.proprietaire_id
+
+    if owner_id:
+        abo = (
+            await db.execute(
+                select(Abonnement).where(Abonnement.proprietaire_id == owner_id)
+            )
+        ).scalar_one_or_none()
+
+        if abo:
+            cfg = PLAN_CATALOG.get(abo.plan, {})
+            nb_gerants_max = cfg.get("nb_gerants_max", 1)
+
+            nb_gerants_actuels = (
+                await db.execute(
+                    select(func.count(User.id)).where(
+                        User.boutique_id == effective_id,
+                        User.role == "MANAGER",
+                    )
+                )
+            ).scalar_one()
+
+            if nb_gerants_actuels >= nb_gerants_max:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Limite de {nb_gerants_max} gérant(s) atteinte pour le plan {abo.plan}",
+                )
+
     user = User(
         nom=payload.nom,
         telephone=payload.telephone,
@@ -206,6 +243,7 @@ async def update_manager(
         user.code_pin_hash = hash_pin(payload.code_pin)
     if payload.mot_de_passe is not None:
         user.mot_de_passe_hash = hash_password(payload.mot_de_passe)
+        user.token_version = user.token_version + 1
     if payload.actif is not None:
         user.actif = payload.actif
     if payload.boutique_id is not None:

@@ -1937,7 +1937,7 @@ class _ClientPickerDialogState extends ConsumerState<_ClientPickerDialog> {
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
                   error: (e, _) => Center(
-                      child: Text('Erreur: $e',
+                      child: Text('Erreur de chargement',
                           style: AppTextStyles.bodySmall)),
                   data: (clients) {
                     final filtered = _query.isEmpty

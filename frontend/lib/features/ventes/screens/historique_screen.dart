@@ -344,7 +344,7 @@ class _HistoriqueScreenState extends ConsumerState<HistoriqueScreen> {
                     const Icon(Symbols.error_outline,
                         size: 48, color: AppColors.textDisabled),
                     const SizedBox(height: 8),
-                    Text('Erreur: $e',
+                    Text('Erreur de chargement',
                         style: AppTextStyles.bodySmall
                             .copyWith(color: AppColors.textSecondary)),
                     const SizedBox(height: 12),
@@ -528,7 +528,7 @@ class _VenteTileState extends ConsumerState<_VenteTile> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Erreur: $e'),
+          content: Text('Erreur lors du retour'),
           backgroundColor: Colors.red,
         ));
       }

@@ -75,7 +75,7 @@ class _ProduitFormDialogState extends ConsumerState<ProduitFormDialog> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur : $e')),
+          SnackBar(content: Text('Erreur lors de la sauvegarde')),
         );
       }
     } finally {
