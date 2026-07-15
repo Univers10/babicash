@@ -26,10 +26,12 @@ app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 # ── Admin backoffice ────────────────────────────────────────────────
 from app.admin.routes import router as admin_router
 from app.admin.auth import router as admin_auth_router
+from app.admin.backup_routes import router as backup_router
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(admin_auth_router, prefix="/admin")
 app.include_router(admin_router, prefix="/admin")
+app.include_router(backup_router, prefix="/admin")
 
 
 @app.get("/health", tags=["health"])

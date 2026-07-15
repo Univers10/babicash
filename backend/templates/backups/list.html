@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Backups - BabiCash Admin{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-bold">Backups de la base</h2>
+    <form method="POST" action="/admin/backups/create">
+        <button type="submit" class="btn btn-primary btn-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+            Nouveau backup
+        </button>
+    </form>
+</div>
+
+{% if backups %}
+<div class="overflow-x-auto">
+    <table class="table table-zebra w-full">
+        <thead>
+            <tr>
+                <th>Fichier</th>
+                <th>Date</th>
+                <th>Taille</th>
+                <th class="text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in backups %}
+            <tr>
+                <td class="font-mono text-sm">{{ b.nom }}</td>
+                <td>{{ b.date }}</td>
+                <td>{{ b.taille }}</td>
+                <td class="text-right">
+                    <form method="POST" action="/admin/backups/restore/{{ b.nom }}" class="inline"
+                          onclick="return confirm('Restaurer ce backup ? La base actuelle sera écrasée.')">
+                        <button type="submit" class="btn btn-warning btn-xs">Restaurer</button>
+                    </form>
+                    <form method="POST" action="/admin/backups/delete/{{ b.nom }}" class="inline"
+                          onclick="return confirm('Supprimer ce backup ?')">
+                        <button type="submit" class="btn btn-error btn-xs">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <span>Aucun backup disponible. Cliquez sur "Nouveau backup" pour en créer un.</span>
+</div>
+{% endif %}
+{% endblock %}
