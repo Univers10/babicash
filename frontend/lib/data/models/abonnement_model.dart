@@ -11,10 +11,11 @@ class AbonnementOut with _$AbonnementOut {
     @JsonKey(name: 'proprietaire_id') required String proprietaireId,
     required String plan,
     @JsonKey(name: 'quota_ventes_par_boutique') required int quotaVentesParBoutique,
-    // Le backend (Pydantic v2) sérialise les Decimal en chaînes ("5000.00")
-    @JsonKey(name: 'prix_base', fromJson: parseDouble) @Default(5000) double prixBase,
+    @JsonKey(name: 'prix_base', fromJson: parseDouble) @Default(0) double prixBase,
     @JsonKey(name: 'nb_boutiques') @Default(1) int nbBoutiques,
-    @JsonKey(name: 'prix_total_mensuel', fromJson: parseDouble) @Default(5000) double prixTotalMensuel,
+    @JsonKey(name: 'nb_boutiques_max') @Default(1) int nbBoutiquesMax,
+    @JsonKey(name: 'nb_gerants_max') @Default(1) int nbGerantsMax,
+    @JsonKey(name: 'prix_total_mensuel', fromJson: parseDouble) @Default(0) double prixTotalMensuel,
     @JsonKey(name: 'date_fin') DateTime? dateFin,
     @Default(true) bool actif,
   }) = _AbonnementOut;

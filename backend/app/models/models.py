@@ -235,27 +235,30 @@ class Abonnement(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    # 1 abonnement par propriétaire (OWNER), couvre toutes ses boutiques
     proprietaire_id: Mapped[str] = mapped_column(
         String(255), nullable=False, unique=True
     )
     plan: Mapped[str] = mapped_column(
         String(20), nullable=False, default="FREE"
-    )  # FREE | PRO
-    # Prix de base mensuel en FCFA (boutique 1)
+    )  # FREE | KIOSQUE | BOUTIQUE | COMMERCE | ENTREPRISE | EMPIRE
     prix_base: Mapped[Decimal] = mapped_column(
-        Numeric(12, 2), nullable=False, default=Decimal("5000.00")
+        Numeric(12, 2), nullable=False, default=Decimal("0.00")
     )
-    # Quota ventes/mois par boutique (FREE=20, PRO=illimité)
     quota_ventes_par_boutique: Mapped[int] = mapped_column(
         Integer, nullable=False, default=20
+    )
+    nb_boutiques_max: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=1
+    )
+    nb_gerants_max: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=1
     )
     date_debut: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     date_fin: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
-    )  # None = pas d'expiration (PRO actif)
+    )
     actif: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
 

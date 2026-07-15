@@ -21,13 +21,15 @@ class AbonnementOut(BaseModel):
     quota_ventes_par_boutique: int
     prix_base: Decimal
     nb_boutiques: int
-    prix_total_mensuel: Decimal  # prix_base * (1 + 0.75 * (nb_boutiques - 1))
+    nb_boutiques_max: int
+    nb_gerants_max: int
+    prix_total_mensuel: Decimal
     date_fin: datetime | None
     actif: bool
 
 
 class UpgradeRequest(BaseModel):
-    plan: str = Field(pattern="^(FREE|PRO)$")
+    plan: str = Field(pattern="^(FREE|KIOSQUE|BOUTIQUE|COMMERCE|ENTREPRISE|EMPIRE)$")
     date_fin: datetime | None = None
 
 
@@ -47,6 +49,8 @@ async def get_mon_abonnement(
         quota_ventes_par_boutique=abo.quota_ventes_par_boutique,
         prix_base=abo.prix_base,
         nb_boutiques=nb_boutiques,
+        nb_boutiques_max=abo.nb_boutiques_max,
+        nb_gerants_max=abo.nb_gerants_max,
         prix_total_mensuel=prix_total,
         date_fin=abo.date_fin,
         actif=abo.actif,
@@ -95,6 +99,8 @@ async def upgrade_abonnement(
         quota_ventes_par_boutique=abo.quota_ventes_par_boutique,
         prix_base=abo.prix_base,
         nb_boutiques=nb_boutiques,
+        nb_boutiques_max=abo.nb_boutiques_max,
+        nb_gerants_max=abo.nb_gerants_max,
         prix_total_mensuel=prix_total,
         date_fin=abo.date_fin,
         actif=abo.actif,

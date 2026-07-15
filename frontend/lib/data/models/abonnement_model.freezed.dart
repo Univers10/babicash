@@ -24,12 +24,15 @@ mixin _$AbonnementOut {
   String get proprietaireId => throw _privateConstructorUsedError;
   String get plan => throw _privateConstructorUsedError;
   @JsonKey(name: 'quota_ventes_par_boutique')
-  int get quotaVentesParBoutique =>
-      throw _privateConstructorUsedError; // Le backend (Pydantic v2) sérialise les Decimal en chaînes ("5000.00")
+  int get quotaVentesParBoutique => throw _privateConstructorUsedError;
   @JsonKey(name: 'prix_base', fromJson: parseDouble)
   double get prixBase => throw _privateConstructorUsedError;
   @JsonKey(name: 'nb_boutiques')
   int get nbBoutiques => throw _privateConstructorUsedError;
+  @JsonKey(name: 'nb_boutiques_max')
+  int get nbBoutiquesMax => throw _privateConstructorUsedError;
+  @JsonKey(name: 'nb_gerants_max')
+  int get nbGerantsMax => throw _privateConstructorUsedError;
   @JsonKey(name: 'prix_total_mensuel', fromJson: parseDouble)
   double get prixTotalMensuel => throw _privateConstructorUsedError;
   @JsonKey(name: 'date_fin')
@@ -58,6 +61,8 @@ abstract class $AbonnementOutCopyWith<$Res> {
       @JsonKey(name: 'quota_ventes_par_boutique') int quotaVentesParBoutique,
       @JsonKey(name: 'prix_base', fromJson: parseDouble) double prixBase,
       @JsonKey(name: 'nb_boutiques') int nbBoutiques,
+      @JsonKey(name: 'nb_boutiques_max') int nbBoutiquesMax,
+      @JsonKey(name: 'nb_gerants_max') int nbGerantsMax,
       @JsonKey(name: 'prix_total_mensuel', fromJson: parseDouble)
       double prixTotalMensuel,
       @JsonKey(name: 'date_fin') DateTime? dateFin,
@@ -84,6 +89,8 @@ class _$AbonnementOutCopyWithImpl<$Res, $Val extends AbonnementOut>
     Object? quotaVentesParBoutique = null,
     Object? prixBase = null,
     Object? nbBoutiques = null,
+    Object? nbBoutiquesMax = null,
+    Object? nbGerantsMax = null,
     Object? prixTotalMensuel = null,
     Object? dateFin = freezed,
     Object? actif = null,
@@ -108,6 +115,14 @@ class _$AbonnementOutCopyWithImpl<$Res, $Val extends AbonnementOut>
       nbBoutiques: null == nbBoutiques
           ? _value.nbBoutiques
           : nbBoutiques // ignore: cast_nullable_to_non_nullable
+              as int,
+      nbBoutiquesMax: null == nbBoutiquesMax
+          ? _value.nbBoutiquesMax
+          : nbBoutiquesMax // ignore: cast_nullable_to_non_nullable
+              as int,
+      nbGerantsMax: null == nbGerantsMax
+          ? _value.nbGerantsMax
+          : nbGerantsMax // ignore: cast_nullable_to_non_nullable
               as int,
       prixTotalMensuel: null == prixTotalMensuel
           ? _value.prixTotalMensuel
@@ -139,6 +154,8 @@ abstract class _$$AbonnementOutImplCopyWith<$Res>
       @JsonKey(name: 'quota_ventes_par_boutique') int quotaVentesParBoutique,
       @JsonKey(name: 'prix_base', fromJson: parseDouble) double prixBase,
       @JsonKey(name: 'nb_boutiques') int nbBoutiques,
+      @JsonKey(name: 'nb_boutiques_max') int nbBoutiquesMax,
+      @JsonKey(name: 'nb_gerants_max') int nbGerantsMax,
       @JsonKey(name: 'prix_total_mensuel', fromJson: parseDouble)
       double prixTotalMensuel,
       @JsonKey(name: 'date_fin') DateTime? dateFin,
@@ -163,6 +180,8 @@ class __$$AbonnementOutImplCopyWithImpl<$Res>
     Object? quotaVentesParBoutique = null,
     Object? prixBase = null,
     Object? nbBoutiques = null,
+    Object? nbBoutiquesMax = null,
+    Object? nbGerantsMax = null,
     Object? prixTotalMensuel = null,
     Object? dateFin = freezed,
     Object? actif = null,
@@ -188,6 +207,14 @@ class __$$AbonnementOutImplCopyWithImpl<$Res>
           ? _value.nbBoutiques
           : nbBoutiques // ignore: cast_nullable_to_non_nullable
               as int,
+      nbBoutiquesMax: null == nbBoutiquesMax
+          ? _value.nbBoutiquesMax
+          : nbBoutiquesMax // ignore: cast_nullable_to_non_nullable
+              as int,
+      nbGerantsMax: null == nbGerantsMax
+          ? _value.nbGerantsMax
+          : nbGerantsMax // ignore: cast_nullable_to_non_nullable
+              as int,
       prixTotalMensuel: null == prixTotalMensuel
           ? _value.prixTotalMensuel
           : prixTotalMensuel // ignore: cast_nullable_to_non_nullable
@@ -212,10 +239,12 @@ class _$AbonnementOutImpl implements _AbonnementOut {
       required this.plan,
       @JsonKey(name: 'quota_ventes_par_boutique')
       required this.quotaVentesParBoutique,
-      @JsonKey(name: 'prix_base', fromJson: parseDouble) this.prixBase = 5000,
+      @JsonKey(name: 'prix_base', fromJson: parseDouble) this.prixBase = 0,
       @JsonKey(name: 'nb_boutiques') this.nbBoutiques = 1,
+      @JsonKey(name: 'nb_boutiques_max') this.nbBoutiquesMax = 1,
+      @JsonKey(name: 'nb_gerants_max') this.nbGerantsMax = 1,
       @JsonKey(name: 'prix_total_mensuel', fromJson: parseDouble)
-      this.prixTotalMensuel = 5000,
+      this.prixTotalMensuel = 0,
       @JsonKey(name: 'date_fin') this.dateFin,
       this.actif = true});
 
@@ -230,13 +259,18 @@ class _$AbonnementOutImpl implements _AbonnementOut {
   @override
   @JsonKey(name: 'quota_ventes_par_boutique')
   final int quotaVentesParBoutique;
-// Le backend (Pydantic v2) sérialise les Decimal en chaînes ("5000.00")
   @override
   @JsonKey(name: 'prix_base', fromJson: parseDouble)
   final double prixBase;
   @override
   @JsonKey(name: 'nb_boutiques')
   final int nbBoutiques;
+  @override
+  @JsonKey(name: 'nb_boutiques_max')
+  final int nbBoutiquesMax;
+  @override
+  @JsonKey(name: 'nb_gerants_max')
+  final int nbGerantsMax;
   @override
   @JsonKey(name: 'prix_total_mensuel', fromJson: parseDouble)
   final double prixTotalMensuel;
@@ -249,7 +283,7 @@ class _$AbonnementOutImpl implements _AbonnementOut {
 
   @override
   String toString() {
-    return 'AbonnementOut(proprietaireId: $proprietaireId, plan: $plan, quotaVentesParBoutique: $quotaVentesParBoutique, prixBase: $prixBase, nbBoutiques: $nbBoutiques, prixTotalMensuel: $prixTotalMensuel, dateFin: $dateFin, actif: $actif)';
+    return 'AbonnementOut(proprietaireId: $proprietaireId, plan: $plan, quotaVentesParBoutique: $quotaVentesParBoutique, prixBase: $prixBase, nbBoutiques: $nbBoutiques, nbBoutiquesMax: $nbBoutiquesMax, nbGerantsMax: $nbGerantsMax, prixTotalMensuel: $prixTotalMensuel, dateFin: $dateFin, actif: $actif)';
   }
 
   @override
@@ -266,6 +300,10 @@ class _$AbonnementOutImpl implements _AbonnementOut {
                 other.prixBase == prixBase) &&
             (identical(other.nbBoutiques, nbBoutiques) ||
                 other.nbBoutiques == nbBoutiques) &&
+            (identical(other.nbBoutiquesMax, nbBoutiquesMax) ||
+                other.nbBoutiquesMax == nbBoutiquesMax) &&
+            (identical(other.nbGerantsMax, nbGerantsMax) ||
+                other.nbGerantsMax == nbGerantsMax) &&
             (identical(other.prixTotalMensuel, prixTotalMensuel) ||
                 other.prixTotalMensuel == prixTotalMensuel) &&
             (identical(other.dateFin, dateFin) || other.dateFin == dateFin) &&
@@ -281,6 +319,8 @@ class _$AbonnementOutImpl implements _AbonnementOut {
       quotaVentesParBoutique,
       prixBase,
       nbBoutiques,
+      nbBoutiquesMax,
+      nbGerantsMax,
       prixTotalMensuel,
       dateFin,
       actif);
@@ -309,6 +349,8 @@ abstract class _AbonnementOut implements AbonnementOut {
       required final int quotaVentesParBoutique,
       @JsonKey(name: 'prix_base', fromJson: parseDouble) final double prixBase,
       @JsonKey(name: 'nb_boutiques') final int nbBoutiques,
+      @JsonKey(name: 'nb_boutiques_max') final int nbBoutiquesMax,
+      @JsonKey(name: 'nb_gerants_max') final int nbGerantsMax,
       @JsonKey(name: 'prix_total_mensuel', fromJson: parseDouble)
       final double prixTotalMensuel,
       @JsonKey(name: 'date_fin') final DateTime? dateFin,
@@ -324,13 +366,19 @@ abstract class _AbonnementOut implements AbonnementOut {
   String get plan;
   @override
   @JsonKey(name: 'quota_ventes_par_boutique')
-  int get quotaVentesParBoutique; // Le backend (Pydantic v2) sérialise les Decimal en chaînes ("5000.00")
+  int get quotaVentesParBoutique;
   @override
   @JsonKey(name: 'prix_base', fromJson: parseDouble)
   double get prixBase;
   @override
   @JsonKey(name: 'nb_boutiques')
   int get nbBoutiques;
+  @override
+  @JsonKey(name: 'nb_boutiques_max')
+  int get nbBoutiquesMax;
+  @override
+  @JsonKey(name: 'nb_gerants_max')
+  int get nbGerantsMax;
   @override
   @JsonKey(name: 'prix_total_mensuel', fromJson: parseDouble)
   double get prixTotalMensuel;

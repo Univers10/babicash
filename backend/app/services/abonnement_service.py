@@ -9,10 +9,51 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Abonnement, Boutique, Vente
 
-_VALID_PLANS = {"FREE", "PRO"}
-_QUOTA_FREE = 20
-_PRIX_BASE = Decimal("5000.00")   # FCFA/mois pour la 1ère boutique
-_REMISE_MULTI = Decimal("0.75")   # chaque boutique supplémentaire = 75% du prix de base
+_UNLIMITED = 2_147_483_647  # sentinel pour "illimité"
+
+# Catalogue des plans — doit correspondre au frontend plan_catalog.dart
+PLAN_CATALOG: dict[str, dict] = {
+    "FREE": {
+        "prix_base": Decimal("0.00"),
+        "quota_ventes": 20,
+        "nb_boutiques_max": 1,
+        "nb_gerants_max": 1,
+    },
+    "KIOSQUE": {
+        "prix_base": Decimal("2000.00"),
+        "quota_ventes": 200,
+        "nb_boutiques_max": 1,
+        "nb_gerants_max": 1,
+    },
+    "BOUTIQUE": {
+        "prix_base": Decimal("5000.00"),
+        "quota_ventes": _UNLIMITED,
+        "nb_boutiques_max": 1,
+        "nb_gerants_max": 3,
+    },
+    "COMMERCE": {
+        "prix_base": Decimal("10000.00"),
+        "quota_ventes": _UNLIMITED,
+        "nb_boutiques_max": 3,
+        "nb_gerants_max": 6,
+    },
+    "ENTREPRISE": {
+        "prix_base": Decimal("15000.00"),
+        "quota_ventes": _UNLIMITED,
+        "nb_boutiques_max": 6,
+        "nb_gerants_max": 12,
+    },
+    "EMPIRE": {
+        "prix_base": Decimal("20000.00"),
+        "quota_ventes": _UNLIMITED,
+        "nb_boutiques_max": _UNLIMITED,
+        "nb_gerants_max": _UNLIMITED,
+    },
+}
+
+_VALID_PLANS = set(PLAN_CATALOG.keys())
+_QUOTA_FREE = PLAN_CATALOG["FREE"]["quota_ventes"]
+_REMISE_MULTI = Decimal("0.75")  # chaque boutique supplémentaire = 75% du prix de base
 
 
 def _maintenant() -> datetime:
@@ -21,20 +62,19 @@ def _maintenant() -> datetime:
 
 
 def _est_expire(abo: Abonnement) -> bool:
-    """Vérifie si l'abonnement PRO a une date d'expiration dépassée."""
-    if abo.plan != "PRO" or not abo.actif or abo.date_fin is None:
+    """Vérifie si l'abonnement payant a une date d'expiration dépassée."""
+    if abo.plan == "FREE" or not abo.actif or abo.date_fin is None:
         return False
     now = _maintenant()
     df = abo.date_fin
-    # Normaliser : si l'un est aware et l'autre naive, on retire le tzinfo
     if df.tzinfo is not None and now.tzinfo is None:
         df = df.replace(tzinfo=None)
     return df <= now
 
 
 def est_pro_actif(abo: Abonnement) -> bool:
-    """PRO actif et non expiré. Passe par _est_expire pour gérer naive/aware."""
-    return abo.plan == "PRO" and abo.actif and not _est_expire(abo)
+    """Plan payant actif et non expiré (tous plans sauf FREE)."""
+    return abo.plan != "FREE" and abo.plan in _VALID_PLANS and abo.actif and not _est_expire(abo)
 
 
 async def _revertir_si_expire(db: AsyncSession, abo: Abonnement) -> Abonnement:
@@ -71,11 +111,14 @@ async def get_or_create_abonnement(
     ).scalar_one_or_none()
 
     if abo is None:
+        cfg = PLAN_CATALOG["FREE"]
         abo = Abonnement(
             proprietaire_id=proprietaire_id,
             plan="FREE",
-            prix_base=_PRIX_BASE,
-            quota_ventes_par_boutique=_QUOTA_FREE,
+            prix_base=cfg["prix_base"],
+            quota_ventes_par_boutique=cfg["quota_ventes"],
+            nb_boutiques_max=cfg["nb_boutiques_max"],
+            nb_gerants_max=cfg["nb_gerants_max"],
         )
         db.add(abo)
         await db.flush()
@@ -124,7 +167,7 @@ async def peut_creer_boutique(
     """Vérifie si le propriétaire peut créer une boutique supplémentaire.
 
     La 1ère boutique est incluse dans tous les plans. À partir de la 2e,
-    un abonnement PRO actif (et non expiré) est requis.
+    un plan payant actif (et non expiré) est requis.
     Retourne (autorise, abonnement, nb_boutiques_actuelles).
     """
     abo = await get_or_create_abonnement(db, proprietaire_id)
@@ -133,9 +176,7 @@ async def peut_creer_boutique(
     if nb_boutiques == 0:
         return True, abo, nb_boutiques
 
-    pro_actif = abo.plan == "PRO" and abo.actif and (
-        abo.date_fin is None or abo.date_fin > datetime.now(timezone.utc)
-    )
+    pro_actif = est_pro_actif(abo)
     return pro_actif, abo, nb_boutiques
 
 
@@ -171,7 +212,7 @@ async def upgrader_plan(
     plan: str,
     date_fin: datetime | None = None,
 ) -> Abonnement:
-    """Passe l'OWNER en plan PRO (ou redescend en FREE)."""
+    """Change le plan de l'OWNER (upgrade ou downgrade)."""
     if plan not in _VALID_PLANS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -179,49 +220,71 @@ async def upgrader_plan(
         )
 
     abo = await get_or_create_abonnement(db, proprietaire_id)
+    cfg = PLAN_CATALOG[plan]
 
     # Protection downgrade : vérifier si le downgrade est possible
-    if plan == "FREE" and abo.plan == "PRO":
+    if plan == "FREE" and abo.plan != "FREE":
         nb_boutiques = await compter_boutiques_owner(db, proprietaire_id)
-        if nb_boutiques > 1:
+        if nb_boutiques > cfg["nb_boutiques_max"]:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail={
                     "code": "DOWNGRADE_BLOQUE",
                     "message": (
                         f"Vous avez {nb_boutiques} boutiques. "
-                        "Supprimez les boutiques supplémentaires avant de redescendre en plan FREE (1 boutique max)."
+                        f"Le plan {plan} limite à {cfg['nb_boutiques_max']} boutique(s). "
+                        "Supprimez les boutiques supplémentaires avant de redescendre."
                     ),
                     "nb_boutiques": nb_boutiques,
                 },
             )
-        ventes_mois = 0
-        # Vérifier pour chaque boutique si le quota serait dépassé
-        boutiques = (
-            await db.execute(
-                select(Boutique.id).where(Boutique.proprietaire_id == proprietaire_id)
-            )
-        ).scalars().all()
-        for bid in boutiques:
-            count = await compter_ventes_mois(db, bid)
-            if count > _QUOTA_FREE:
+        if cfg["quota_ventes"] != _UNLIMITED:
+            boutiques = (
+                await db.execute(
+                    select(Boutique.id).where(Boutique.proprietaire_id == proprietaire_id)
+                )
+            ).scalars().all()
+            for bid in boutiques:
+                count = await compter_ventes_mois(db, bid)
+                if count > cfg["quota_ventes"]:
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail={
+                            "code": "DOWNGRADE_VENTES",
+                            "message": (
+                                f"Une de vos boutiques a déjà {count} ventes ce mois. "
+                                f"Le plan {plan} limite à {cfg['quota_ventes']} ventes/mois. "
+                                "Attendez le prochain mois ou choisissez un plan supérieur."
+                            ),
+                            "ventes_mois": count,
+                            "quota_plan": cfg["quota_ventes"],
+                        },
+                    )
+
+    # Protection downgrade inter-plans payants
+    if plan != "FREE" and abo.plan != "FREE" and plan != abo.plan:
+        old_idx = list(_VALID_PLANS).index(abo.plan)
+        new_idx = list(_VALID_PLANS).index(plan)
+        if new_idx < old_idx:
+            nb_boutiques = await compter_boutiques_owner(db, proprietaire_id)
+            if nb_boutiques > cfg["nb_boutiques_max"]:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail={
-                        "code": "DOWNGRADE_VENTES",
+                        "code": "DOWNGRADE_BLOQUE",
                         "message": (
-                            f"Une de vos boutiques a déjà {count} ventes ce mois. "
-                            f"Le plan FREE limite à {_QUOTA_FREE} ventes/mois. "
-                            "Attendez le prochain mois ou restez en plan PRO."
+                            f"Vous avez {nb_boutiques} boutiques. "
+                            f"Le plan {plan} limite à {cfg['nb_boutiques_max']} boutique(s)."
                         ),
-                        "ventes_mois": count,
-                        "quota_free": _QUOTA_FREE,
+                        "nb_boutiques": nb_boutiques,
                     },
                 )
-            ventes_mois = max(ventes_mois, count)
 
     abo.plan = plan
-    abo.quota_ventes_par_boutique = _QUOTA_FREE if plan == "FREE" else 2_147_483_647  # sentinel illimité
+    abo.prix_base = cfg["prix_base"]
+    abo.quota_ventes_par_boutique = cfg["quota_ventes"]
+    abo.nb_boutiques_max = cfg["nb_boutiques_max"]
+    abo.nb_gerants_max = cfg["nb_gerants_max"]
     abo.date_fin = date_fin
     abo.actif = True
     await db.commit()
