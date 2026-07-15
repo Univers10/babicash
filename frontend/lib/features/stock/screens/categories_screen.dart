@@ -413,79 +413,89 @@ class _CategoryCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         splashColor: Colors.white24,
-        child: Stack(
-          children: [
-            // Icône décorative en fond
-            Positioned(
-              right: -8,
-              bottom: -8,
-              child: Icon(
-                icon,
-                size: 64,
-                color: Colors.white.withValues(alpha: 0.15),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            clipBehavior: Clip.hardEdge,
+            children: [
+              // Icône décorative en fond
+              Positioned(
+                right: -8,
+                bottom: -8,
+                child: Icon(
+                  icon,
+                  size: 64,
+                  color: Colors.white.withValues(alpha: 0.15),
+                ),
               ),
-            ),
-            // Contenu
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Ligne supérieure : icône + menu
-                  Row(
+              // Contenu
+              Positioned.fill(
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(10),
+                      // Ligne supérieure : icône + menu
+                      SizedBox(
+                        height: 28,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 28,
+                              height: 28,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(7),
+                              ),
+                              child: Icon(icon, size: 16, color: Colors.white),
+                            ),
+                            const Spacer(),
+                            PopupMenuButton<String>(
+                              icon: Icon(Symbols.more_vert, color: Colors.white.withValues(alpha: 0.8), size: 16),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onSelected: (v) {
+                                if (v == 'edit') onEdit();
+                                if (v == 'delete') onDelete();
+                              },
+                              itemBuilder: (_) => [
+                                const PopupMenuItem(value: 'edit', child: Text('Modifier')),
+                                const PopupMenuItem(value: 'delete', child: Text('Supprimer')),
+                              ],
+                            ),
+                          ],
                         ),
-                        child: Icon(icon, size: 20, color: Colors.white),
                       ),
                       const Spacer(),
-                      PopupMenuButton<String>(
-                        icon: Icon(Symbols.more_vert, color: Colors.white.withValues(alpha: 0.8), size: 20),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        onSelected: (v) {
-                          if (v == 'edit') onEdit();
-                          if (v == 'delete') onDelete();
-                        },
-                        itemBuilder: (_) => [
-                          const PopupMenuItem(value: 'edit', child: Text('Modifier')),
-                          const PopupMenuItem(value: 'delete', child: Text('Supprimer')),
-                        ],
+                      // Nom
+                      Text(
+                        categorie.nom,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          height: 1.15,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 1),
+                      // Nombre de produits
+                      Text(
+                        '$productCount produit${productCount > 1 ? 's' : ''}',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.75),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
-                  const Spacer(),
-                  // Nom
-                  Text(
-                    categorie.nom,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      height: 1.2,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  // Nombre de produits
-                  Text(
-                    '$productCount produit${productCount > 1 ? 's' : ''}',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.75),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
