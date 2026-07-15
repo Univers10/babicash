@@ -11,9 +11,9 @@
 | Sévérité | Corrigé | En attente |
 |----------|---------|------------|
 | CRITICAL | 5/5 | 0 |
-| HIGH | 9/11 | 2 |
+| HIGH | 10/11 | 1 |
 | MEDIUM | 3/3 | 0 |
-| **Total** | **17/19** | **2** |
+| **Total** | **18/19** | **1** |
 
 ---
 
@@ -87,6 +87,17 @@
 - La création d'un manager vérifie maintenant `nb_gerants_max` du plan actif
 - Renvoie 403 si la limite est atteinte
 
+### H11 — Certificate pinning (`dio_certificate_pinner`)
+- **Avant :** Validation SSL uniquement au niveau OS
+- **Après :** Pinning SHA-256 via `dio_certificate_pinner` + Android `network_security_config.xml`
+- **Fichiers :**
+  - `lib/core/network/cert_pinning.dart` — Configuration des empreintes SHA-256
+  - `lib/core/network/api_client.dart` — Intercepteur Dio ajouté
+  - `android/app/src/main/res/xml/network_security_config.xml` — Pin Android
+  - `android/app/src/main/AndroidManifest.xml` — `networkSecurityConfig` activé
+- **Empreinte :** `8809EB8129A32832A3D4343C369C40C1967A12F4C35B846E502369ED9F8AD5C3` (Let's Encrypt, expire 08/10/2026)
+- **Note :** Mettre à jour les empreintes lors du renouvellement du certificat Let's Encrypt
+
 ---
 
 ## MEDIUM — Tous corrigés
@@ -104,7 +115,6 @@
 | # | Fix | Raison |
 |---|-----|--------|
 | H9 | Chiffrement SQLite local | Nécessite `sqlcipher_flutter` (migration drift complexe) |
-| H11 | Certificate pinning | Nécessite `flutter_ssl_pinning` ou `dio_certificate_pinner` |
 | H12 | Refresh token | Nécessite endpoint `/api/v1/refresh` + interceptor Flutter |
 
 ---
@@ -134,17 +144,22 @@ templates/login.html                                ~5 lignes (rate limit msg, C
 templates/owners/detail.html                        ~2 lignes (CSRF)
 ```
 
-### Frontend (8 fichiers)
+### Frontend (12 fichiers)
 ```
-lib/data/local/database.dart                        ~3 lignes (TODO encryption)
-lib/features/auth/providers/auth_provider.dart      +15 lignes (wipe DB on logout)
-lib/features/sessions/screens/sessions_screen.dart  1 ligne (generic error)
-lib/features/stock/screens/categories_screen.dart   1 ligne (generic error)
-lib/features/stock/screens/stock_screen.dart        1 ligne (generic error)
-lib/features/stock/widgets/produit_form_dialog.dart 1 ligne (generic error)
-lib/features/caisse/screens/caisse_screen.dart      1 ligne (generic error)
-lib/features/caisse/screens/ticket_screen.dart      1 ligne (generic error)
-lib/features/ventes/screens/historique_screen.dart  2 lignes (generic errors)
+lib/core/network/cert_pinning.dart                       NOUVEAU (config SHA-256 pins)
+lib/core/network/api_client.dart                         ~3 lignes (import + interceptor)
+pubspec.yaml                                              +1 ligne (dio_certificate_pinner)
+lib/data/local/database.dart                             ~3 lignes (TODO encryption)
+lib/features/auth/providers/auth_provider.dart           +15 lignes (wipe DB on logout)
+lib/features/sessions/screens/sessions_screen.dart       1 ligne (generic error)
+lib/features/stock/screens/categories_screen.dart        1 ligne (generic error)
+lib/features/stock/screens/stock_screen.dart             1 ligne (generic error)
+lib/features/stock/widgets/produit_form_dialog.dart      1 ligne (generic error)
+lib/features/caisse/screens/caisse_screen.dart           1 ligne (generic error)
+lib/features/caisse/screens/ticket_screen.dart           1 ligne (generic error)
+lib/features/ventes/screens/historique_screen.dart       2 lignes (generic errors)
+android/app/src/main/res/xml/network_security_config.xml NOUVEAU (pin Android)
+android/app/src/main/AndroidManifest.xml                 +2 lignes (networkSecurityConfig)
 ```
 
 ---
