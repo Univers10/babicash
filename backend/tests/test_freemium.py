@@ -1,5 +1,6 @@
 """Tests du modèle freemium : quota ventes, upgrade PRO, multi-boutique."""
 import pytest
+from datetime import datetime, timedelta, timezone
 
 from tests.conftest import login
 
@@ -204,3 +205,118 @@ async def test_upgrade_reserve_owner(client, seeded):
         headers=headers,
     )
     assert r.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_upgrade_plan_invalide_rejeté(client, seeded):
+    """Un plan inconnu (ex: 'PREMIUM') doit être rejeté par le service."""
+    token = await login(client, seeded["owner_email"], "boss1234")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    r = await client.post(
+        "/api/v1/abonnements/upgrade",
+        json={"plan": "PREMIUM"},
+        headers=headers,
+    )
+    assert r.status_code == 422, r.text  # Pydantic pattern validation
+
+
+@pytest.mark.asyncio
+async def test_downgrade_protege_trop_boutiques(client, seeded):
+    """Impossible de redescendre en FREE quand on a > 1 boutique."""
+    token = await login(client, seeded["owner_email"], "boss1234")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Passer PRO + créer 2e boutique
+    await client.post("/api/v1/abonnements/upgrade", json={"plan": "PRO"}, headers=headers)
+    r = await client.post("/api/v1/boutiques/", json={"nom": "Boutique 2"}, headers=headers)
+    assert r.status_code == 201, r.text
+
+    # Downgrade vers FREE → bloqué (409)
+    r = await client.post(
+        "/api/v1/abonnements/upgrade",
+        json={"plan": "FREE"},
+        headers=headers,
+    )
+    assert r.status_code == 409, r.text
+    assert r.json()["detail"]["code"] == "DOWNGRADE_BLOQUE"
+
+
+@pytest.mark.asyncio
+async def test_downgrade_protege_trop_ventes(client, seeded):
+    """Impossible de redescendre en FREE si une boutique a > 20 ventes ce mois."""
+    token = await login(client, seeded["owner_email"], "boss1234")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Passer PRO pour pouvoir pousser > 20 ventes
+    await client.post("/api/v1/abonnements/upgrade", json={"plan": "PRO"}, headers=headers)
+
+    # Pousser 21 ventes
+    for i in range(21):
+        resp = await client.post(
+            "/api/v1/sync/push",
+            json=_vente(seeded["boutique_id"], seeded["produit_id"], f"downgrade-test-{i}"),
+            headers=headers,
+        )
+        assert resp.status_code == 200, f"vente {i} refusée: {resp.text}"
+
+    # Downgrade vers FREE → bloqué (409) car 21 > 20
+    r = await client.post(
+        "/api/v1/abonnements/upgrade",
+        json={"plan": "FREE"},
+        headers=headers,
+    )
+    assert r.status_code == 409, r.text
+    assert r.json()["detail"]["code"] == "DOWNGRADE_VENTES"
+
+
+@pytest.mark.asyncio
+async def test_downgrade_autorise_sans_surplus(client, seeded):
+    """Downgrade FREE autorisé si 1 boutique et ventes ≤ 20."""
+    token = await login(client, seeded["owner_email"], "boss1234")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Passer PRO (1 seule boutique, 0 ventes)
+    await client.post("/api/v1/abonnements/upgrade", json={"plan": "PRO"}, headers=headers)
+
+    # Downgrade → autorisé
+    r = await client.post(
+        "/api/v1/abonnements/upgrade",
+        json={"plan": "FREE"},
+        headers=headers,
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["plan"] == "FREE"
+    assert r.json()["quota_ventes_par_boutique"] == 20
+
+
+@pytest.mark.asyncio
+async def test_abonnement_expire_revert_auto(client, seeded):
+    """Un abonnement PRO avec date_fin dépassée revient automatiquement à FREE."""
+    token = await login(client, seeded["owner_email"], "boss1234")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Passer PRO avec date_fin dans le passé
+    hier = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+    r = await client.post(
+        "/api/v1/abonnements/upgrade",
+        json={"plan": "PRO", "date_fin": hier},
+        headers=headers,
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["plan"] == "PRO"  # encore PRO immédiatement après upgrade
+
+    # Vérifier le plan → l'auto-revert doit se déclencher
+    r = await client.get("/api/v1/abonnements/mon-plan", headers=headers)
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["plan"] == "FREE", "Le plan PRO expiré doit revenir à FREE"
+    assert body["quota_ventes_par_boutique"] == 20
+
+    # Le quota doit aussi refléter FREE
+    r = await client.get(
+        f"/api/v1/abonnements/quota/{seeded['boutique_id']}", headers=headers
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["plan"] == "FREE"
+    assert r.json()["illimite"] is False

@@ -3,14 +3,49 @@ import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 
+from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Abonnement, Boutique, Vente
 
+_VALID_PLANS = {"FREE", "PRO"}
 _QUOTA_FREE = 20
 _PRIX_BASE = Decimal("5000.00")   # FCFA/mois pour la 1ère boutique
 _REMISE_MULTI = Decimal("0.75")   # chaque boutique supplémentaire = 75% du prix de base
+
+
+def _maintenant() -> datetime:
+    """Retourne maintenant en UTC. Si la colonne date_fin est naive, on compare naive."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def _est_expire(abo: Abonnement) -> bool:
+    """Vérifie si l'abonnement PRO a une date d'expiration dépassée."""
+    if abo.plan != "PRO" or not abo.actif or abo.date_fin is None:
+        return False
+    now = _maintenant()
+    df = abo.date_fin
+    # Normaliser : si l'un est aware et l'autre naive, on retire le tzinfo
+    if df.tzinfo is not None and now.tzinfo is None:
+        df = df.replace(tzinfo=None)
+    return df <= now
+
+
+def est_pro_actif(abo: Abonnement) -> bool:
+    """PRO actif et non expiré. Passe par _est_expire pour gérer naive/aware."""
+    return abo.plan == "PRO" and abo.actif and not _est_expire(abo)
+
+
+async def _revertir_si_expire(db: AsyncSession, abo: Abonnement) -> Abonnement:
+    """Révertit automatiquement un abonnement PRO expiré vers FREE.
+    Retourne l'abonnement potentiellement modifié (et flush si changement)."""
+    if _est_expire(abo):
+        abo.plan = "FREE"
+        abo.quota_ventes_par_boutique = _QUOTA_FREE
+        abo.actif = True
+        await db.flush()
+    return abo
 
 
 def calculer_prix_total(prix_base: Decimal, nb_boutiques: int) -> Decimal:
@@ -44,6 +79,8 @@ async def get_or_create_abonnement(
         )
         db.add(abo)
         await db.flush()
+
+    await _revertir_si_expire(db, abo)
 
     return abo
 
@@ -114,15 +151,15 @@ async def verifier_quota(
     """
     abo = await get_or_create_abonnement(db, proprietaire_id)
 
+    ventes_mois = await compter_ventes_mois(db, boutique_id)
+
     # Plan PRO actif et non expiré : toujours autorisé
-    if abo.plan == "PRO" and abo.actif:
-        if abo.date_fin is None or abo.date_fin > datetime.now(timezone.utc):
-            return True, abo, 0
+    if est_pro_actif(abo):
+        return True, abo, ventes_mois
 
     if not abo.actif:
-        return False, abo, 0
+        return False, abo, ventes_mois
 
-    ventes_mois = await compter_ventes_mois(db, boutique_id)
     autorise = (ventes_mois + nb_nouvelles_ventes) <= abo.quota_ventes_par_boutique
 
     return autorise, abo, ventes_mois
@@ -135,9 +172,56 @@ async def upgrader_plan(
     date_fin: datetime | None = None,
 ) -> Abonnement:
     """Passe l'OWNER en plan PRO (ou redescend en FREE)."""
+    if plan not in _VALID_PLANS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Plan invalide : '{plan}'. Valeurs acceptées : {sorted(_VALID_PLANS)}",
+        )
+
     abo = await get_or_create_abonnement(db, proprietaire_id)
+
+    # Protection downgrade : vérifier si le downgrade est possible
+    if plan == "FREE" and abo.plan == "PRO":
+        nb_boutiques = await compter_boutiques_owner(db, proprietaire_id)
+        if nb_boutiques > 1:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "code": "DOWNGRADE_BLOQUE",
+                    "message": (
+                        f"Vous avez {nb_boutiques} boutiques. "
+                        "Supprimez les boutiques supplémentaires avant de redescendre en plan FREE (1 boutique max)."
+                    ),
+                    "nb_boutiques": nb_boutiques,
+                },
+            )
+        ventes_mois = 0
+        # Vérifier pour chaque boutique si le quota serait dépassé
+        boutiques = (
+            await db.execute(
+                select(Boutique.id).where(Boutique.proprietaire_id == proprietaire_id)
+            )
+        ).scalars().all()
+        for bid in boutiques:
+            count = await compter_ventes_mois(db, bid)
+            if count > _QUOTA_FREE:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail={
+                        "code": "DOWNGRADE_VENTES",
+                        "message": (
+                            f"Une de vos boutiques a déjà {count} ventes ce mois. "
+                            f"Le plan FREE limite à {_QUOTA_FREE} ventes/mois. "
+                            "Attendez le prochain mois ou restez en plan PRO."
+                        ),
+                        "ventes_mois": count,
+                        "quota_free": _QUOTA_FREE,
+                    },
+                )
+            ventes_mois = max(ventes_mois, count)
+
     abo.plan = plan
-    abo.quota_ventes_par_boutique = 999_999 if plan == "PRO" else _QUOTA_FREE
+    abo.quota_ventes_par_boutique = _QUOTA_FREE if plan == "FREE" else 2_147_483_647  # sentinel illimité
     abo.date_fin = date_fin
     abo.actif = True
     await db.commit()

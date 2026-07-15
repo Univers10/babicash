@@ -5,13 +5,16 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:babicash/main.dart';
 
 void main() {
   testWidgets('App launches', (WidgetTester tester) async {
-    await tester.pumpWidget(const BabiCashApp());
+    // BabiCashApp lit des providers Riverpod : le ProviderScope est obligatoire
+    // (en prod il est posé dans main()).
+    await tester.pumpWidget(const ProviderScope(child: BabiCashApp()));
     expect(find.byType(BabiCashApp), findsOneWidget);
   });
 }

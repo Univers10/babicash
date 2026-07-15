@@ -13,7 +13,11 @@ final quotaProvider = FutureProvider.autoDispose<QuotaInfo?>((ref) async {
   try {
     final api = ref.watch(abonnementsApiProvider);
     return await api.quotaBoutique(boutiqueId);
-  } on AppException {
+  } on AppException catch (e) {
+    // QuotaException = 402 QUOTA_DEPASSE, ForbiddenException = abonnement requis
+    if (e is QuotaException || e is ForbiddenException) {
+      rethrow;
+    }
     return null;
   }
 });
