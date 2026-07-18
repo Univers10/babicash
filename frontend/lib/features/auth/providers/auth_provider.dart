@@ -1,4 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import '../../../core/config/oauth_config.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/storage/secure_storage.dart';
 import '../../../data/local/database.dart';
@@ -20,12 +23,14 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
     final role = await storage.getRole();
     final nom = await storage.getNom();
     final boutiqueId = await storage.getBoutiqueId();
+    final email = await storage.getEmail();
     if (token == null || role == null || nom == null) return null;
     return SessionUser(
       token: token,
       role: role,
       nom: nom,
       boutiqueId: boutiqueId,
+      email: email,
     );
   }
 
@@ -147,6 +152,112 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
     }
   }
 
+  /// Sauvegarde la session et bascule l'état après un login réussi.
+  Future<void> _onLoginSuccess(TokenResponse resp) async {
+    final storage = ref.read(secureStorageProvider);
+    await storage.saveSession(
+      token: resp.accessToken,
+      role: resp.role,
+      nom: resp.nom,
+      boutiqueId: resp.boutiqueId,
+      email: resp.email,
+    );
+    state = AsyncData(SessionUser(
+      token: resp.accessToken,
+      role: resp.role,
+      nom: resp.nom,
+      boutiqueId: resp.boutiqueId,
+      email: resp.email,
+    ));
+  }
+
+  Future<void> loginWithGoogle() async {
+    final previous = state.valueOrNull;
+    state = const AsyncLoading();
+    final api = ref.read(authApiProvider);
+    try {
+      final google = GoogleSignIn(
+        scopes: const ['email'],
+        serverClientId: OAuthConfig.googleServerClientId,
+      );
+      final account = await google.signIn();
+      if (account == null) {
+        // Annulé par l'utilisateur : pas une erreur
+        state = AsyncData(previous);
+        return;
+      }
+      final idToken = (await account.authentication).idToken;
+      if (idToken == null) {
+        state = AsyncError(
+          const UnknownException('Google n\'a pas fourni de token.'),
+          StackTrace.current,
+        );
+        return;
+      }
+      final resp = await api.loginGoogle(GoogleTokenRequest(idToken: idToken));
+      await _onLoginSuccess(resp);
+    } on DioException catch (e) {
+      state = AsyncError(mapDioError(e), StackTrace.current);
+    } catch (e) {
+      state = AsyncError(
+        const UnknownException('Connexion Google impossible.'),
+        StackTrace.current,
+      );
+    }
+  }
+
+  Future<void> loginWithApple() async {
+    final previous = state.valueOrNull;
+    state = const AsyncLoading();
+    final api = ref.read(authApiProvider);
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        webAuthenticationOptions: WebAuthenticationOptions(
+          clientId: OAuthConfig.appleServiceId,
+          redirectUri: OAuthConfig.appleRedirectUri,
+        ),
+      );
+      final identityToken = credential.identityToken;
+      if (identityToken == null) {
+        state = AsyncError(
+          const UnknownException('Apple n\'a pas fourni de token.'),
+          StackTrace.current,
+        );
+        return;
+      }
+      // Apple ne fournit le nom qu'à la toute première autorisation.
+      final nom = [credential.givenName, credential.familyName]
+          .whereType<String>()
+          .join(' ')
+          .trim();
+      final resp = await api.loginApple(AppleTokenRequest(
+        identityToken: identityToken,
+        nom: nom.isEmpty ? null : nom,
+      ));
+      await _onLoginSuccess(resp);
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (e.code == AuthorizationErrorCode.canceled) {
+        state = AsyncData(previous);
+        return;
+      }
+      state = AsyncError(
+        const UnknownException('Connexion Apple impossible.'),
+        StackTrace.current,
+      );
+    } on DioException catch (e) {
+      state = AsyncError(mapDioError(e), StackTrace.current);
+    } catch (e) {
+      state = AsyncError(
+        const UnknownException('Connexion Apple impossible.'),
+        StackTrace.current,
+      );
+    }
+  }
+
   Future<void> logout() async {
     // Effacer la base locale avant de déconnecter
     try {
@@ -160,6 +271,11 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
       await db.delete(db.localTiers).go();
     } catch (_) {
       // Ignorer les erreurs de nettoyage
+    }
+    try {
+      await GoogleSignIn().signOut();
+    } catch (_) {
+      // Pas de session Google active : rien à faire
     }
     await ref.read(secureStorageProvider).clearSession();
     state = const AsyncData(null);

@@ -12,8 +12,7 @@ _$AbonnementOutImpl _$$AbonnementOutImplFromJson(Map<String, dynamic> json) =>
       plan: json['plan'] as String,
       quotaVentesParBoutique:
           (json['quota_ventes_par_boutique'] as num).toInt(),
-      prixBase:
-          json['prix_base'] == null ? 0 : parseDouble(json['prix_base']),
+      prixBase: json['prix_base'] == null ? 0 : parseDouble(json['prix_base']),
       nbBoutiques: (json['nb_boutiques'] as num?)?.toInt() ?? 1,
       nbBoutiquesMax: (json['nb_boutiques_max'] as num?)?.toInt() ?? 1,
       nbGerantsMax: (json['nb_gerants_max'] as num?)?.toInt() ?? 1,

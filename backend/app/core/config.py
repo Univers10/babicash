@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     # Laisser vide ou mettre "*" pour tout autoriser (dev uniquement)
     ALLOWED_ORIGINS: str = "*"
 
+    # OAuth (Google / Apple sign-in) : vide = fonctionnalité désactivée pour ce provider
+    GOOGLE_CLIENT_ID: str = ""
+    APPLE_CLIENT_ID: str = ""
+
     @field_validator("SECRET_KEY")
     @classmethod
     def secret_key_must_be_changed(cls, v: str) -> str:

@@ -1,4 +1,6 @@
 """Routes d'authentification admin (login / logout / change password)."""
+import uuid
+
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -144,7 +146,7 @@ async def change_password_submit(
 
     user = (
         await db.execute(
-            select(User).where(User.id == int(current_user.id))
+            select(User).where(User.id == uuid.UUID(current_user.id))
         )
     ).scalar_one_or_none()
 

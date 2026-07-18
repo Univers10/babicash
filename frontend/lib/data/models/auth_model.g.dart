@@ -63,12 +63,39 @@ Map<String, dynamic> _$$LoginIdRequestImplToJson(
       'mot_de_passe': instance.motDePasse,
     };
 
+_$GoogleTokenRequestImpl _$$GoogleTokenRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$GoogleTokenRequestImpl(
+      idToken: json['id_token'] as String,
+    );
+
+Map<String, dynamic> _$$GoogleTokenRequestImplToJson(
+        _$GoogleTokenRequestImpl instance) =>
+    <String, dynamic>{
+      'id_token': instance.idToken,
+    };
+
+_$AppleTokenRequestImpl _$$AppleTokenRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$AppleTokenRequestImpl(
+      identityToken: json['identity_token'] as String,
+      nom: json['nom'] as String?,
+    );
+
+Map<String, dynamic> _$$AppleTokenRequestImplToJson(
+        _$AppleTokenRequestImpl instance) =>
+    <String, dynamic>{
+      'identity_token': instance.identityToken,
+      'nom': instance.nom,
+    };
+
 _$TokenResponseImpl _$$TokenResponseImplFromJson(Map<String, dynamic> json) =>
     _$TokenResponseImpl(
       accessToken: json['access_token'] as String,
       role: json['role'] as String,
       boutiqueId: json['boutique_id'] as String?,
       nom: json['nom'] as String,
+      email: json['email'] as String?,
     );
 
 Map<String, dynamic> _$$TokenResponseImplToJson(_$TokenResponseImpl instance) =>
@@ -77,4 +104,5 @@ Map<String, dynamic> _$$TokenResponseImplToJson(_$TokenResponseImpl instance) =>
       'role': instance.role,
       'boutique_id': instance.boutiqueId,
       'nom': instance.nom,
+      'email': instance.email,
     };

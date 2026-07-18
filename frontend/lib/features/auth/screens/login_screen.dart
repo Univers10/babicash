@@ -218,6 +218,60 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const VGap(AppSpacing.xl),
 
+                  // Séparateur connexion sociale
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
+                        ),
+                        child: Text(
+                          'ou',
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
+                  ),
+                  const VGap(AppSpacing.xl),
+
+                  // Connexion sociale
+                  _SocialButton(
+                    label: 'Continuer avec Google',
+                    leading: const Text(
+                      'G',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF4285F4),
+                      ),
+                    ),
+                    onPressed: isLoading
+                        ? null
+                        : () => ref
+                            .read(authStateProvider.notifier)
+                            .loginWithGoogle(),
+                  ),
+                  const VGap(AppSpacing.md),
+                  _SocialButton(
+                    label: 'Continuer avec Apple',
+                    leading: const Icon(
+                      Icons.apple,
+                      size: 22,
+                      color: AppColors.textPrimary,
+                    ),
+                    onPressed: isLoading
+                        ? null
+                        : () => ref
+                            .read(authStateProvider.notifier)
+                            .loginWithApple(),
+                  ),
+                  const VGap(AppSpacing.xl),
+
                   // Lien PIN
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -269,6 +323,46 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SocialButton extends StatelessWidget {
+  const _SocialButton({
+    required this.label,
+    required this.leading,
+    required this.onPressed,
+  });
+
+  final String label;
+  final Widget leading;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: AppSpacing.buttonHeight,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: AppColors.border),
+          foregroundColor: AppColors.textPrimary,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            leading,
+            const HGap(AppSpacing.sm),
+            Text(
+              label,
+              style: AppTextStyles.button.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
         ),
       ),
     );

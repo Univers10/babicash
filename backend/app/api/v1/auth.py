@@ -1,4 +1,6 @@
 import uuid
+from decimal import Decimal
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -32,7 +34,58 @@ def _token_for(user: User) -> Token:
         role=user.role,
         boutique_id=boutique_id,
         nom=user.nom,
+        email=user.email,
+        avatar_url=user.avatar_url,
     )
+
+
+async def provision_owner_with_boutique(
+    db: AsyncSession,
+    *,
+    nom: str,
+    email: str | None = None,
+    mot_de_passe_hash: str | None = None,
+    telephone: str | None = None,
+    oauth_provider: str | None = None,
+    oauth_id: str | None = None,
+    avatar_url: str | None = None,
+) -> User:
+    """Crée un propriétaire + sa boutique par défaut + un abonnement FREE.
+
+    Utilisé aussi bien par /register (mot de passe) que par les endpoints
+    OAuth (/oauth/google, /oauth/apple) pour l'inscription à la volée.
+    """
+    user = User(
+        nom=nom,
+        email=email,
+        mot_de_passe_hash=mot_de_passe_hash,
+        telephone=telephone,
+        role="OWNER",
+        oauth_provider=oauth_provider,
+        oauth_id=oauth_id,
+        avatar_url=avatar_url,
+    )
+    db.add(user)
+    await db.flush()
+
+    boutique = Boutique(
+        nom=f"Boutique de {nom}",
+        proprietaire_id=str(user.id),
+    )
+    db.add(boutique)
+    await db.flush()
+
+    abonnement = Abonnement(
+        proprietaire_id=str(user.id),
+        plan="FREE",
+        prix_base=Decimal("5000.00"),
+        quota_ventes_par_boutique=20,
+    )
+    db.add(abonnement)
+
+    await db.commit()
+    await db.refresh(user)
+    return user
 
 
 @router.post("/login", response_model=Token)
@@ -154,37 +207,13 @@ async def register(
             detail="Cet email est déjà utilisé",
         )
 
-    # Créer l'utilisateur propriétaire
-    user = User(
+    user = await provision_owner_with_boutique(
+        db,
         nom=payload.nom,
         email=payload.email,
         mot_de_passe_hash=hash_password(payload.mot_de_passe),
         telephone=payload.telephone,
-        role="OWNER",
     )
-    db.add(user)
-    await db.flush()
-
-    # Créer la boutique par défaut
-    boutique = Boutique(
-        nom=f"Boutique de {payload.nom}",
-        proprietaire_id=str(user.id),
-    )
-    db.add(boutique)
-    await db.flush()
-
-    # Créer l'abonnement FREE
-    from decimal import Decimal
-    abonnement = Abonnement(
-        proprietaire_id=str(user.id),
-        plan="FREE",
-        prix_base=Decimal("5000.00"),
-        quota_ventes_par_boutique=20,
-    )
-    db.add(abonnement)
-
-    await db.commit()
-    await db.refresh(user)
 
     return _token_for(user)
 
