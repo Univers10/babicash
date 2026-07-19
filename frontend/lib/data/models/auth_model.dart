@@ -46,12 +46,33 @@ class LoginIdRequest with _$LoginIdRequest {
 }
 
 @freezed
+class GoogleTokenRequest with _$GoogleTokenRequest {
+  const factory GoogleTokenRequest({
+    @JsonKey(name: 'id_token') required String idToken,
+  }) = _GoogleTokenRequest;
+  factory GoogleTokenRequest.fromJson(Map<String, dynamic> json) =>
+      _$GoogleTokenRequestFromJson(json);
+}
+
+@freezed
+class AppleTokenRequest with _$AppleTokenRequest {
+  const factory AppleTokenRequest({
+    @JsonKey(name: 'identity_token') required String identityToken,
+    // Apple ne fournit le nom qu'à la première autorisation, hors du token.
+    String? nom,
+  }) = _AppleTokenRequest;
+  factory AppleTokenRequest.fromJson(Map<String, dynamic> json) =>
+      _$AppleTokenRequestFromJson(json);
+}
+
+@freezed
 class TokenResponse with _$TokenResponse {
   const factory TokenResponse({
     @JsonKey(name: 'access_token') required String accessToken,
     required String role,
     @JsonKey(name: 'boutique_id') String? boutiqueId,
     required String nom,
+    String? email,
   }) = _TokenResponse;
   factory TokenResponse.fromJson(Map<String, dynamic> json) =>
       _$TokenResponseFromJson(json);
@@ -64,6 +85,7 @@ class SessionUser with _$SessionUser {
     required String role,
     required String nom,
     String? boutiqueId,
+    String? email,
   }) = _SessionUser;
 
   const SessionUser._();

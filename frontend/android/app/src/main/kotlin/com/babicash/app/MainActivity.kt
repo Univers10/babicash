@@ -1,4 +1,4 @@
-package com.example.babicash
+package com.babicash.app
 
 import io.flutter.embedding.android.FlutterActivity
 

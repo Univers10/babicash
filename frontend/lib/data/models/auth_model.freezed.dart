@@ -766,6 +766,340 @@ abstract class _LoginIdRequest implements LoginIdRequest {
       throw _privateConstructorUsedError;
 }
 
+GoogleTokenRequest _$GoogleTokenRequestFromJson(Map<String, dynamic> json) {
+  return _GoogleTokenRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$GoogleTokenRequest {
+  @JsonKey(name: 'id_token')
+  String get idToken => throw _privateConstructorUsedError;
+
+  /// Serializes this GoogleTokenRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of GoogleTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $GoogleTokenRequestCopyWith<GoogleTokenRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $GoogleTokenRequestCopyWith<$Res> {
+  factory $GoogleTokenRequestCopyWith(
+          GoogleTokenRequest value, $Res Function(GoogleTokenRequest) then) =
+      _$GoogleTokenRequestCopyWithImpl<$Res, GoogleTokenRequest>;
+  @useResult
+  $Res call({@JsonKey(name: 'id_token') String idToken});
+}
+
+/// @nodoc
+class _$GoogleTokenRequestCopyWithImpl<$Res, $Val extends GoogleTokenRequest>
+    implements $GoogleTokenRequestCopyWith<$Res> {
+  _$GoogleTokenRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of GoogleTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? idToken = null,
+  }) {
+    return _then(_value.copyWith(
+      idToken: null == idToken
+          ? _value.idToken
+          : idToken // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$GoogleTokenRequestImplCopyWith<$Res>
+    implements $GoogleTokenRequestCopyWith<$Res> {
+  factory _$$GoogleTokenRequestImplCopyWith(_$GoogleTokenRequestImpl value,
+          $Res Function(_$GoogleTokenRequestImpl) then) =
+      __$$GoogleTokenRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({@JsonKey(name: 'id_token') String idToken});
+}
+
+/// @nodoc
+class __$$GoogleTokenRequestImplCopyWithImpl<$Res>
+    extends _$GoogleTokenRequestCopyWithImpl<$Res, _$GoogleTokenRequestImpl>
+    implements _$$GoogleTokenRequestImplCopyWith<$Res> {
+  __$$GoogleTokenRequestImplCopyWithImpl(_$GoogleTokenRequestImpl _value,
+      $Res Function(_$GoogleTokenRequestImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of GoogleTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? idToken = null,
+  }) {
+    return _then(_$GoogleTokenRequestImpl(
+      idToken: null == idToken
+          ? _value.idToken
+          : idToken // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$GoogleTokenRequestImpl implements _GoogleTokenRequest {
+  const _$GoogleTokenRequestImpl(
+      {@JsonKey(name: 'id_token') required this.idToken});
+
+  factory _$GoogleTokenRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$GoogleTokenRequestImplFromJson(json);
+
+  @override
+  @JsonKey(name: 'id_token')
+  final String idToken;
+
+  @override
+  String toString() {
+    return 'GoogleTokenRequest(idToken: $idToken)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$GoogleTokenRequestImpl &&
+            (identical(other.idToken, idToken) || other.idToken == idToken));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, idToken);
+
+  /// Create a copy of GoogleTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$GoogleTokenRequestImplCopyWith<_$GoogleTokenRequestImpl> get copyWith =>
+      __$$GoogleTokenRequestImplCopyWithImpl<_$GoogleTokenRequestImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$GoogleTokenRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _GoogleTokenRequest implements GoogleTokenRequest {
+  const factory _GoogleTokenRequest(
+          {@JsonKey(name: 'id_token') required final String idToken}) =
+      _$GoogleTokenRequestImpl;
+
+  factory _GoogleTokenRequest.fromJson(Map<String, dynamic> json) =
+      _$GoogleTokenRequestImpl.fromJson;
+
+  @override
+  @JsonKey(name: 'id_token')
+  String get idToken;
+
+  /// Create a copy of GoogleTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$GoogleTokenRequestImplCopyWith<_$GoogleTokenRequestImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+AppleTokenRequest _$AppleTokenRequestFromJson(Map<String, dynamic> json) {
+  return _AppleTokenRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$AppleTokenRequest {
+  @JsonKey(name: 'identity_token')
+  String get identityToken =>
+      throw _privateConstructorUsedError; // Apple ne fournit le nom qu'à la première autorisation, hors du token.
+  String? get nom => throw _privateConstructorUsedError;
+
+  /// Serializes this AppleTokenRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of AppleTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $AppleTokenRequestCopyWith<AppleTokenRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $AppleTokenRequestCopyWith<$Res> {
+  factory $AppleTokenRequestCopyWith(
+          AppleTokenRequest value, $Res Function(AppleTokenRequest) then) =
+      _$AppleTokenRequestCopyWithImpl<$Res, AppleTokenRequest>;
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'identity_token') String identityToken, String? nom});
+}
+
+/// @nodoc
+class _$AppleTokenRequestCopyWithImpl<$Res, $Val extends AppleTokenRequest>
+    implements $AppleTokenRequestCopyWith<$Res> {
+  _$AppleTokenRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of AppleTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? identityToken = null,
+    Object? nom = freezed,
+  }) {
+    return _then(_value.copyWith(
+      identityToken: null == identityToken
+          ? _value.identityToken
+          : identityToken // ignore: cast_nullable_to_non_nullable
+              as String,
+      nom: freezed == nom
+          ? _value.nom
+          : nom // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$AppleTokenRequestImplCopyWith<$Res>
+    implements $AppleTokenRequestCopyWith<$Res> {
+  factory _$$AppleTokenRequestImplCopyWith(_$AppleTokenRequestImpl value,
+          $Res Function(_$AppleTokenRequestImpl) then) =
+      __$$AppleTokenRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'identity_token') String identityToken, String? nom});
+}
+
+/// @nodoc
+class __$$AppleTokenRequestImplCopyWithImpl<$Res>
+    extends _$AppleTokenRequestCopyWithImpl<$Res, _$AppleTokenRequestImpl>
+    implements _$$AppleTokenRequestImplCopyWith<$Res> {
+  __$$AppleTokenRequestImplCopyWithImpl(_$AppleTokenRequestImpl _value,
+      $Res Function(_$AppleTokenRequestImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of AppleTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? identityToken = null,
+    Object? nom = freezed,
+  }) {
+    return _then(_$AppleTokenRequestImpl(
+      identityToken: null == identityToken
+          ? _value.identityToken
+          : identityToken // ignore: cast_nullable_to_non_nullable
+              as String,
+      nom: freezed == nom
+          ? _value.nom
+          : nom // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$AppleTokenRequestImpl implements _AppleTokenRequest {
+  const _$AppleTokenRequestImpl(
+      {@JsonKey(name: 'identity_token') required this.identityToken, this.nom});
+
+  factory _$AppleTokenRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$AppleTokenRequestImplFromJson(json);
+
+  @override
+  @JsonKey(name: 'identity_token')
+  final String identityToken;
+// Apple ne fournit le nom qu'à la première autorisation, hors du token.
+  @override
+  final String? nom;
+
+  @override
+  String toString() {
+    return 'AppleTokenRequest(identityToken: $identityToken, nom: $nom)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$AppleTokenRequestImpl &&
+            (identical(other.identityToken, identityToken) ||
+                other.identityToken == identityToken) &&
+            (identical(other.nom, nom) || other.nom == nom));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, identityToken, nom);
+
+  /// Create a copy of AppleTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$AppleTokenRequestImplCopyWith<_$AppleTokenRequestImpl> get copyWith =>
+      __$$AppleTokenRequestImplCopyWithImpl<_$AppleTokenRequestImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$AppleTokenRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _AppleTokenRequest implements AppleTokenRequest {
+  const factory _AppleTokenRequest(
+      {@JsonKey(name: 'identity_token') required final String identityToken,
+      final String? nom}) = _$AppleTokenRequestImpl;
+
+  factory _AppleTokenRequest.fromJson(Map<String, dynamic> json) =
+      _$AppleTokenRequestImpl.fromJson;
+
+  @override
+  @JsonKey(name: 'identity_token')
+  String
+      get identityToken; // Apple ne fournit le nom qu'à la première autorisation, hors du token.
+  @override
+  String? get nom;
+
+  /// Create a copy of AppleTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$AppleTokenRequestImplCopyWith<_$AppleTokenRequestImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 TokenResponse _$TokenResponseFromJson(Map<String, dynamic> json) {
   return _TokenResponse.fromJson(json);
 }
@@ -778,6 +1112,7 @@ mixin _$TokenResponse {
   @JsonKey(name: 'boutique_id')
   String? get boutiqueId => throw _privateConstructorUsedError;
   String get nom => throw _privateConstructorUsedError;
+  String? get email => throw _privateConstructorUsedError;
 
   /// Serializes this TokenResponse to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -799,7 +1134,8 @@ abstract class $TokenResponseCopyWith<$Res> {
       {@JsonKey(name: 'access_token') String accessToken,
       String role,
       @JsonKey(name: 'boutique_id') String? boutiqueId,
-      String nom});
+      String nom,
+      String? email});
 }
 
 /// @nodoc
@@ -821,6 +1157,7 @@ class _$TokenResponseCopyWithImpl<$Res, $Val extends TokenResponse>
     Object? role = null,
     Object? boutiqueId = freezed,
     Object? nom = null,
+    Object? email = freezed,
   }) {
     return _then(_value.copyWith(
       accessToken: null == accessToken
@@ -839,6 +1176,10 @@ class _$TokenResponseCopyWithImpl<$Res, $Val extends TokenResponse>
           ? _value.nom
           : nom // ignore: cast_nullable_to_non_nullable
               as String,
+      email: freezed == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -855,7 +1196,8 @@ abstract class _$$TokenResponseImplCopyWith<$Res>
       {@JsonKey(name: 'access_token') String accessToken,
       String role,
       @JsonKey(name: 'boutique_id') String? boutiqueId,
-      String nom});
+      String nom,
+      String? email});
 }
 
 /// @nodoc
@@ -875,6 +1217,7 @@ class __$$TokenResponseImplCopyWithImpl<$Res>
     Object? role = null,
     Object? boutiqueId = freezed,
     Object? nom = null,
+    Object? email = freezed,
   }) {
     return _then(_$TokenResponseImpl(
       accessToken: null == accessToken
@@ -893,6 +1236,10 @@ class __$$TokenResponseImplCopyWithImpl<$Res>
           ? _value.nom
           : nom // ignore: cast_nullable_to_non_nullable
               as String,
+      email: freezed == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -904,7 +1251,8 @@ class _$TokenResponseImpl implements _TokenResponse {
       {@JsonKey(name: 'access_token') required this.accessToken,
       required this.role,
       @JsonKey(name: 'boutique_id') this.boutiqueId,
-      required this.nom});
+      required this.nom,
+      this.email});
 
   factory _$TokenResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$TokenResponseImplFromJson(json);
@@ -919,10 +1267,12 @@ class _$TokenResponseImpl implements _TokenResponse {
   final String? boutiqueId;
   @override
   final String nom;
+  @override
+  final String? email;
 
   @override
   String toString() {
-    return 'TokenResponse(accessToken: $accessToken, role: $role, boutiqueId: $boutiqueId, nom: $nom)';
+    return 'TokenResponse(accessToken: $accessToken, role: $role, boutiqueId: $boutiqueId, nom: $nom, email: $email)';
   }
 
   @override
@@ -935,13 +1285,14 @@ class _$TokenResponseImpl implements _TokenResponse {
             (identical(other.role, role) || other.role == role) &&
             (identical(other.boutiqueId, boutiqueId) ||
                 other.boutiqueId == boutiqueId) &&
-            (identical(other.nom, nom) || other.nom == nom));
+            (identical(other.nom, nom) || other.nom == nom) &&
+            (identical(other.email, email) || other.email == email));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
-      Object.hash(runtimeType, accessToken, role, boutiqueId, nom);
+      Object.hash(runtimeType, accessToken, role, boutiqueId, nom, email);
 
   /// Create a copy of TokenResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -964,7 +1315,8 @@ abstract class _TokenResponse implements TokenResponse {
       {@JsonKey(name: 'access_token') required final String accessToken,
       required final String role,
       @JsonKey(name: 'boutique_id') final String? boutiqueId,
-      required final String nom}) = _$TokenResponseImpl;
+      required final String nom,
+      final String? email}) = _$TokenResponseImpl;
 
   factory _TokenResponse.fromJson(Map<String, dynamic> json) =
       _$TokenResponseImpl.fromJson;
@@ -979,6 +1331,8 @@ abstract class _TokenResponse implements TokenResponse {
   String? get boutiqueId;
   @override
   String get nom;
+  @override
+  String? get email;
 
   /// Create a copy of TokenResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -994,6 +1348,7 @@ mixin _$SessionUser {
   String get role => throw _privateConstructorUsedError;
   String get nom => throw _privateConstructorUsedError;
   String? get boutiqueId => throw _privateConstructorUsedError;
+  String? get email => throw _privateConstructorUsedError;
 
   /// Create a copy of SessionUser
   /// with the given fields replaced by the non-null parameter values.
@@ -1008,7 +1363,12 @@ abstract class $SessionUserCopyWith<$Res> {
           SessionUser value, $Res Function(SessionUser) then) =
       _$SessionUserCopyWithImpl<$Res, SessionUser>;
   @useResult
-  $Res call({String token, String role, String nom, String? boutiqueId});
+  $Res call(
+      {String token,
+      String role,
+      String nom,
+      String? boutiqueId,
+      String? email});
 }
 
 /// @nodoc
@@ -1030,6 +1390,7 @@ class _$SessionUserCopyWithImpl<$Res, $Val extends SessionUser>
     Object? role = null,
     Object? nom = null,
     Object? boutiqueId = freezed,
+    Object? email = freezed,
   }) {
     return _then(_value.copyWith(
       token: null == token
@@ -1048,6 +1409,10 @@ class _$SessionUserCopyWithImpl<$Res, $Val extends SessionUser>
           ? _value.boutiqueId
           : boutiqueId // ignore: cast_nullable_to_non_nullable
               as String?,
+      email: freezed == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -1060,7 +1425,12 @@ abstract class _$$SessionUserImplCopyWith<$Res>
       __$$SessionUserImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String token, String role, String nom, String? boutiqueId});
+  $Res call(
+      {String token,
+      String role,
+      String nom,
+      String? boutiqueId,
+      String? email});
 }
 
 /// @nodoc
@@ -1080,6 +1450,7 @@ class __$$SessionUserImplCopyWithImpl<$Res>
     Object? role = null,
     Object? nom = null,
     Object? boutiqueId = freezed,
+    Object? email = freezed,
   }) {
     return _then(_$SessionUserImpl(
       token: null == token
@@ -1098,6 +1469,10 @@ class __$$SessionUserImplCopyWithImpl<$Res>
           ? _value.boutiqueId
           : boutiqueId // ignore: cast_nullable_to_non_nullable
               as String?,
+      email: freezed == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -1109,7 +1484,8 @@ class _$SessionUserImpl extends _SessionUser {
       {required this.token,
       required this.role,
       required this.nom,
-      this.boutiqueId})
+      this.boutiqueId,
+      this.email})
       : super._();
 
   @override
@@ -1120,10 +1496,12 @@ class _$SessionUserImpl extends _SessionUser {
   final String nom;
   @override
   final String? boutiqueId;
+  @override
+  final String? email;
 
   @override
   String toString() {
-    return 'SessionUser(token: $token, role: $role, nom: $nom, boutiqueId: $boutiqueId)';
+    return 'SessionUser(token: $token, role: $role, nom: $nom, boutiqueId: $boutiqueId, email: $email)';
   }
 
   @override
@@ -1135,11 +1513,13 @@ class _$SessionUserImpl extends _SessionUser {
             (identical(other.role, role) || other.role == role) &&
             (identical(other.nom, nom) || other.nom == nom) &&
             (identical(other.boutiqueId, boutiqueId) ||
-                other.boutiqueId == boutiqueId));
+                other.boutiqueId == boutiqueId) &&
+            (identical(other.email, email) || other.email == email));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, token, role, nom, boutiqueId);
+  int get hashCode =>
+      Object.hash(runtimeType, token, role, nom, boutiqueId, email);
 
   /// Create a copy of SessionUser
   /// with the given fields replaced by the non-null parameter values.
@@ -1155,7 +1535,8 @@ abstract class _SessionUser extends SessionUser {
       {required final String token,
       required final String role,
       required final String nom,
-      final String? boutiqueId}) = _$SessionUserImpl;
+      final String? boutiqueId,
+      final String? email}) = _$SessionUserImpl;
   const _SessionUser._() : super._();
 
   @override
@@ -1166,6 +1547,8 @@ abstract class _SessionUser extends SessionUser {
   String get nom;
   @override
   String? get boutiqueId;
+  @override
+  String? get email;
 
   /// Create a copy of SessionUser
   /// with the given fields replaced by the non-null parameter values.

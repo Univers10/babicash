@@ -1,4 +1,6 @@
 """Dependencies admin : authentification par cookie."""
+import uuid
+
 from fastapi import Cookie, Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
@@ -43,8 +45,16 @@ async def require_admin(
         )
 
     # Vérifier que l'utilisateur existe toujours et que le token n'a pas été révoqué
+    try:
+        user_id = uuid.UUID(payload["sub"])
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_307_TEMPORARY_REDIRECT,
+            headers={"Location": "/admin/login"},
+        )
+
     user = (
-        await db.execute(select(User).where(User.id == payload["sub"]))
+        await db.execute(select(User).where(User.id == user_id))
     ).scalar_one_or_none()
 
     if user is None or not user.actif or user.role != "ADMIN":

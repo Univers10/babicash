@@ -5,6 +5,7 @@ const _kTokenKey = 'babicash_jwt';
 const _kRoleKey = 'babicash_role';
 const _kBoutiqueIdKey = 'babicash_boutique_id';
 const _kNomKey = 'babicash_nom';
+const _kEmailKey = 'babicash_email';
 
 class SecureStorageService {
   const SecureStorageService(this._storage);
@@ -23,6 +24,7 @@ class SecureStorageService {
     required String role,
     required String nom,
     String? boutiqueId,
+    String? email,
   }) async {
     await Future.wait([
       _storage.write(key: _kTokenKey, value: token, aOptions: _androidOptions, iOptions: _iosOptions),
@@ -30,6 +32,8 @@ class SecureStorageService {
       _storage.write(key: _kNomKey, value: nom, aOptions: _androidOptions, iOptions: _iosOptions),
       if (boutiqueId != null)
         _storage.write(key: _kBoutiqueIdKey, value: boutiqueId, aOptions: _androidOptions, iOptions: _iosOptions),
+      if (email != null)
+        _storage.write(key: _kEmailKey, value: email, aOptions: _androidOptions, iOptions: _iosOptions),
     ]);
   }
 
@@ -45,6 +49,9 @@ class SecureStorageService {
   Future<String?> getNom() =>
       _storage.read(key: _kNomKey, aOptions: _androidOptions, iOptions: _iosOptions);
 
+  Future<String?> getEmail() =>
+      _storage.read(key: _kEmailKey, aOptions: _androidOptions, iOptions: _iosOptions);
+
   Future<bool> hasSession() async {
     final token = await getToken();
     return token != null && token.isNotEmpty;
@@ -56,6 +63,7 @@ class SecureStorageService {
       _storage.delete(key: _kRoleKey, aOptions: _androidOptions, iOptions: _iosOptions),
       _storage.delete(key: _kBoutiqueIdKey, aOptions: _androidOptions, iOptions: _iosOptions),
       _storage.delete(key: _kNomKey, aOptions: _androidOptions, iOptions: _iosOptions),
+      _storage.delete(key: _kEmailKey, aOptions: _androidOptions, iOptions: _iosOptions),
     ]);
   }
 }

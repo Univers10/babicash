@@ -31,12 +31,28 @@ class LoginIdRequest(BaseModel):
     mot_de_passe: str
 
 
+class GoogleTokenRequest(BaseModel):
+    """Connexion / inscription via Google Sign-In."""
+
+    id_token: str
+
+
+class AppleTokenRequest(BaseModel):
+    """Connexion / inscription via Apple Sign-In (flux web)."""
+
+    identity_token: str
+    # Apple ne renvoie le nom qu'à la toute première autorisation, hors du token.
+    nom: str | None = Field(default=None, max_length=255)
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
     role: str
     boutique_id: str | None = None
     nom: str | None = None
+    email: str | None = None
+    avatar_url: str | None = None
 
 
 class CurrentUser(BaseModel):
