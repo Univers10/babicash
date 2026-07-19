@@ -11,9 +11,10 @@
 class OAuthConfig {
   OAuthConfig._();
 
-  // TODO: remplacer par le Client ID Web de la Google Cloud Console.
+  // Client ID Web de la Google Cloud Console (projet BabiCash).
+  // Doit rester identique à GOOGLE_CLIENT_ID côté backend.
   static const googleServerClientId =
-      'REMPLACER-MOI.apps.googleusercontent.com';
+      '888445557233-ec33fb0s4jgnvbi9f13vfkhp6vq250q3.apps.googleusercontent.com';
 
   // TODO: remplacer par le Services ID du portail Apple Developer.
   static const appleServiceId = 'com.babicash.app.signin';
