@@ -6,9 +6,32 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/local/database.dart';
 import '../../../features/stock/providers/stock_provider.dart';
+import '../providers/caisse_provider.dart';
 
 // Provider pour la catégorie sélectionnée
 final _selectedCategoryProvider = StateProvider<String?>((_) => null);
+
+/// Identifiant virtuel du filtre « Sans catégorie » (produits avec
+/// `categorieId == null`). Purement UI : jamais persisté en base.
+const kSansCategorieId = '__sans_categorie__';
+
+// Couleurs neutres pour le regroupement virtuel « Sans catégorie »
+const _sansCategorieColor = Color(0xFF607D8B); // gris bleu
+const _sansCategorieBgColor = Color(0xFFECEFF1);
+
+/// Clé de tri alphabétique insensible à la casse et aux accents.
+String _sortKey(String s) {
+  const accents = 'àâäáãåçéèêëíìîïñóòôöõúùûüýÿ';
+  const sans = 'aaaaaaceeeeiiiinooooouuuuyy';
+  final lower = s.toLowerCase();
+  final buf = StringBuffer();
+  for (final rune in lower.runes) {
+    final ch = String.fromCharCode(rune);
+    final idx = accents.indexOf(ch);
+    buf.write(idx >= 0 ? sans[idx] : ch);
+  }
+  return buf.toString();
+}
 
 // Palette de couleurs pour les catégories (style Odoo POS)
 const _categoryColors = [
@@ -53,6 +76,13 @@ class CatalogueGrid extends ConsumerWidget {
     final stockAsync = ref.watch(stockProvider);
     final categoriesAsync = ref.watch(categoriesProvider);
     final selectedCatId = ref.watch(_selectedCategoryProvider);
+    // C3 : quantités du panier par produit — badge mis à jour en temps réel
+    final panier = ref.watch(panierProvider);
+    final qteAuPanier = <String, int>{};
+    for (final item in panier) {
+      final id = item.produitId;
+      if (id != null) qteAuPanier[id] = (qteAuPanier[id] ?? 0) + item.quantite;
+    }
     final screenW = MediaQuery.of(context).size.width;
     final crossCount = screenW > 900
         ? 5
@@ -60,12 +90,17 @@ class CatalogueGrid extends ConsumerWidget {
             ? 4
             : 3;
 
-    // Construire un map catId -> colorIndex
-    final categories = categoriesAsync.valueOrNull ?? [];
+    // Catégories triées (insensible à la casse et aux accents) ; les couleurs
+    // suivent l'ordre trié pour rester cohérentes entre puces et tuiles.
+    final categories = [...(categoriesAsync.valueOrNull ?? <LocalCategory>[])]
+      ..sort((a, b) => _sortKey(a.nom).compareTo(_sortKey(b.nom)));
     final catColorMap = <String, int>{};
     for (int i = 0; i < categories.length; i++) {
       catColorMap[categories[i].id] = i % _categoryColors.length;
     }
+    // C5 : y a-t-il des produits sans catégorie ? (regroupement virtuel)
+    final hasSansCategorie = (stockAsync.valueOrNull ?? const <LocalProduit>[])
+        .any((p) => p.categorieId == null);
 
     return Column(
       children: [
@@ -73,15 +108,17 @@ class CatalogueGrid extends ConsumerWidget {
         categoriesAsync.when(
           loading: () => const SizedBox(height: 48),
           error: (_, __) => const SizedBox(height: 48),
-          data: (cats) {
-            if (cats.isEmpty) return const SizedBox.shrink();
+          data: (_) {
+            if (categories.isEmpty) return const SizedBox.shrink();
+            final itemCount =
+                1 + categories.length + (hasSansCategorie ? 1 : 0);
             return Container(
               height: 48,
               color: AppColors.background,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                itemCount: cats.length + 1,
+                itemCount: itemCount,
                 separatorBuilder: (_, __) => const SizedBox(width: 6),
                 itemBuilder: (_, i) {
                   if (i == 0) {
@@ -93,9 +130,21 @@ class CatalogueGrid extends ConsumerWidget {
                       onTap: () => ref.read(_selectedCategoryProvider.notifier).state = null,
                     );
                   }
-                  final cat = cats[i - 1];
+                  // Puce virtuelle « Sans catégorie », toujours en dernier
+                  if (hasSansCategorie && i == itemCount - 1) {
+                    final isSelected = selectedCatId == kSansCategorieId;
+                    return _CategoryChip(
+                      label: 'Sans catégorie',
+                      color: _sansCategorieColor,
+                      isSelected: isSelected,
+                      onTap: () => ref
+                          .read(_selectedCategoryProvider.notifier)
+                          .state = isSelected ? null : kSansCategorieId,
+                    );
+                  }
+                  final cat = categories[i - 1];
                   final isSelected = selectedCatId == cat.id;
-                  final colorIdx = (i - 1) % _categoryColors.length;
+                  final colorIdx = catColorMap[cat.id] ?? 0;
                   return _CategoryChip(
                     label: cat.nom,
                     color: _categoryColors[colorIdx],
@@ -120,8 +169,11 @@ class CatalogueGrid extends ConsumerWidget {
             data: (tous) {
               var produits = tous.toList();
 
-              // Filtre par catégorie
-              if (selectedCatId != null) {
+              // Filtre par catégorie (dont regroupement virtuel « Sans catégorie »)
+              if (selectedCatId == kSansCategorieId) {
+                produits =
+                    produits.where((p) => p.categorieId == null).toList();
+              } else if (selectedCatId != null) {
                 produits = produits
                     .where((p) => p.categorieId == selectedCatId)
                     .toList();
@@ -168,11 +220,15 @@ class CatalogueGrid extends ConsumerWidget {
                 itemCount: produits.length,
                 itemBuilder: (_, i) {
                   final p = produits[i];
-                  final cIdx = catColorMap[p.categorieId] ?? 0;
+                  final cIdx = catColorMap[p.categorieId];
                   return _ProduitTile(
                     produit: p,
-                    accentColor: _categoryColors[cIdx],
-                    bgColor: _categoryBgColors[cIdx],
+                    accentColor:
+                        cIdx != null ? _categoryColors[cIdx] : _sansCategorieColor,
+                    bgColor: cIdx != null
+                        ? _categoryBgColors[cIdx]
+                        : _sansCategorieBgColor,
+                    quantiteAuPanier: qteAuPanier[p.id] ?? 0,
                     onTap: () => onProduitTap(p),
                   );
                 },
@@ -232,11 +288,13 @@ class _ProduitTile extends StatelessWidget {
     required this.produit,
     required this.accentColor,
     required this.bgColor,
+    required this.quantiteAuPanier,
     required this.onTap,
   });
   final LocalProduit produit;
   final Color accentColor;
   final Color bgColor;
+  final int quantiteAuPanier;
   final VoidCallback onTap;
 
   @override
@@ -301,46 +359,72 @@ class _ProduitTile extends StatelessWidget {
                 ],
               ),
             ),
-            // Badge rupture
-            if (enRupture)
-              Positioned(
-                top: 6,
-                right: 6,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppColors.error,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: const Text(
-                    'Rupture',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700),
-                  ),
-                ),
+            // Badges (stock + quantité au panier)
+            Positioned(
+              top: 6,
+              right: 6,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Badge rupture
+                  if (enRupture)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.error,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        'Rupture',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  // Badge stock faible
+                  if (!enRupture &&
+                      produit.stockActuel <= produit.stockAlerte)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.warning,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        '⚠',
+                        style: TextStyle(fontSize: 9),
+                      ),
+                    ),
+                  // Badge quantité au panier (C3) — temps réel
+                  if (quantiteAuPanier > 0) ...[
+                    if (enRupture ||
+                        produit.stockActuel <= produit.stockAlerte)
+                      const SizedBox(width: AppSpacing.xs),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      constraints:
+                          const BoxConstraints(minWidth: 20),
+                      decoration: const BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: AppSpacing.borderRadiusFull,
+                      ),
+                      child: Text(
+                        '$quantiteAuPanier',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ],
+                ],
               ),
-            // Badge stock faible
-            if (!enRupture &&
-                produit.stockActuel <= produit.stockAlerte)
-              Positioned(
-                top: 6,
-                right: 6,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppColors.warning,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: const Text(
-                    '⚠',
-                    style: TextStyle(fontSize: 9),
-                  ),
-                ),
-              ),
+            ),
           ],
         ),
       ),
