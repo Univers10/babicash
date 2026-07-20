@@ -9,6 +9,8 @@ import '../../features/caisse/screens/caisse_screen.dart';
 import '../../features/stock/screens/categories_screen.dart';
 import '../../features/stock/screens/stock_screen.dart';
 import '../../features/tiers/screens/tiers_screen.dart';
+import '../../features/sessions/screens/session_detail_screen.dart';
+import '../../features/sessions/screens/session_history_screen.dart';
 import '../../features/sessions/screens/sessions_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
@@ -26,6 +28,7 @@ abstract final class AppRoutes {
   static const settings = '/settings';
   static const tiers = '/tiers';
   static const sessions = '/sessions';
+  static const sessionsHistorique = '/sessions/historique';
   static const dashboard = '/dashboard';
   static const historique = '/historique';
   static const abonnement = '/abonnement';
@@ -85,6 +88,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.sessions,
             builder: (_, __) => const SessionsScreen(),
+            routes: [
+              GoRoute(
+                path: 'historique',
+                builder: (_, __) => const SessionHistoryScreen(),
+              ),
+              GoRoute(
+                path: 'details/:id',
+                builder: (_, state) => SessionDetailScreen(
+                  sessionId: state.pathParameters['id']!,
+                ),
+              ),
+            ],
           ),
           GoRoute(
             path: AppRoutes.settings,
