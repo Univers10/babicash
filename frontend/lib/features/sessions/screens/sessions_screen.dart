@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -37,6 +39,13 @@ class SessionsScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: const MenuButton(),
         title: const Text('Session de caisse'),
+        actions: [
+          IconButton(
+            icon: const Icon(Symbols.history),
+            tooltip: 'Historique des sessions',
+            onPressed: () => context.push(AppRoutes.sessionsHistorique),
+          ),
+        ],
       ),
       body: sessionAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),

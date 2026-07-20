@@ -74,6 +74,20 @@ class ThermalPrintService {
     _printer.printEscPos(PosPrinterRole.cashier, b);
   }
 
+  /// Imprime un texte libre, une chaîne par ligne (déjà formatée en 32 col).
+  /// Utilisé par les rapports de session. Ne fait rien de plus que l'envoi :
+  /// l'appelant vérifie [isConnected] avant d'appeler.
+  static Future<void> printTextLines(List<String> lines) async {
+    final b = EscPosBuilder();
+    b.init();
+    for (final line in lines) {
+      b.text(line);
+    }
+    b.feed(3);
+    b.cut();
+    _printer.printEscPos(PosPrinterRole.cashier, b);
+  }
+
   static String _lr(String left, String right, int width) {
     final spaces = width - left.length - right.length;
     return spaces > 0 ? left + ' ' * spaces + right : '$left $right';
