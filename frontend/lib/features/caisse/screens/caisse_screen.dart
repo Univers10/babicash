@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/local/database.dart';
 import '../../../features/abonnements/providers/quota_provider.dart';
@@ -68,8 +69,6 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
             // ── Top bar ─────────────────────────────────────────────────────
             _PosTopBar(
               quotaAsync: quotaAsync,
-              searchCtrl: _searchCtrl,
-              onSearch: (v) => setState(() => _searchQuery = v),
               onRefresh: _refreshData,
             ),
             // ── Body ────────────────────────────────────────────────────────
@@ -82,6 +81,8 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
                           flex: 6,
                           child: _CataloguePane(
                             searchQuery: _searchQuery,
+                            searchCtrl: _searchCtrl,
+                            onSearch: (v) => setState(() => _searchQuery = v),
                             onAdd: _addProduit,
                           ),
                         ),
@@ -101,6 +102,8 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
                       children: [
                         _CataloguePane(
                           searchQuery: _searchQuery,
+                          searchCtrl: _searchCtrl,
+                          onSearch: (v) => setState(() => _searchQuery = v),
                           onAdd: _addProduit,
                           bottomPadding: panier.isNotEmpty ? 80 : 0,
                         ),
@@ -112,7 +115,7 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
                             child: _MobilePanierBar(
                               count: panier.length,
                               total: total,
-                              onOpen: () => _showPanierSheet(context, panier, total),
+                              onOpen: () => _showPanierSheet(context),
                             ),
                           ),
                       ],
@@ -142,13 +145,12 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
     );
   }
 
-  void _showPanierSheet(
-      BuildContext context, List<PanierItem> panier, double total) {
+  void _showPanierSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _MobilePanierSheet(panier: panier, total: total),
+      builder: (_) => const _MobilePanierSheet(),
     );
   }
 }
@@ -158,13 +160,9 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
 class _PosTopBar extends StatelessWidget {
   const _PosTopBar({
     required this.quotaAsync,
-    required this.searchCtrl,
-    required this.onSearch,
     required this.onRefresh,
   });
   final AsyncValue quotaAsync;
-  final TextEditingController searchCtrl;
-  final ValueChanged<String> onSearch;
   final VoidCallback onRefresh;
 
   @override
@@ -192,55 +190,7 @@ class _PosTopBar extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(width: 16),
-          // Barre de recherche
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-              ),
-              child: TextField(
-                controller: searchCtrl,
-                onChanged: onSearch,
-                style: const TextStyle(
-                    color: Colors.white, fontSize: 15, height: 1.2,
-                    decoration: TextDecoration.none,
-                    decorationColor: Colors.transparent),
-                cursorColor: Colors.white,
-                decoration: InputDecoration(
-                  hintText: 'Rechercher un produit...',
-                  hintStyle: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6), fontSize: 15),
-                  prefixIcon: Icon(Symbols.search,
-                      color: Colors.white.withValues(alpha: 0.8), size: 20),
-                  suffixIcon: searchCtrl.text.isNotEmpty
-                      ? IconButton(
-                          icon: Icon(Symbols.close,
-                              color: Colors.white.withValues(alpha: 0.8),
-                              size: 18),
-                          onPressed: () {
-                            searchCtrl.clear();
-                            onSearch('');
-                          },
-                        )
-                      : null,
-                  filled: true,
-                  fillColor: Colors.transparent,
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  disabledBorder: InputBorder.none,
-                  errorBorder: InputBorder.none,
-                  focusedErrorBorder: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                      vertical: 10, horizontal: 4),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
+          const Spacer(),
           // Bouton refresh
           IconButton(
             onPressed: onRefresh,
@@ -289,10 +239,14 @@ class _PosTopBar extends StatelessWidget {
 class _CataloguePane extends ConsumerWidget {
   const _CataloguePane({
     required this.searchQuery,
+    required this.searchCtrl,
+    required this.onSearch,
     required this.onAdd,
     this.bottomPadding = 0,
   });
   final String searchQuery;
+  final TextEditingController searchCtrl;
+  final ValueChanged<String> onSearch;
   final void Function(LocalProduit) onAdd;
   final double bottomPadding;
 
@@ -300,10 +254,80 @@ class _CataloguePane extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       color: AppColors.background,
-      child: CatalogueGrid(
-        onProduitTap: onAdd,
-        searchQuery: searchQuery,
-        bottomPadding: bottomPadding,
+      child: Column(
+        children: [
+          // Barre de recherche — juste au-dessus des filtres catégories
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md, AppSpacing.sm, AppSpacing.md, 0),
+            child: _CatalogueSearchBar(
+              searchCtrl: searchCtrl,
+              onSearch: onSearch,
+            ),
+          ),
+          Expanded(
+            child: CatalogueGrid(
+              onProduitTap: onAdd,
+              searchQuery: searchQuery,
+              bottomPadding: bottomPadding,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Barre de recherche catalogue ──────────────────────────────────────────────
+
+class _CatalogueSearchBar extends StatelessWidget {
+  const _CatalogueSearchBar({
+    required this.searchCtrl,
+    required this.onSearch,
+  });
+  final TextEditingController searchCtrl;
+  final ValueChanged<String> onSearch;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: searchCtrl,
+      onChanged: onSearch,
+      style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
+      decoration: InputDecoration(
+        hintText: 'Rechercher un produit...',
+        hintStyle:
+            AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
+        prefixIcon: const Icon(Symbols.search,
+            color: AppColors.textSecondary, size: 20),
+        suffixIcon: searchCtrl.text.isNotEmpty
+            ? IconButton(
+                icon: const Icon(Symbols.close,
+                    color: AppColors.textSecondary, size: 18),
+                onPressed: () {
+                  searchCtrl.clear();
+                  onSearch('');
+                },
+                tooltip: 'Effacer la recherche',
+              )
+            : null,
+        isDense: true,
+        filled: true,
+        fillColor: AppColors.surface,
+        contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+        border: const OutlineInputBorder(
+          borderRadius: AppSpacing.borderRadiusSm,
+          borderSide: BorderSide(color: AppColors.border),
+        ),
+        enabledBorder: const OutlineInputBorder(
+          borderRadius: AppSpacing.borderRadiusSm,
+          borderSide: BorderSide(color: AppColors.border),
+        ),
+        focusedBorder: const OutlineInputBorder(
+          borderRadius: AppSpacing.borderRadiusSm,
+          borderSide: BorderSide(color: AppColors.primary, width: 2),
+        ),
       ),
     );
   }
@@ -1009,13 +1033,24 @@ class _MobilePanierBar extends StatelessWidget {
 // ── Mobile : bottom sheet panier ──────────────────────────────────────────────
 
 class _MobilePanierSheet extends ConsumerWidget {
-  const _MobilePanierSheet(
-      {required this.panier, required this.total});
-  final List<PanierItem> panier;
-  final double total;
+  const _MobilePanierSheet();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Réactif : la sheet suit le panier en temps réel (décrément, suppression
+    // de ligne...) au lieu d'afficher une copie figée à l'ouverture.
+    final panier = ref.watch(panierProvider);
+    final remiseGlobale = ref.watch(remiseGlobaleProvider);
+    final sousTotal = panier.fold(0.0, (s, i) => s + i.total);
+    final total = sousTotal * (1 - remiseGlobale / 100);
+
+    // Fermer la sheet si le panier se vide (dernière ligne supprimée).
+    ref.listen(panierProvider, (_, next) {
+      if (next.isEmpty && Navigator.of(context).canPop()) {
+        Navigator.pop(context);
+      }
+    });
+
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
@@ -1044,6 +1079,9 @@ class _MobilePanierSheet extends ConsumerWidget {
                         color: AppColors.primary,
                         fontWeight: FontWeight.w700)),
                 const Spacer(),
+                // Bouton client — accessible aussi en portrait (petit écran)
+                _ClientBouton(panier: panier),
+                const SizedBox(width: 4),
                 TextButton(
                   onPressed: () {
                     ref.read(panierProvider.notifier).clear();
