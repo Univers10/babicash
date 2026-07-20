@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../../core/errors/app_exception.dart';
+import '../../../core/router/app_router.dart';
+import '../../../core/storage/secure_storage.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -27,6 +29,33 @@ class _LoginPinScreenState extends ConsumerState<LoginPinScreen> {
 
   String get _pin =>
       _pinControllers.map((c) => c.text).join();
+
+  @override
+  void initState() {
+    super.initState();
+    _prefillTelephone();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Arrivée suite à une session expirée : informer l'utilisateur.
+      if (ref.read(sessionExpiredProvider) == LoginMethod.pin) {
+        AppSnackbar.info(
+          context,
+          'Session expirée. Saisissez votre code PIN pour continuer.',
+        );
+      }
+    });
+  }
+
+  /// Préremplit le numéro depuis le secure storage (dernier login PIN).
+  Future<void> _prefillTelephone() async {
+    final telephone = await ref.read(secureStorageProvider).getTelephone();
+    if (!mounted || telephone == null || telephone.isEmpty) return;
+    if (_telCtrl.text.isEmpty) {
+      setState(() => _telCtrl.text = telephone);
+      // Le numéro est déjà là : l'utilisateur n'a plus que le PIN à saisir.
+      _pinFocusNodes.first.requestFocus();
+    }
+  }
 
   @override
   void dispose() {
@@ -64,7 +93,13 @@ class _LoginPinScreenState extends ConsumerState<LoginPinScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Connexion gérant'),
-        leading: BackButton(onPressed: () => context.pop()),
+        leading: BackButton(
+          // Après une redirection (session expirée), il n'y a rien à
+          // dépiler : retour explicite à l'écran de connexion.
+          onPressed: () => context.canPop()
+              ? context.pop()
+              : context.go(AppRoutes.login),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

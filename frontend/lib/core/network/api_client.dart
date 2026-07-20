@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+import '../../features/auth/providers/auth_provider.dart';
 import '../storage/secure_storage.dart';
 
 const String _baseUrl = 'https://babicash.ecomotionafricaci.com';
@@ -10,7 +11,10 @@ const String _baseUrl = 'https://babicash.ecomotionafricaci.com';
 class ApiClient {
   ApiClient._();
 
-  static Dio create(SecureStorageService storage) {
+  static Dio create(
+    SecureStorageService storage, {
+    Future<void> Function()? onSessionExpired,
+  }) {
     final dio = Dio(
       BaseOptions(
         baseUrl: '$_baseUrl/api/v1',
@@ -34,9 +38,11 @@ class ApiClient {
           handler.next(options);
         },
         onError: (error, handler) async {
-          // 401 → session expirée, on efface le token
+          // 401 → session expirée, on efface le token et on notifie
+          // l'état d'auth (redirection vers l'écran de reconnexion).
           if (error.response?.statusCode == 401) {
             await storage.clearSession();
+            await onSessionExpired?.call();
           }
           handler.next(error);
         },
@@ -63,5 +69,11 @@ class ApiClient {
 
 final dioProvider = Provider<Dio>((ref) {
   final storage = ref.watch(secureStorageProvider);
-  return ApiClient.create(storage);
+  return ApiClient.create(
+    storage,
+    // Lecture différée (au moment du 401) pour éviter toute dépendance
+    // circulaire entre dioProvider et authStateProvider.
+    onSessionExpired: () =>
+        ref.read(authStateProvider.notifier).onSessionExpired(),
+  );
 });
