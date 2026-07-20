@@ -4,6 +4,7 @@ from app.models.models import (
     Categorie,
     CompteTiers,
     LigneVente,
+    MouvementStock,
     Produit,
     SessionCaisse,
     TransactionCaisse,
@@ -20,5 +21,6 @@ __all__ = [
     "SessionCaisse",
     "Vente",
     "LigneVente",
+    "MouvementStock",
     "TransactionCaisse",
 ]

@@ -272,6 +272,42 @@ class Abonnement(Base):
     actif: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
 
+class MouvementStock(Base):
+    """Journal des mouvements de stock (entrées / sorties manuelles)."""
+
+    __tablename__ = "mouvements_stock"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    boutique_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("boutiques.id"), nullable=False
+    )
+    produit_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("produits.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    produit_nom: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    type_mouvement: Mapped[str] = mapped_column(
+        String(10), nullable=False
+    )  # ENTREE | SORTIE
+    quantite: Mapped[int] = mapped_column(Integer, nullable=False)
+    motif: Mapped[str] = mapped_column(String(255), nullable=False)
+    auteur_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    auteur_nom: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    date_mouvement: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    # Empêche les doublons de synchronisation (idempotence)
+    id_local_smartphone: Mapped[str | None] = mapped_column(
+        String(255), unique=True, nullable=True
+    )
+    synced: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+
 class TransactionCaisse(Base):
     __tablename__ = "transactions_caisse"
 
