@@ -6,6 +6,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../data/local/database.dart';
 import '../providers/produits_crud_provider.dart';
 import '../providers/stock_provider.dart';
+import 'categorie_selector_field.dart';
 
 class ProduitFormDialog extends ConsumerStatefulWidget {
   const ProduitFormDialog({super.key, this.produit});
@@ -26,7 +27,8 @@ class _ProduitFormDialogState extends ConsumerState<ProduitFormDialog> {
       text: widget.produit?.stockActuel.toString() ?? '0');
   late final _alerteController = TextEditingController(
       text: widget.produit?.stockAlerte.toString() ?? '5');
-  String? _categorieId;
+  // Préchargée depuis le produit en édition (P3) ; `null` = « Sans catégorie ».
+  late String? _categorieId = widget.produit?.categorieId;
   bool _isLoading = false;
 
   @override
@@ -104,15 +106,9 @@ class _ProduitFormDialogState extends ConsumerState<ProduitFormDialog> {
               ),
               const VGap(AppSpacing.md),
               categoriesAsync.when(
-                data: (cats) => DropdownButtonFormField<String?>(
-                  initialValue: _categorieId,
-                  decoration: const InputDecoration(labelText: 'Catégorie'),
-                  items: [
-                    const DropdownMenuItem(
-                        value: null, child: Text('Sans catégorie')),
-                    ...cats.map((c) => DropdownMenuItem(
-                        value: c.id, child: Text(c.nom))),
-                  ],
+                data: (cats) => CategorieSelectorField(
+                  categories: cats,
+                  selectedId: _categorieId,
                   onChanged: (v) => setState(() => _categorieId = v),
                 ),
                 loading: () => const LinearProgressIndicator(),

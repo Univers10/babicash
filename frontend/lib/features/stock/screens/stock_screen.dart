@@ -6,6 +6,8 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../data/local/database.dart';
+import '../../../shared/utils/categorie_utils.dart';
 import '../../../shared/widgets/menu_button.dart';
 import '../providers/mouvements_provider.dart';
 import '../providers/stock_provider.dart';
@@ -24,6 +26,9 @@ class StockScreen extends ConsumerStatefulWidget {
 }
 
 class _StockScreenState extends ConsumerState<StockScreen> {
+  /// Sentinelle du filtre « Sans catégorie » (groupe virtuel, jamais en base).
+  static const String _sansCategorieChipId = '__sans_categorie__';
+
   String _searchQuery = '';
   _StockFilter _filter = _StockFilter.tous;
   String? _selectedCatId;
@@ -95,6 +100,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
           ),
         ),
         data: (allProduits) {
+          final cats = categoriesAsync.valueOrNull ?? const <LocalCategory>[];
           if (allProduits.isEmpty) {
             return Center(
               child: Column(
@@ -131,7 +137,11 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                 .where((p) => p.stockActuel > 0 && p.stockActuel <= p.stockAlerte)
                 .toList();
           }
-          if (_selectedCatId != null) {
+          if (_selectedCatId == _sansCategorieChipId) {
+            produits = produits
+                .where((p) => estProduitSansCategorie(p, cats))
+                .toList();
+          } else if (_selectedCatId != null) {
             produits = produits.where((p) => p.categorieId == _selectedCatId).toList();
           }
           if (_searchQuery.isNotEmpty) {
@@ -224,15 +234,21 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                 categoriesAsync.when(
                   loading: () => const SizedBox(height: 48),
                   error: (_, __) => const SizedBox.shrink(),
-                  data: (cats) {
-                    if (cats.isEmpty) return const SizedBox.shrink();
+                  data: (chipCats) {
+                    if (chipCats.isEmpty) return const SizedBox.shrink();
+                    // Chip virtuel « Sans catégorie » affiché en dernier,
+                    // seulement s'il existe des produits concernés.
+                    final avecSansCategorie = allProduits
+                        .any((p) => estProduitSansCategorie(p, chipCats));
+                    final itemCount =
+                        chipCats.length + 1 + (avecSansCategorie ? 1 : 0);
                     return Container(
                       height: 44,
                       margin: const EdgeInsets.only(top: 10),
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: cats.length + 1,
+                        itemCount: itemCount,
                         separatorBuilder: (_, __) => const SizedBox(width: 6),
                         itemBuilder: (_, i) {
                           if (i == 0) {
@@ -243,7 +259,17 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                               onTap: () => setState(() => _selectedCatId = null),
                             );
                           }
-                          final cat = cats[i - 1];
+                          if (avecSansCategorie && i == itemCount - 1) {
+                            final isSelected =
+                                _selectedCatId == _sansCategorieChipId;
+                            return _CatChip(
+                              label: sansCategorieLabel,
+                              isSelected: isSelected,
+                              onTap: () => setState(() => _selectedCatId =
+                                  isSelected ? null : _sansCategorieChipId),
+                            );
+                          }
+                          final cat = chipCats[i - 1];
                           final isSelected = _selectedCatId == cat.id;
                           return _CatChip(
                             label: cat.nom,
@@ -274,14 +300,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                             ],
                           ),
                         )
-                      : _isGridView
-                          ? _buildGridView(produits)
-                          : ListView.separated(
-                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
-                              itemCount: produits.length,
-                              separatorBuilder: (_, __) => const VGap(AppSpacing.sm),
-                              itemBuilder: (_, i) => ProduitCard(produit: produits[i]),
-                            ),
+                      : _buildProduits(produits, cats),
                 ),
               ],
             ),
@@ -291,22 +310,65 @@ class _StockScreenState extends ConsumerState<StockScreen> {
     );
   }
 
-  Widget _buildGridView(List produits) {
+  /// Rend les produits filtrés. En vue « Toutes » (aucun filtre catégorie),
+  /// les produits sont regroupés par catégorie triée alphabétiquement,
+  /// avec le groupe virtuel « Sans catégorie » en dernier (P5).
+  Widget _buildProduits(List<LocalProduit> produits, List<LocalCategory> cats) {
+    final grouper = _selectedCatId == null && cats.isNotEmpty;
+    if (!grouper) {
+      return _isGridView
+          ? GridView.builder(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+              gridDelegate: _gridDelegate(),
+              itemCount: produits.length,
+              itemBuilder: (_, i) => _buildGridItem(produits[i]),
+            )
+          : ListView.separated(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+              itemCount: produits.length,
+              separatorBuilder: (_, __) => const VGap(AppSpacing.sm),
+              itemBuilder: (_, i) => ProduitCard(produit: produits[i]),
+            );
+    }
+
+    final groupes = grouperProduitsParCategorie(produits, cats);
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+      children: [
+        for (final groupe in groupes) ...[
+          _GroupeHeader(nom: groupe.nom, count: groupe.produits.length),
+          if (_isGridView)
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: _gridDelegate(),
+              itemCount: groupe.produits.length,
+              itemBuilder: (_, i) => _buildGridItem(groupe.produits[i]),
+            )
+          else
+            for (final p in groupe.produits)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: ProduitCard(produit: p),
+              ),
+        ],
+      ],
+    );
+  }
+
+  SliverGridDelegateWithFixedCrossAxisCount _gridDelegate() {
     final screenW = MediaQuery.of(context).size.width;
     final crossCount = screenW > 900 ? 4 : screenW > 600 ? 3 : 2;
+    return SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: crossCount,
+      childAspectRatio: 0.85,
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 10,
+    );
+  }
 
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossCount,
-        childAspectRatio: 0.85,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-      ),
-      itemCount: produits.length,
-      itemBuilder: (_, i) {
-        final p = produits[i];
-        final enRupture = p.stockActuel <= 0;
+  Widget _buildGridItem(LocalProduit p) {
+    final enRupture = p.stockActuel <= 0;
         final enAlerte = !enRupture && p.stockActuel <= p.stockAlerte;
         Color stockColor = AppColors.success;
         if (enRupture) { stockColor = AppColors.error; }
@@ -399,7 +461,44 @@ class _StockScreenState extends ConsumerState<StockScreen> {
             ),
           ),
         );
-      },
+  }
+}
+
+// ── En-tête de groupe (catégorie ou « Sans catégorie ») ──────────────────────
+
+class _GroupeHeader extends StatelessWidget {
+  const _GroupeHeader({required this.nom, required this.count});
+  final String nom;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xs, AppSpacing.md, AppSpacing.xs, AppSpacing.sm),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              nom,
+              style: AppTextStyles.labelMedium.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w700,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const HGap(AppSpacing.sm),
+          Text(
+            '$count',
+            style: AppTextStyles.labelMedium.copyWith(
+              color: AppColors.textTertiary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
