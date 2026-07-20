@@ -6,6 +6,7 @@ import '../../../data/remote/categories_api.dart';
 import '../../../data/remote/produits_api.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/boutiques/providers/boutique_provider.dart';
+import '../../../shared/utils/categorie_utils.dart';
 
 final stockProvider = FutureProvider<List<LocalProduit>>((ref) async {
   final db = ref.watch(appDatabaseProvider);
@@ -61,5 +62,8 @@ final categoriesProvider = FutureProvider<List<LocalCategory>>((ref) async {
     }
   }
 
-  return db.getCategoriesByBoutique(boutiqueId);
+  // Tri alphabétique (insensible à la casse et aux accents) appliqué à la
+  // source : tous les affichages (dropdown, filtres, écran catégories)
+  // héritent du même ordre.
+  return trierCategories(await db.getCategoriesByBoutique(boutiqueId));
 });
