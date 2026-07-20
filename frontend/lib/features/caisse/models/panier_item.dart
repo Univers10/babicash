@@ -11,10 +11,16 @@ class PanierItem with _$PanierItem {
     required double prixAchat,
     @Default(1) int quantite,
     @Default(0.0) double remise, // pourcentage 0-100
+    // Lot (prix de groupe) : les items partageant un même lotId sont vendus
+    // ensemble à lotPrixTotal, réparti à l'enregistrement. null = item normal.
+    String? lotId,
+    String? lotNom,
+    double? lotPrixTotal,
   }) = _PanierItem;
 
   const PanierItem._();
 
+  bool get estDansLot => lotId != null;
   double get prixApresRemise => prixUnitaire * (1 - remise / 100);
   double get total => prixApresRemise * quantite;
   double get margeUnitaire => prixApresRemise - prixAchat;

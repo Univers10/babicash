@@ -1252,9 +1252,27 @@ class $LocalLignesVenteTable extends LocalLignesVente
       type: DriftSqlType.double,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _lotIdMeta = const VerificationMeta('lotId');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, venteIdLocal, produitId, quantite, prixVenduReel, margeCalculee];
+  late final GeneratedColumn<String> lotId = GeneratedColumn<String>(
+      'lot_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _lotNomMeta = const VerificationMeta('lotNom');
+  @override
+  late final GeneratedColumn<String> lotNom = GeneratedColumn<String>(
+      'lot_nom', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        venteIdLocal,
+        produitId,
+        quantite,
+        prixVenduReel,
+        margeCalculee,
+        lotId,
+        lotNom
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1299,6 +1317,14 @@ class $LocalLignesVenteTable extends LocalLignesVente
           margeCalculee.isAcceptableOrUnknown(
               data['marge_calculee']!, _margeCalculeeMeta));
     }
+    if (data.containsKey('lot_id')) {
+      context.handle(
+          _lotIdMeta, lotId.isAcceptableOrUnknown(data['lot_id']!, _lotIdMeta));
+    }
+    if (data.containsKey('lot_nom')) {
+      context.handle(_lotNomMeta,
+          lotNom.isAcceptableOrUnknown(data['lot_nom']!, _lotNomMeta));
+    }
     return context;
   }
 
@@ -1320,6 +1346,10 @@ class $LocalLignesVenteTable extends LocalLignesVente
           DriftSqlType.double, data['${effectivePrefix}prix_vendu_reel'])!,
       margeCalculee: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}marge_calculee'])!,
+      lotId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}lot_id']),
+      lotNom: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}lot_nom']),
     );
   }
 
@@ -1337,13 +1367,17 @@ class LocalLignesVenteData extends DataClass
   final int quantite;
   final double prixVenduReel;
   final double margeCalculee;
+  final String? lotId;
+  final String? lotNom;
   const LocalLignesVenteData(
       {required this.id,
       required this.venteIdLocal,
       this.produitId,
       required this.quantite,
       required this.prixVenduReel,
-      required this.margeCalculee});
+      required this.margeCalculee,
+      this.lotId,
+      this.lotNom});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1355,6 +1389,12 @@ class LocalLignesVenteData extends DataClass
     map['quantite'] = Variable<int>(quantite);
     map['prix_vendu_reel'] = Variable<double>(prixVenduReel);
     map['marge_calculee'] = Variable<double>(margeCalculee);
+    if (!nullToAbsent || lotId != null) {
+      map['lot_id'] = Variable<String>(lotId);
+    }
+    if (!nullToAbsent || lotNom != null) {
+      map['lot_nom'] = Variable<String>(lotNom);
+    }
     return map;
   }
 
@@ -1368,6 +1408,10 @@ class LocalLignesVenteData extends DataClass
       quantite: Value(quantite),
       prixVenduReel: Value(prixVenduReel),
       margeCalculee: Value(margeCalculee),
+      lotId:
+          lotId == null && nullToAbsent ? const Value.absent() : Value(lotId),
+      lotNom:
+          lotNom == null && nullToAbsent ? const Value.absent() : Value(lotNom),
     );
   }
 
@@ -1381,6 +1425,8 @@ class LocalLignesVenteData extends DataClass
       quantite: serializer.fromJson<int>(json['quantite']),
       prixVenduReel: serializer.fromJson<double>(json['prixVenduReel']),
       margeCalculee: serializer.fromJson<double>(json['margeCalculee']),
+      lotId: serializer.fromJson<String?>(json['lotId']),
+      lotNom: serializer.fromJson<String?>(json['lotNom']),
     );
   }
   @override
@@ -1393,6 +1439,8 @@ class LocalLignesVenteData extends DataClass
       'quantite': serializer.toJson<int>(quantite),
       'prixVenduReel': serializer.toJson<double>(prixVenduReel),
       'margeCalculee': serializer.toJson<double>(margeCalculee),
+      'lotId': serializer.toJson<String?>(lotId),
+      'lotNom': serializer.toJson<String?>(lotNom),
     };
   }
 
@@ -1402,7 +1450,9 @@ class LocalLignesVenteData extends DataClass
           Value<String?> produitId = const Value.absent(),
           int? quantite,
           double? prixVenduReel,
-          double? margeCalculee}) =>
+          double? margeCalculee,
+          Value<String?> lotId = const Value.absent(),
+          Value<String?> lotNom = const Value.absent()}) =>
       LocalLignesVenteData(
         id: id ?? this.id,
         venteIdLocal: venteIdLocal ?? this.venteIdLocal,
@@ -1410,6 +1460,8 @@ class LocalLignesVenteData extends DataClass
         quantite: quantite ?? this.quantite,
         prixVenduReel: prixVenduReel ?? this.prixVenduReel,
         margeCalculee: margeCalculee ?? this.margeCalculee,
+        lotId: lotId.present ? lotId.value : this.lotId,
+        lotNom: lotNom.present ? lotNom.value : this.lotNom,
       );
   LocalLignesVenteData copyWithCompanion(LocalLignesVenteCompanion data) {
     return LocalLignesVenteData(
@@ -1425,6 +1477,8 @@ class LocalLignesVenteData extends DataClass
       margeCalculee: data.margeCalculee.present
           ? data.margeCalculee.value
           : this.margeCalculee,
+      lotId: data.lotId.present ? data.lotId.value : this.lotId,
+      lotNom: data.lotNom.present ? data.lotNom.value : this.lotNom,
     );
   }
 
@@ -1436,14 +1490,16 @@ class LocalLignesVenteData extends DataClass
           ..write('produitId: $produitId, ')
           ..write('quantite: $quantite, ')
           ..write('prixVenduReel: $prixVenduReel, ')
-          ..write('margeCalculee: $margeCalculee')
+          ..write('margeCalculee: $margeCalculee, ')
+          ..write('lotId: $lotId, ')
+          ..write('lotNom: $lotNom')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, venteIdLocal, produitId, quantite, prixVenduReel, margeCalculee);
+  int get hashCode => Object.hash(id, venteIdLocal, produitId, quantite,
+      prixVenduReel, margeCalculee, lotId, lotNom);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1453,7 +1509,9 @@ class LocalLignesVenteData extends DataClass
           other.produitId == this.produitId &&
           other.quantite == this.quantite &&
           other.prixVenduReel == this.prixVenduReel &&
-          other.margeCalculee == this.margeCalculee);
+          other.margeCalculee == this.margeCalculee &&
+          other.lotId == this.lotId &&
+          other.lotNom == this.lotNom);
 }
 
 class LocalLignesVenteCompanion extends UpdateCompanion<LocalLignesVenteData> {
@@ -1463,6 +1521,8 @@ class LocalLignesVenteCompanion extends UpdateCompanion<LocalLignesVenteData> {
   final Value<int> quantite;
   final Value<double> prixVenduReel;
   final Value<double> margeCalculee;
+  final Value<String?> lotId;
+  final Value<String?> lotNom;
   const LocalLignesVenteCompanion({
     this.id = const Value.absent(),
     this.venteIdLocal = const Value.absent(),
@@ -1470,6 +1530,8 @@ class LocalLignesVenteCompanion extends UpdateCompanion<LocalLignesVenteData> {
     this.quantite = const Value.absent(),
     this.prixVenduReel = const Value.absent(),
     this.margeCalculee = const Value.absent(),
+    this.lotId = const Value.absent(),
+    this.lotNom = const Value.absent(),
   });
   LocalLignesVenteCompanion.insert({
     this.id = const Value.absent(),
@@ -1478,6 +1540,8 @@ class LocalLignesVenteCompanion extends UpdateCompanion<LocalLignesVenteData> {
     this.quantite = const Value.absent(),
     required double prixVenduReel,
     this.margeCalculee = const Value.absent(),
+    this.lotId = const Value.absent(),
+    this.lotNom = const Value.absent(),
   })  : venteIdLocal = Value(venteIdLocal),
         prixVenduReel = Value(prixVenduReel);
   static Insertable<LocalLignesVenteData> custom({
@@ -1487,6 +1551,8 @@ class LocalLignesVenteCompanion extends UpdateCompanion<LocalLignesVenteData> {
     Expression<int>? quantite,
     Expression<double>? prixVenduReel,
     Expression<double>? margeCalculee,
+    Expression<String>? lotId,
+    Expression<String>? lotNom,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1495,6 +1561,8 @@ class LocalLignesVenteCompanion extends UpdateCompanion<LocalLignesVenteData> {
       if (quantite != null) 'quantite': quantite,
       if (prixVenduReel != null) 'prix_vendu_reel': prixVenduReel,
       if (margeCalculee != null) 'marge_calculee': margeCalculee,
+      if (lotId != null) 'lot_id': lotId,
+      if (lotNom != null) 'lot_nom': lotNom,
     });
   }
 
@@ -1504,7 +1572,9 @@ class LocalLignesVenteCompanion extends UpdateCompanion<LocalLignesVenteData> {
       Value<String?>? produitId,
       Value<int>? quantite,
       Value<double>? prixVenduReel,
-      Value<double>? margeCalculee}) {
+      Value<double>? margeCalculee,
+      Value<String?>? lotId,
+      Value<String?>? lotNom}) {
     return LocalLignesVenteCompanion(
       id: id ?? this.id,
       venteIdLocal: venteIdLocal ?? this.venteIdLocal,
@@ -1512,6 +1582,8 @@ class LocalLignesVenteCompanion extends UpdateCompanion<LocalLignesVenteData> {
       quantite: quantite ?? this.quantite,
       prixVenduReel: prixVenduReel ?? this.prixVenduReel,
       margeCalculee: margeCalculee ?? this.margeCalculee,
+      lotId: lotId ?? this.lotId,
+      lotNom: lotNom ?? this.lotNom,
     );
   }
 
@@ -1536,6 +1608,12 @@ class LocalLignesVenteCompanion extends UpdateCompanion<LocalLignesVenteData> {
     if (margeCalculee.present) {
       map['marge_calculee'] = Variable<double>(margeCalculee.value);
     }
+    if (lotId.present) {
+      map['lot_id'] = Variable<String>(lotId.value);
+    }
+    if (lotNom.present) {
+      map['lot_nom'] = Variable<String>(lotNom.value);
+    }
     return map;
   }
 
@@ -1547,7 +1625,9 @@ class LocalLignesVenteCompanion extends UpdateCompanion<LocalLignesVenteData> {
           ..write('produitId: $produitId, ')
           ..write('quantite: $quantite, ')
           ..write('prixVenduReel: $prixVenduReel, ')
-          ..write('margeCalculee: $margeCalculee')
+          ..write('margeCalculee: $margeCalculee, ')
+          ..write('lotId: $lotId, ')
+          ..write('lotNom: $lotNom')
           ..write(')'))
         .toString();
   }
@@ -4152,6 +4232,8 @@ typedef $$LocalLignesVenteTableCreateCompanionBuilder
   Value<int> quantite,
   required double prixVenduReel,
   Value<double> margeCalculee,
+  Value<String?> lotId,
+  Value<String?> lotNom,
 });
 typedef $$LocalLignesVenteTableUpdateCompanionBuilder
     = LocalLignesVenteCompanion Function({
@@ -4161,6 +4243,8 @@ typedef $$LocalLignesVenteTableUpdateCompanionBuilder
   Value<int> quantite,
   Value<double> prixVenduReel,
   Value<double> margeCalculee,
+  Value<String?> lotId,
+  Value<String?> lotNom,
 });
 
 final class $$LocalLignesVenteTableReferences extends BaseReferences<
@@ -4207,6 +4291,12 @@ class $$LocalLignesVenteTableFilterComposer
 
   ColumnFilters<double> get margeCalculee => $composableBuilder(
       column: $table.margeCalculee, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get lotId => $composableBuilder(
+      column: $table.lotId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get lotNom => $composableBuilder(
+      column: $table.lotNom, builder: (column) => ColumnFilters(column));
 
   $$LocalVentesTableFilterComposer get venteIdLocal {
     final $$LocalVentesTableFilterComposer composer = $composerBuilder(
@@ -4255,6 +4345,12 @@ class $$LocalLignesVenteTableOrderingComposer
       column: $table.margeCalculee,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get lotId => $composableBuilder(
+      column: $table.lotId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get lotNom => $composableBuilder(
+      column: $table.lotNom, builder: (column) => ColumnOrderings(column));
+
   $$LocalVentesTableOrderingComposer get venteIdLocal {
     final $$LocalVentesTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -4299,6 +4395,12 @@ class $$LocalLignesVenteTableAnnotationComposer
 
   GeneratedColumn<double> get margeCalculee => $composableBuilder(
       column: $table.margeCalculee, builder: (column) => column);
+
+  GeneratedColumn<String> get lotId =>
+      $composableBuilder(column: $table.lotId, builder: (column) => column);
+
+  GeneratedColumn<String> get lotNom =>
+      $composableBuilder(column: $table.lotNom, builder: (column) => column);
 
   $$LocalVentesTableAnnotationComposer get venteIdLocal {
     final $$LocalVentesTableAnnotationComposer composer = $composerBuilder(
@@ -4351,6 +4453,8 @@ class $$LocalLignesVenteTableTableManager extends RootTableManager<
             Value<int> quantite = const Value.absent(),
             Value<double> prixVenduReel = const Value.absent(),
             Value<double> margeCalculee = const Value.absent(),
+            Value<String?> lotId = const Value.absent(),
+            Value<String?> lotNom = const Value.absent(),
           }) =>
               LocalLignesVenteCompanion(
             id: id,
@@ -4359,6 +4463,8 @@ class $$LocalLignesVenteTableTableManager extends RootTableManager<
             quantite: quantite,
             prixVenduReel: prixVenduReel,
             margeCalculee: margeCalculee,
+            lotId: lotId,
+            lotNom: lotNom,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -4367,6 +4473,8 @@ class $$LocalLignesVenteTableTableManager extends RootTableManager<
             Value<int> quantite = const Value.absent(),
             required double prixVenduReel,
             Value<double> margeCalculee = const Value.absent(),
+            Value<String?> lotId = const Value.absent(),
+            Value<String?> lotNom = const Value.absent(),
           }) =>
               LocalLignesVenteCompanion.insert(
             id: id,
@@ -4375,6 +4483,8 @@ class $$LocalLignesVenteTableTableManager extends RootTableManager<
             quantite: quantite,
             prixVenduReel: prixVenduReel,
             margeCalculee: margeCalculee,
+            lotId: lotId,
+            lotNom: lotNom,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (

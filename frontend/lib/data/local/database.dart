@@ -55,6 +55,10 @@ class LocalLignesVente extends Table {
   IntColumn get quantite => integer().withDefault(const Constant(1))();
   RealColumn get prixVenduReel => real()();
   RealColumn get margeCalculee => real().withDefault(const Constant(0))();
+  // Lot (prix de groupe) : lignes vendues ensemble à un prix négocié réparti.
+  // null = ligne normale (toutes les ventes existantes).
+  TextColumn get lotId => text().nullable()();
+  TextColumn get lotNom => text().nullable()();
 }
 
 class LocalDepenses extends Table {
@@ -132,7 +136,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -141,6 +145,12 @@ class AppDatabase extends _$AppDatabase {
           if (from < 2) {
             // v2 : journal des mouvements de stock
             await m.createTable(localMouvementsStock);
+          }
+          if (from < 3) {
+            // v3 : lot (prix de groupe) — colonnes additives nullable,
+            // les ventes locales existantes gardent lot_id/lot_nom = null.
+            await m.addColumn(localLignesVente, localLignesVente.lotId);
+            await m.addColumn(localLignesVente, localLignesVente.lotNom);
           }
         },
       );

@@ -47,6 +47,8 @@ class SyncService {
                       produitId: l.produitId,
                       quantite: l.quantite,
                       prixVenduReel: l.prixVenduReel,
+                      lotId: l.lotId,
+                      lotNom: l.lotNom,
                     ))
                 .toList(),
           ));
