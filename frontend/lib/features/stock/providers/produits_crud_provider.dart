@@ -49,9 +49,13 @@ class ProduitsCrudNotifier extends AsyncNotifier<void> {
     ref.invalidate(stockProvider);
   }
 
+  /// [categorieId] est TOUJOURS appliqué tel quel : `null` signifie
+  /// « Sans catégorie » (et non « ne pas modifier »). Le PATCH backend
+  /// utilise `exclude_unset`, mais `categorie_id` étant toujours présent
+  /// dans le JSON, la valeur envoyée (y compris `null`) fait foi.
   Future<void> updateProduit({
     required String id,
-    String? categorieId,
+    required String? categorieId,
     String? nom,
     double? prixAchat,
     double? prixVente,
@@ -87,7 +91,7 @@ class ProduitsCrudNotifier extends AsyncNotifier<void> {
       prixVenteSuggere: drift.Value(prixVente ?? existing.prixVenteSuggere),
       stockActuel: drift.Value(stock ?? existing.stockActuel),
       stockAlerte: drift.Value(stockAlerte ?? existing.stockAlerte),
-      categorieId: drift.Value(categorieId ?? existing.categorieId),
+      categorieId: drift.Value(categorieId),
     ));
 
     ref.invalidate(stockProvider);
