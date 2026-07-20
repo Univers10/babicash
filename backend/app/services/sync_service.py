@@ -9,6 +9,7 @@ from app.models import (
     Boutique,
     CompteTiers,
     LigneVente,
+    MouvementStock,
     Produit,
     TransactionCaisse,
     Vente,
@@ -20,6 +21,8 @@ from app.schemas.sync import (
     DepensePushResult,
     EntreeStockIn,
     EntreeStockPushResult,
+    MouvementStockIn,
+    MouvementStockPushResult,
     SyncPushRequest,
     SyncPushResponse,
     VenteIn,
@@ -307,6 +310,72 @@ async def _process_entree_stock(
     ), produits
 
 
+async def _process_mouvement_stock(
+    db: AsyncSession,
+    boutique: Boutique,
+    mouvement_in: MouvementStockIn,
+    auteur_id: uuid.UUID | None = None,
+) -> tuple[MouvementStockPushResult, Produit | None]:
+    # Idempotence : si l'id_local existe déjà, ne pas réappliquer le mouvement.
+    existing = (
+        await db.execute(
+            select(MouvementStock).where(
+                MouvementStock.id_local_smartphone
+                == mouvement_in.id_local_smartphone
+            )
+        )
+    ).scalar_one_or_none()
+    if existing is not None:
+        return MouvementStockPushResult(
+            id_local_smartphone=mouvement_in.id_local_smartphone,
+            mouvement_id=existing.id,
+            deja_synchronise=True,
+        ), None
+
+    produit = (
+        await db.execute(
+            select(Produit).where(
+                Produit.id == mouvement_in.produit_id,
+                Produit.boutique_id == boutique.id,
+            )
+        )
+    ).scalar_one_or_none()
+
+    # Recalcul du stock à partir du mouvement (source de vérité serveur).
+    if produit is not None:
+        if mouvement_in.type_mouvement == "ENTREE":
+            produit.stock_actuel += mouvement_in.quantite
+        else:  # SORTIE
+            produit.stock_actuel -= mouvement_in.quantite
+
+    mouvement = MouvementStock(
+        boutique_id=boutique.id,
+        produit_id=produit.id if produit is not None else None,
+        produit_nom=(
+            produit.nom if produit is not None else mouvement_in.produit_nom
+        ),
+        type_mouvement=mouvement_in.type_mouvement,
+        quantite=mouvement_in.quantite,
+        motif=mouvement_in.motif,
+        auteur_id=auteur_id,
+        auteur_nom=mouvement_in.auteur_nom,
+        id_local_smartphone=mouvement_in.id_local_smartphone,
+        synced=True,
+    )
+    if mouvement_in.date_mouvement is not None:
+        mouvement.date_mouvement = mouvement_in.date_mouvement
+
+    db.add(mouvement)
+    await db.flush()
+
+    return MouvementStockPushResult(
+        id_local_smartphone=mouvement_in.id_local_smartphone,
+        mouvement_id=mouvement.id,
+        deja_synchronise=False,
+        stock_actuel=produit.stock_actuel if produit is not None else None,
+    ), produit
+
+
 async def push(
     db: AsyncSession, boutique: Boutique, payload: SyncPushRequest,
     caissier_id: uuid.UUID | None = None,
@@ -357,12 +426,24 @@ async def push(
         result, produits_entree = await _process_entree_stock(db, boutique, entree_in)
         response.entrees_stock.append(result)
         produits_modifies.update(produits_entree)
+    # Mouvements de stock manuels (entrées / sorties avec motif)
+    produits_entree_mouvement: set[uuid.UUID] = set()
+    for mouvement_in in payload.mouvements_stock:
+        result, produit_mvt = await _process_mouvement_stock(
+            db, boutique, mouvement_in, auteur_id=caissier_id
+        )
+        response.mouvements_stock.append(result)
+        if produit_mvt is not None:
+            produits_modifies[produit_mvt.id] = produit_mvt
+            if mouvement_in.type_mouvement == "ENTREE":
+                produits_entree_mouvement.add(produit_mvt.id)
     await db.commit()
-    # Alertes stock : uniquement pour les produits dont le stock a baissé (ventes),
-    # pas pour les entrées de stock (stock qui monte).
+    # Alertes stock : uniquement pour les produits dont le stock a baissé
+    # (ventes, sorties de stock), pas pour les entrées (stock qui monte).
     entrees_produits = {
         pid for res in response.entrees_stock for pid in res.produits_mis_a_jour
     }
+    entrees_produits |= produits_entree_mouvement
     for produit in produits_modifies.values():
         if produit.id in entrees_produits:
             continue  # stock en hausse : pas d'alerte

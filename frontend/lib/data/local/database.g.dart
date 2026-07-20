@@ -2825,6 +2825,576 @@ class LocalTiersCompanion extends UpdateCompanion<LocalTier> {
   }
 }
 
+class $LocalMouvementsStockTable extends LocalMouvementsStock
+    with TableInfo<$LocalMouvementsStockTable, LocalMouvementsStockData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalMouvementsStockTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _boutiqueIdMeta =
+      const VerificationMeta('boutiqueId');
+  @override
+  late final GeneratedColumn<String> boutiqueId = GeneratedColumn<String>(
+      'boutique_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _produitIdMeta =
+      const VerificationMeta('produitId');
+  @override
+  late final GeneratedColumn<String> produitId = GeneratedColumn<String>(
+      'produit_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _produitNomMeta =
+      const VerificationMeta('produitNom');
+  @override
+  late final GeneratedColumn<String> produitNom = GeneratedColumn<String>(
+      'produit_nom', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _typeMouvementMeta =
+      const VerificationMeta('typeMouvement');
+  @override
+  late final GeneratedColumn<String> typeMouvement = GeneratedColumn<String>(
+      'type_mouvement', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _quantiteMeta =
+      const VerificationMeta('quantite');
+  @override
+  late final GeneratedColumn<int> quantite = GeneratedColumn<int>(
+      'quantite', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _motifMeta = const VerificationMeta('motif');
+  @override
+  late final GeneratedColumn<String> motif = GeneratedColumn<String>(
+      'motif', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _auteurIdMeta =
+      const VerificationMeta('auteurId');
+  @override
+  late final GeneratedColumn<String> auteurId = GeneratedColumn<String>(
+      'auteur_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _auteurNomMeta =
+      const VerificationMeta('auteurNom');
+  @override
+  late final GeneratedColumn<String> auteurNom = GeneratedColumn<String>(
+      'auteur_nom', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _dateMouvementMeta =
+      const VerificationMeta('dateMouvement');
+  @override
+  late final GeneratedColumn<DateTime> dateMouvement =
+      GeneratedColumn<DateTime>('date_mouvement', aliasedName, false,
+          type: DriftSqlType.dateTime,
+          requiredDuringInsert: false,
+          defaultValue: currentDateAndTime);
+  static const VerificationMeta _syncedMeta = const VerificationMeta('synced');
+  @override
+  late final GeneratedColumn<bool> synced = GeneratedColumn<bool>(
+      'synced', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("synced" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        boutiqueId,
+        produitId,
+        produitNom,
+        typeMouvement,
+        quantite,
+        motif,
+        auteurId,
+        auteurNom,
+        dateMouvement,
+        synced
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_mouvements_stock';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<LocalMouvementsStockData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('boutique_id')) {
+      context.handle(
+          _boutiqueIdMeta,
+          boutiqueId.isAcceptableOrUnknown(
+              data['boutique_id']!, _boutiqueIdMeta));
+    } else if (isInserting) {
+      context.missing(_boutiqueIdMeta);
+    }
+    if (data.containsKey('produit_id')) {
+      context.handle(_produitIdMeta,
+          produitId.isAcceptableOrUnknown(data['produit_id']!, _produitIdMeta));
+    } else if (isInserting) {
+      context.missing(_produitIdMeta);
+    }
+    if (data.containsKey('produit_nom')) {
+      context.handle(
+          _produitNomMeta,
+          produitNom.isAcceptableOrUnknown(
+              data['produit_nom']!, _produitNomMeta));
+    }
+    if (data.containsKey('type_mouvement')) {
+      context.handle(
+          _typeMouvementMeta,
+          typeMouvement.isAcceptableOrUnknown(
+              data['type_mouvement']!, _typeMouvementMeta));
+    } else if (isInserting) {
+      context.missing(_typeMouvementMeta);
+    }
+    if (data.containsKey('quantite')) {
+      context.handle(_quantiteMeta,
+          quantite.isAcceptableOrUnknown(data['quantite']!, _quantiteMeta));
+    } else if (isInserting) {
+      context.missing(_quantiteMeta);
+    }
+    if (data.containsKey('motif')) {
+      context.handle(
+          _motifMeta, motif.isAcceptableOrUnknown(data['motif']!, _motifMeta));
+    } else if (isInserting) {
+      context.missing(_motifMeta);
+    }
+    if (data.containsKey('auteur_id')) {
+      context.handle(_auteurIdMeta,
+          auteurId.isAcceptableOrUnknown(data['auteur_id']!, _auteurIdMeta));
+    }
+    if (data.containsKey('auteur_nom')) {
+      context.handle(_auteurNomMeta,
+          auteurNom.isAcceptableOrUnknown(data['auteur_nom']!, _auteurNomMeta));
+    } else if (isInserting) {
+      context.missing(_auteurNomMeta);
+    }
+    if (data.containsKey('date_mouvement')) {
+      context.handle(
+          _dateMouvementMeta,
+          dateMouvement.isAcceptableOrUnknown(
+              data['date_mouvement']!, _dateMouvementMeta));
+    }
+    if (data.containsKey('synced')) {
+      context.handle(_syncedMeta,
+          synced.isAcceptableOrUnknown(data['synced']!, _syncedMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalMouvementsStockData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalMouvementsStockData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      boutiqueId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}boutique_id'])!,
+      produitId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}produit_id'])!,
+      produitNom: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}produit_nom'])!,
+      typeMouvement: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}type_mouvement'])!,
+      quantite: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}quantite'])!,
+      motif: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}motif'])!,
+      auteurId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}auteur_id']),
+      auteurNom: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}auteur_nom'])!,
+      dateMouvement: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}date_mouvement'])!,
+      synced: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}synced'])!,
+    );
+  }
+
+  @override
+  $LocalMouvementsStockTable createAlias(String alias) {
+    return $LocalMouvementsStockTable(attachedDatabase, alias);
+  }
+}
+
+class LocalMouvementsStockData extends DataClass
+    implements Insertable<LocalMouvementsStockData> {
+  final String id;
+  final String boutiqueId;
+  final String produitId;
+  final String produitNom;
+  final String typeMouvement;
+  final int quantite;
+  final String motif;
+  final String? auteurId;
+  final String auteurNom;
+  final DateTime dateMouvement;
+  final bool synced;
+  const LocalMouvementsStockData(
+      {required this.id,
+      required this.boutiqueId,
+      required this.produitId,
+      required this.produitNom,
+      required this.typeMouvement,
+      required this.quantite,
+      required this.motif,
+      this.auteurId,
+      required this.auteurNom,
+      required this.dateMouvement,
+      required this.synced});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['boutique_id'] = Variable<String>(boutiqueId);
+    map['produit_id'] = Variable<String>(produitId);
+    map['produit_nom'] = Variable<String>(produitNom);
+    map['type_mouvement'] = Variable<String>(typeMouvement);
+    map['quantite'] = Variable<int>(quantite);
+    map['motif'] = Variable<String>(motif);
+    if (!nullToAbsent || auteurId != null) {
+      map['auteur_id'] = Variable<String>(auteurId);
+    }
+    map['auteur_nom'] = Variable<String>(auteurNom);
+    map['date_mouvement'] = Variable<DateTime>(dateMouvement);
+    map['synced'] = Variable<bool>(synced);
+    return map;
+  }
+
+  LocalMouvementsStockCompanion toCompanion(bool nullToAbsent) {
+    return LocalMouvementsStockCompanion(
+      id: Value(id),
+      boutiqueId: Value(boutiqueId),
+      produitId: Value(produitId),
+      produitNom: Value(produitNom),
+      typeMouvement: Value(typeMouvement),
+      quantite: Value(quantite),
+      motif: Value(motif),
+      auteurId: auteurId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(auteurId),
+      auteurNom: Value(auteurNom),
+      dateMouvement: Value(dateMouvement),
+      synced: Value(synced),
+    );
+  }
+
+  factory LocalMouvementsStockData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalMouvementsStockData(
+      id: serializer.fromJson<String>(json['id']),
+      boutiqueId: serializer.fromJson<String>(json['boutiqueId']),
+      produitId: serializer.fromJson<String>(json['produitId']),
+      produitNom: serializer.fromJson<String>(json['produitNom']),
+      typeMouvement: serializer.fromJson<String>(json['typeMouvement']),
+      quantite: serializer.fromJson<int>(json['quantite']),
+      motif: serializer.fromJson<String>(json['motif']),
+      auteurId: serializer.fromJson<String?>(json['auteurId']),
+      auteurNom: serializer.fromJson<String>(json['auteurNom']),
+      dateMouvement: serializer.fromJson<DateTime>(json['dateMouvement']),
+      synced: serializer.fromJson<bool>(json['synced']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'boutiqueId': serializer.toJson<String>(boutiqueId),
+      'produitId': serializer.toJson<String>(produitId),
+      'produitNom': serializer.toJson<String>(produitNom),
+      'typeMouvement': serializer.toJson<String>(typeMouvement),
+      'quantite': serializer.toJson<int>(quantite),
+      'motif': serializer.toJson<String>(motif),
+      'auteurId': serializer.toJson<String?>(auteurId),
+      'auteurNom': serializer.toJson<String>(auteurNom),
+      'dateMouvement': serializer.toJson<DateTime>(dateMouvement),
+      'synced': serializer.toJson<bool>(synced),
+    };
+  }
+
+  LocalMouvementsStockData copyWith(
+          {String? id,
+          String? boutiqueId,
+          String? produitId,
+          String? produitNom,
+          String? typeMouvement,
+          int? quantite,
+          String? motif,
+          Value<String?> auteurId = const Value.absent(),
+          String? auteurNom,
+          DateTime? dateMouvement,
+          bool? synced}) =>
+      LocalMouvementsStockData(
+        id: id ?? this.id,
+        boutiqueId: boutiqueId ?? this.boutiqueId,
+        produitId: produitId ?? this.produitId,
+        produitNom: produitNom ?? this.produitNom,
+        typeMouvement: typeMouvement ?? this.typeMouvement,
+        quantite: quantite ?? this.quantite,
+        motif: motif ?? this.motif,
+        auteurId: auteurId.present ? auteurId.value : this.auteurId,
+        auteurNom: auteurNom ?? this.auteurNom,
+        dateMouvement: dateMouvement ?? this.dateMouvement,
+        synced: synced ?? this.synced,
+      );
+  LocalMouvementsStockData copyWithCompanion(
+      LocalMouvementsStockCompanion data) {
+    return LocalMouvementsStockData(
+      id: data.id.present ? data.id.value : this.id,
+      boutiqueId:
+          data.boutiqueId.present ? data.boutiqueId.value : this.boutiqueId,
+      produitId: data.produitId.present ? data.produitId.value : this.produitId,
+      produitNom:
+          data.produitNom.present ? data.produitNom.value : this.produitNom,
+      typeMouvement: data.typeMouvement.present
+          ? data.typeMouvement.value
+          : this.typeMouvement,
+      quantite: data.quantite.present ? data.quantite.value : this.quantite,
+      motif: data.motif.present ? data.motif.value : this.motif,
+      auteurId: data.auteurId.present ? data.auteurId.value : this.auteurId,
+      auteurNom: data.auteurNom.present ? data.auteurNom.value : this.auteurNom,
+      dateMouvement: data.dateMouvement.present
+          ? data.dateMouvement.value
+          : this.dateMouvement,
+      synced: data.synced.present ? data.synced.value : this.synced,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalMouvementsStockData(')
+          ..write('id: $id, ')
+          ..write('boutiqueId: $boutiqueId, ')
+          ..write('produitId: $produitId, ')
+          ..write('produitNom: $produitNom, ')
+          ..write('typeMouvement: $typeMouvement, ')
+          ..write('quantite: $quantite, ')
+          ..write('motif: $motif, ')
+          ..write('auteurId: $auteurId, ')
+          ..write('auteurNom: $auteurNom, ')
+          ..write('dateMouvement: $dateMouvement, ')
+          ..write('synced: $synced')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      boutiqueId,
+      produitId,
+      produitNom,
+      typeMouvement,
+      quantite,
+      motif,
+      auteurId,
+      auteurNom,
+      dateMouvement,
+      synced);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalMouvementsStockData &&
+          other.id == this.id &&
+          other.boutiqueId == this.boutiqueId &&
+          other.produitId == this.produitId &&
+          other.produitNom == this.produitNom &&
+          other.typeMouvement == this.typeMouvement &&
+          other.quantite == this.quantite &&
+          other.motif == this.motif &&
+          other.auteurId == this.auteurId &&
+          other.auteurNom == this.auteurNom &&
+          other.dateMouvement == this.dateMouvement &&
+          other.synced == this.synced);
+}
+
+class LocalMouvementsStockCompanion
+    extends UpdateCompanion<LocalMouvementsStockData> {
+  final Value<String> id;
+  final Value<String> boutiqueId;
+  final Value<String> produitId;
+  final Value<String> produitNom;
+  final Value<String> typeMouvement;
+  final Value<int> quantite;
+  final Value<String> motif;
+  final Value<String?> auteurId;
+  final Value<String> auteurNom;
+  final Value<DateTime> dateMouvement;
+  final Value<bool> synced;
+  final Value<int> rowid;
+  const LocalMouvementsStockCompanion({
+    this.id = const Value.absent(),
+    this.boutiqueId = const Value.absent(),
+    this.produitId = const Value.absent(),
+    this.produitNom = const Value.absent(),
+    this.typeMouvement = const Value.absent(),
+    this.quantite = const Value.absent(),
+    this.motif = const Value.absent(),
+    this.auteurId = const Value.absent(),
+    this.auteurNom = const Value.absent(),
+    this.dateMouvement = const Value.absent(),
+    this.synced = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalMouvementsStockCompanion.insert({
+    required String id,
+    required String boutiqueId,
+    required String produitId,
+    this.produitNom = const Value.absent(),
+    required String typeMouvement,
+    required int quantite,
+    required String motif,
+    this.auteurId = const Value.absent(),
+    required String auteurNom,
+    this.dateMouvement = const Value.absent(),
+    this.synced = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        boutiqueId = Value(boutiqueId),
+        produitId = Value(produitId),
+        typeMouvement = Value(typeMouvement),
+        quantite = Value(quantite),
+        motif = Value(motif),
+        auteurNom = Value(auteurNom);
+  static Insertable<LocalMouvementsStockData> custom({
+    Expression<String>? id,
+    Expression<String>? boutiqueId,
+    Expression<String>? produitId,
+    Expression<String>? produitNom,
+    Expression<String>? typeMouvement,
+    Expression<int>? quantite,
+    Expression<String>? motif,
+    Expression<String>? auteurId,
+    Expression<String>? auteurNom,
+    Expression<DateTime>? dateMouvement,
+    Expression<bool>? synced,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (boutiqueId != null) 'boutique_id': boutiqueId,
+      if (produitId != null) 'produit_id': produitId,
+      if (produitNom != null) 'produit_nom': produitNom,
+      if (typeMouvement != null) 'type_mouvement': typeMouvement,
+      if (quantite != null) 'quantite': quantite,
+      if (motif != null) 'motif': motif,
+      if (auteurId != null) 'auteur_id': auteurId,
+      if (auteurNom != null) 'auteur_nom': auteurNom,
+      if (dateMouvement != null) 'date_mouvement': dateMouvement,
+      if (synced != null) 'synced': synced,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalMouvementsStockCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? boutiqueId,
+      Value<String>? produitId,
+      Value<String>? produitNom,
+      Value<String>? typeMouvement,
+      Value<int>? quantite,
+      Value<String>? motif,
+      Value<String?>? auteurId,
+      Value<String>? auteurNom,
+      Value<DateTime>? dateMouvement,
+      Value<bool>? synced,
+      Value<int>? rowid}) {
+    return LocalMouvementsStockCompanion(
+      id: id ?? this.id,
+      boutiqueId: boutiqueId ?? this.boutiqueId,
+      produitId: produitId ?? this.produitId,
+      produitNom: produitNom ?? this.produitNom,
+      typeMouvement: typeMouvement ?? this.typeMouvement,
+      quantite: quantite ?? this.quantite,
+      motif: motif ?? this.motif,
+      auteurId: auteurId ?? this.auteurId,
+      auteurNom: auteurNom ?? this.auteurNom,
+      dateMouvement: dateMouvement ?? this.dateMouvement,
+      synced: synced ?? this.synced,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (boutiqueId.present) {
+      map['boutique_id'] = Variable<String>(boutiqueId.value);
+    }
+    if (produitId.present) {
+      map['produit_id'] = Variable<String>(produitId.value);
+    }
+    if (produitNom.present) {
+      map['produit_nom'] = Variable<String>(produitNom.value);
+    }
+    if (typeMouvement.present) {
+      map['type_mouvement'] = Variable<String>(typeMouvement.value);
+    }
+    if (quantite.present) {
+      map['quantite'] = Variable<int>(quantite.value);
+    }
+    if (motif.present) {
+      map['motif'] = Variable<String>(motif.value);
+    }
+    if (auteurId.present) {
+      map['auteur_id'] = Variable<String>(auteurId.value);
+    }
+    if (auteurNom.present) {
+      map['auteur_nom'] = Variable<String>(auteurNom.value);
+    }
+    if (dateMouvement.present) {
+      map['date_mouvement'] = Variable<DateTime>(dateMouvement.value);
+    }
+    if (synced.present) {
+      map['synced'] = Variable<bool>(synced.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalMouvementsStockCompanion(')
+          ..write('id: $id, ')
+          ..write('boutiqueId: $boutiqueId, ')
+          ..write('produitId: $produitId, ')
+          ..write('produitNom: $produitNom, ')
+          ..write('typeMouvement: $typeMouvement, ')
+          ..write('quantite: $quantite, ')
+          ..write('motif: $motif, ')
+          ..write('auteurId: $auteurId, ')
+          ..write('auteurNom: $auteurNom, ')
+          ..write('dateMouvement: $dateMouvement, ')
+          ..write('synced: $synced, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2837,6 +3407,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LocalDepensesTable localDepenses = $LocalDepensesTable(this);
   late final $LocalSessionsTable localSessions = $LocalSessionsTable(this);
   late final $LocalTiersTable localTiers = $LocalTiersTable(this);
+  late final $LocalMouvementsStockTable localMouvementsStock =
+      $LocalMouvementsStockTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2848,7 +3420,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         localLignesVente,
         localDepenses,
         localSessions,
-        localTiers
+        localTiers,
+        localMouvementsStock
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -4501,6 +5074,277 @@ typedef $$LocalTiersTableProcessedTableManager = ProcessedTableManager<
     (LocalTier, BaseReferences<_$AppDatabase, $LocalTiersTable, LocalTier>),
     LocalTier,
     PrefetchHooks Function()>;
+typedef $$LocalMouvementsStockTableCreateCompanionBuilder
+    = LocalMouvementsStockCompanion Function({
+  required String id,
+  required String boutiqueId,
+  required String produitId,
+  Value<String> produitNom,
+  required String typeMouvement,
+  required int quantite,
+  required String motif,
+  Value<String?> auteurId,
+  required String auteurNom,
+  Value<DateTime> dateMouvement,
+  Value<bool> synced,
+  Value<int> rowid,
+});
+typedef $$LocalMouvementsStockTableUpdateCompanionBuilder
+    = LocalMouvementsStockCompanion Function({
+  Value<String> id,
+  Value<String> boutiqueId,
+  Value<String> produitId,
+  Value<String> produitNom,
+  Value<String> typeMouvement,
+  Value<int> quantite,
+  Value<String> motif,
+  Value<String?> auteurId,
+  Value<String> auteurNom,
+  Value<DateTime> dateMouvement,
+  Value<bool> synced,
+  Value<int> rowid,
+});
+
+class $$LocalMouvementsStockTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalMouvementsStockTable> {
+  $$LocalMouvementsStockTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get boutiqueId => $composableBuilder(
+      column: $table.boutiqueId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get produitId => $composableBuilder(
+      column: $table.produitId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get produitNom => $composableBuilder(
+      column: $table.produitNom, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get typeMouvement => $composableBuilder(
+      column: $table.typeMouvement, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get quantite => $composableBuilder(
+      column: $table.quantite, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get motif => $composableBuilder(
+      column: $table.motif, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get auteurId => $composableBuilder(
+      column: $table.auteurId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get auteurNom => $composableBuilder(
+      column: $table.auteurNom, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get dateMouvement => $composableBuilder(
+      column: $table.dateMouvement, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get synced => $composableBuilder(
+      column: $table.synced, builder: (column) => ColumnFilters(column));
+}
+
+class $$LocalMouvementsStockTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalMouvementsStockTable> {
+  $$LocalMouvementsStockTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get boutiqueId => $composableBuilder(
+      column: $table.boutiqueId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get produitId => $composableBuilder(
+      column: $table.produitId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get produitNom => $composableBuilder(
+      column: $table.produitNom, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get typeMouvement => $composableBuilder(
+      column: $table.typeMouvement,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get quantite => $composableBuilder(
+      column: $table.quantite, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get motif => $composableBuilder(
+      column: $table.motif, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get auteurId => $composableBuilder(
+      column: $table.auteurId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get auteurNom => $composableBuilder(
+      column: $table.auteurNom, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get dateMouvement => $composableBuilder(
+      column: $table.dateMouvement,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get synced => $composableBuilder(
+      column: $table.synced, builder: (column) => ColumnOrderings(column));
+}
+
+class $$LocalMouvementsStockTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalMouvementsStockTable> {
+  $$LocalMouvementsStockTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get boutiqueId => $composableBuilder(
+      column: $table.boutiqueId, builder: (column) => column);
+
+  GeneratedColumn<String> get produitId =>
+      $composableBuilder(column: $table.produitId, builder: (column) => column);
+
+  GeneratedColumn<String> get produitNom => $composableBuilder(
+      column: $table.produitNom, builder: (column) => column);
+
+  GeneratedColumn<String> get typeMouvement => $composableBuilder(
+      column: $table.typeMouvement, builder: (column) => column);
+
+  GeneratedColumn<int> get quantite =>
+      $composableBuilder(column: $table.quantite, builder: (column) => column);
+
+  GeneratedColumn<String> get motif =>
+      $composableBuilder(column: $table.motif, builder: (column) => column);
+
+  GeneratedColumn<String> get auteurId =>
+      $composableBuilder(column: $table.auteurId, builder: (column) => column);
+
+  GeneratedColumn<String> get auteurNom =>
+      $composableBuilder(column: $table.auteurNom, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get dateMouvement => $composableBuilder(
+      column: $table.dateMouvement, builder: (column) => column);
+
+  GeneratedColumn<bool> get synced =>
+      $composableBuilder(column: $table.synced, builder: (column) => column);
+}
+
+class $$LocalMouvementsStockTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $LocalMouvementsStockTable,
+    LocalMouvementsStockData,
+    $$LocalMouvementsStockTableFilterComposer,
+    $$LocalMouvementsStockTableOrderingComposer,
+    $$LocalMouvementsStockTableAnnotationComposer,
+    $$LocalMouvementsStockTableCreateCompanionBuilder,
+    $$LocalMouvementsStockTableUpdateCompanionBuilder,
+    (
+      LocalMouvementsStockData,
+      BaseReferences<_$AppDatabase, $LocalMouvementsStockTable,
+          LocalMouvementsStockData>
+    ),
+    LocalMouvementsStockData,
+    PrefetchHooks Function()> {
+  $$LocalMouvementsStockTableTableManager(
+      _$AppDatabase db, $LocalMouvementsStockTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalMouvementsStockTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalMouvementsStockTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalMouvementsStockTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> boutiqueId = const Value.absent(),
+            Value<String> produitId = const Value.absent(),
+            Value<String> produitNom = const Value.absent(),
+            Value<String> typeMouvement = const Value.absent(),
+            Value<int> quantite = const Value.absent(),
+            Value<String> motif = const Value.absent(),
+            Value<String?> auteurId = const Value.absent(),
+            Value<String> auteurNom = const Value.absent(),
+            Value<DateTime> dateMouvement = const Value.absent(),
+            Value<bool> synced = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalMouvementsStockCompanion(
+            id: id,
+            boutiqueId: boutiqueId,
+            produitId: produitId,
+            produitNom: produitNom,
+            typeMouvement: typeMouvement,
+            quantite: quantite,
+            motif: motif,
+            auteurId: auteurId,
+            auteurNom: auteurNom,
+            dateMouvement: dateMouvement,
+            synced: synced,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String boutiqueId,
+            required String produitId,
+            Value<String> produitNom = const Value.absent(),
+            required String typeMouvement,
+            required int quantite,
+            required String motif,
+            Value<String?> auteurId = const Value.absent(),
+            required String auteurNom,
+            Value<DateTime> dateMouvement = const Value.absent(),
+            Value<bool> synced = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalMouvementsStockCompanion.insert(
+            id: id,
+            boutiqueId: boutiqueId,
+            produitId: produitId,
+            produitNom: produitNom,
+            typeMouvement: typeMouvement,
+            quantite: quantite,
+            motif: motif,
+            auteurId: auteurId,
+            auteurNom: auteurNom,
+            dateMouvement: dateMouvement,
+            synced: synced,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$LocalMouvementsStockTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $LocalMouvementsStockTable,
+        LocalMouvementsStockData,
+        $$LocalMouvementsStockTableFilterComposer,
+        $$LocalMouvementsStockTableOrderingComposer,
+        $$LocalMouvementsStockTableAnnotationComposer,
+        $$LocalMouvementsStockTableCreateCompanionBuilder,
+        $$LocalMouvementsStockTableUpdateCompanionBuilder,
+        (
+          LocalMouvementsStockData,
+          BaseReferences<_$AppDatabase, $LocalMouvementsStockTable,
+              LocalMouvementsStockData>
+        ),
+        LocalMouvementsStockData,
+        PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4519,4 +5363,6 @@ class $AppDatabaseManager {
       $$LocalSessionsTableTableManager(_db, _db.localSessions);
   $$LocalTiersTableTableManager get localTiers =>
       $$LocalTiersTableTableManager(_db, _db.localTiers);
+  $$LocalMouvementsStockTableTableManager get localMouvementsStock =>
+      $$LocalMouvementsStockTableTableManager(_db, _db.localMouvementsStock);
 }

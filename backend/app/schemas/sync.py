@@ -47,11 +47,25 @@ class EntreeStockIn(BaseModel):
     lignes: list[LigneEntreeStockIn]
 
 
+class MouvementStockIn(BaseModel):
+    """Mouvement de stock manuel (entrée ou sortie) saisi sur le smartphone."""
+
+    id_local_smartphone: str
+    produit_id: uuid.UUID
+    produit_nom: str = ""
+    type_mouvement: str = Field(pattern="^(ENTREE|SORTIE)$")
+    quantite: int = Field(ge=1)
+    motif: str = Field(min_length=1, max_length=255)
+    auteur_nom: str = ""
+    date_mouvement: datetime | None = None
+
+
 class SyncPushRequest(BaseModel):
     boutique_id: uuid.UUID
     ventes: list[VenteIn] = []
     depenses: list[DepenseIn] = []
     entrees_stock: list[EntreeStockIn] = []
+    mouvements_stock: list[MouvementStockIn] = []
 
 
 class VentePushResult(BaseModel):
@@ -76,6 +90,13 @@ class EntreeStockPushResult(BaseModel):
     produits_mis_a_jour: list[uuid.UUID] = []  # IDs des produits dont le stock a changé
 
 
+class MouvementStockPushResult(BaseModel):
+    id_local_smartphone: str
+    mouvement_id: uuid.UUID
+    deja_synchronise: bool = False
+    stock_actuel: int | None = None  # stock du produit après application
+
+
 class AlerteStockItem(BaseModel):
     produit_id: uuid.UUID
     nom: str
@@ -88,7 +109,23 @@ class SyncPushResponse(BaseModel):
     ventes: list[VentePushResult] = []
     depenses: list[DepensePushResult] = []
     entrees_stock: list[EntreeStockPushResult] = []
+    mouvements_stock: list[MouvementStockPushResult] = []
     alertes_stock: list[AlerteStockItem] = []
+
+
+class MouvementStockOut(BaseModel):
+    id: uuid.UUID
+    boutique_id: uuid.UUID
+    produit_id: uuid.UUID | None
+    produit_nom: str
+    type_mouvement: str
+    quantite: int
+    motif: str
+    auteur_id: uuid.UUID | None
+    auteur_nom: str
+    date_mouvement: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ----- PULL (serveur -> smartphone) -----

@@ -763,6 +763,326 @@ abstract class _DepenseIn implements DepenseIn {
       throw _privateConstructorUsedError;
 }
 
+MouvementStockIn _$MouvementStockInFromJson(Map<String, dynamic> json) {
+  return _MouvementStockIn.fromJson(json);
+}
+
+/// @nodoc
+mixin _$MouvementStockIn {
+  @JsonKey(name: 'id_local_smartphone')
+  String get idLocal => throw _privateConstructorUsedError;
+  @JsonKey(name: 'produit_id')
+  String get produitId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'produit_nom')
+  String get produitNom => throw _privateConstructorUsedError;
+  @JsonKey(name: 'type_mouvement')
+  String get typeMouvement => throw _privateConstructorUsedError;
+  int get quantite => throw _privateConstructorUsedError;
+  String get motif => throw _privateConstructorUsedError;
+  @JsonKey(name: 'auteur_nom')
+  String get auteurNom => throw _privateConstructorUsedError;
+  @JsonKey(name: 'date_mouvement')
+  DateTime? get dateMouvement => throw _privateConstructorUsedError;
+
+  /// Serializes this MouvementStockIn to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of MouvementStockIn
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $MouvementStockInCopyWith<MouvementStockIn> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $MouvementStockInCopyWith<$Res> {
+  factory $MouvementStockInCopyWith(
+          MouvementStockIn value, $Res Function(MouvementStockIn) then) =
+      _$MouvementStockInCopyWithImpl<$Res, MouvementStockIn>;
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'id_local_smartphone') String idLocal,
+      @JsonKey(name: 'produit_id') String produitId,
+      @JsonKey(name: 'produit_nom') String produitNom,
+      @JsonKey(name: 'type_mouvement') String typeMouvement,
+      int quantite,
+      String motif,
+      @JsonKey(name: 'auteur_nom') String auteurNom,
+      @JsonKey(name: 'date_mouvement') DateTime? dateMouvement});
+}
+
+/// @nodoc
+class _$MouvementStockInCopyWithImpl<$Res, $Val extends MouvementStockIn>
+    implements $MouvementStockInCopyWith<$Res> {
+  _$MouvementStockInCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of MouvementStockIn
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? idLocal = null,
+    Object? produitId = null,
+    Object? produitNom = null,
+    Object? typeMouvement = null,
+    Object? quantite = null,
+    Object? motif = null,
+    Object? auteurNom = null,
+    Object? dateMouvement = freezed,
+  }) {
+    return _then(_value.copyWith(
+      idLocal: null == idLocal
+          ? _value.idLocal
+          : idLocal // ignore: cast_nullable_to_non_nullable
+              as String,
+      produitId: null == produitId
+          ? _value.produitId
+          : produitId // ignore: cast_nullable_to_non_nullable
+              as String,
+      produitNom: null == produitNom
+          ? _value.produitNom
+          : produitNom // ignore: cast_nullable_to_non_nullable
+              as String,
+      typeMouvement: null == typeMouvement
+          ? _value.typeMouvement
+          : typeMouvement // ignore: cast_nullable_to_non_nullable
+              as String,
+      quantite: null == quantite
+          ? _value.quantite
+          : quantite // ignore: cast_nullable_to_non_nullable
+              as int,
+      motif: null == motif
+          ? _value.motif
+          : motif // ignore: cast_nullable_to_non_nullable
+              as String,
+      auteurNom: null == auteurNom
+          ? _value.auteurNom
+          : auteurNom // ignore: cast_nullable_to_non_nullable
+              as String,
+      dateMouvement: freezed == dateMouvement
+          ? _value.dateMouvement
+          : dateMouvement // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$MouvementStockInImplCopyWith<$Res>
+    implements $MouvementStockInCopyWith<$Res> {
+  factory _$$MouvementStockInImplCopyWith(_$MouvementStockInImpl value,
+          $Res Function(_$MouvementStockInImpl) then) =
+      __$$MouvementStockInImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'id_local_smartphone') String idLocal,
+      @JsonKey(name: 'produit_id') String produitId,
+      @JsonKey(name: 'produit_nom') String produitNom,
+      @JsonKey(name: 'type_mouvement') String typeMouvement,
+      int quantite,
+      String motif,
+      @JsonKey(name: 'auteur_nom') String auteurNom,
+      @JsonKey(name: 'date_mouvement') DateTime? dateMouvement});
+}
+
+/// @nodoc
+class __$$MouvementStockInImplCopyWithImpl<$Res>
+    extends _$MouvementStockInCopyWithImpl<$Res, _$MouvementStockInImpl>
+    implements _$$MouvementStockInImplCopyWith<$Res> {
+  __$$MouvementStockInImplCopyWithImpl(_$MouvementStockInImpl _value,
+      $Res Function(_$MouvementStockInImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of MouvementStockIn
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? idLocal = null,
+    Object? produitId = null,
+    Object? produitNom = null,
+    Object? typeMouvement = null,
+    Object? quantite = null,
+    Object? motif = null,
+    Object? auteurNom = null,
+    Object? dateMouvement = freezed,
+  }) {
+    return _then(_$MouvementStockInImpl(
+      idLocal: null == idLocal
+          ? _value.idLocal
+          : idLocal // ignore: cast_nullable_to_non_nullable
+              as String,
+      produitId: null == produitId
+          ? _value.produitId
+          : produitId // ignore: cast_nullable_to_non_nullable
+              as String,
+      produitNom: null == produitNom
+          ? _value.produitNom
+          : produitNom // ignore: cast_nullable_to_non_nullable
+              as String,
+      typeMouvement: null == typeMouvement
+          ? _value.typeMouvement
+          : typeMouvement // ignore: cast_nullable_to_non_nullable
+              as String,
+      quantite: null == quantite
+          ? _value.quantite
+          : quantite // ignore: cast_nullable_to_non_nullable
+              as int,
+      motif: null == motif
+          ? _value.motif
+          : motif // ignore: cast_nullable_to_non_nullable
+              as String,
+      auteurNom: null == auteurNom
+          ? _value.auteurNom
+          : auteurNom // ignore: cast_nullable_to_non_nullable
+              as String,
+      dateMouvement: freezed == dateMouvement
+          ? _value.dateMouvement
+          : dateMouvement // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$MouvementStockInImpl implements _MouvementStockIn {
+  const _$MouvementStockInImpl(
+      {@JsonKey(name: 'id_local_smartphone') required this.idLocal,
+      @JsonKey(name: 'produit_id') required this.produitId,
+      @JsonKey(name: 'produit_nom') this.produitNom = '',
+      @JsonKey(name: 'type_mouvement') required this.typeMouvement,
+      required this.quantite,
+      required this.motif,
+      @JsonKey(name: 'auteur_nom') this.auteurNom = '',
+      @JsonKey(name: 'date_mouvement') this.dateMouvement});
+
+  factory _$MouvementStockInImpl.fromJson(Map<String, dynamic> json) =>
+      _$$MouvementStockInImplFromJson(json);
+
+  @override
+  @JsonKey(name: 'id_local_smartphone')
+  final String idLocal;
+  @override
+  @JsonKey(name: 'produit_id')
+  final String produitId;
+  @override
+  @JsonKey(name: 'produit_nom')
+  final String produitNom;
+  @override
+  @JsonKey(name: 'type_mouvement')
+  final String typeMouvement;
+  @override
+  final int quantite;
+  @override
+  final String motif;
+  @override
+  @JsonKey(name: 'auteur_nom')
+  final String auteurNom;
+  @override
+  @JsonKey(name: 'date_mouvement')
+  final DateTime? dateMouvement;
+
+  @override
+  String toString() {
+    return 'MouvementStockIn(idLocal: $idLocal, produitId: $produitId, produitNom: $produitNom, typeMouvement: $typeMouvement, quantite: $quantite, motif: $motif, auteurNom: $auteurNom, dateMouvement: $dateMouvement)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$MouvementStockInImpl &&
+            (identical(other.idLocal, idLocal) || other.idLocal == idLocal) &&
+            (identical(other.produitId, produitId) ||
+                other.produitId == produitId) &&
+            (identical(other.produitNom, produitNom) ||
+                other.produitNom == produitNom) &&
+            (identical(other.typeMouvement, typeMouvement) ||
+                other.typeMouvement == typeMouvement) &&
+            (identical(other.quantite, quantite) ||
+                other.quantite == quantite) &&
+            (identical(other.motif, motif) || other.motif == motif) &&
+            (identical(other.auteurNom, auteurNom) ||
+                other.auteurNom == auteurNom) &&
+            (identical(other.dateMouvement, dateMouvement) ||
+                other.dateMouvement == dateMouvement));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, idLocal, produitId, produitNom,
+      typeMouvement, quantite, motif, auteurNom, dateMouvement);
+
+  /// Create a copy of MouvementStockIn
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$MouvementStockInImplCopyWith<_$MouvementStockInImpl> get copyWith =>
+      __$$MouvementStockInImplCopyWithImpl<_$MouvementStockInImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$MouvementStockInImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _MouvementStockIn implements MouvementStockIn {
+  const factory _MouvementStockIn(
+          {@JsonKey(name: 'id_local_smartphone') required final String idLocal,
+          @JsonKey(name: 'produit_id') required final String produitId,
+          @JsonKey(name: 'produit_nom') final String produitNom,
+          @JsonKey(name: 'type_mouvement') required final String typeMouvement,
+          required final int quantite,
+          required final String motif,
+          @JsonKey(name: 'auteur_nom') final String auteurNom,
+          @JsonKey(name: 'date_mouvement') final DateTime? dateMouvement}) =
+      _$MouvementStockInImpl;
+
+  factory _MouvementStockIn.fromJson(Map<String, dynamic> json) =
+      _$MouvementStockInImpl.fromJson;
+
+  @override
+  @JsonKey(name: 'id_local_smartphone')
+  String get idLocal;
+  @override
+  @JsonKey(name: 'produit_id')
+  String get produitId;
+  @override
+  @JsonKey(name: 'produit_nom')
+  String get produitNom;
+  @override
+  @JsonKey(name: 'type_mouvement')
+  String get typeMouvement;
+  @override
+  int get quantite;
+  @override
+  String get motif;
+  @override
+  @JsonKey(name: 'auteur_nom')
+  String get auteurNom;
+  @override
+  @JsonKey(name: 'date_mouvement')
+  DateTime? get dateMouvement;
+
+  /// Create a copy of MouvementStockIn
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$MouvementStockInImplCopyWith<_$MouvementStockInImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 SyncPushRequest _$SyncPushRequestFromJson(Map<String, dynamic> json) {
   return _SyncPushRequest.fromJson(json);
 }
@@ -775,6 +1095,9 @@ mixin _$SyncPushRequest {
   List<DepenseIn> get depenses => throw _privateConstructorUsedError;
   @JsonKey(name: 'entrees_stock')
   List<dynamic> get entreesStock => throw _privateConstructorUsedError;
+  @JsonKey(name: 'mouvements_stock')
+  List<MouvementStockIn> get mouvementsStock =>
+      throw _privateConstructorUsedError;
 
   /// Serializes this SyncPushRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -796,7 +1119,9 @@ abstract class $SyncPushRequestCopyWith<$Res> {
       {@JsonKey(name: 'boutique_id') String boutiqueId,
       List<VenteIn> ventes,
       List<DepenseIn> depenses,
-      @JsonKey(name: 'entrees_stock') List<dynamic> entreesStock});
+      @JsonKey(name: 'entrees_stock') List<dynamic> entreesStock,
+      @JsonKey(name: 'mouvements_stock')
+      List<MouvementStockIn> mouvementsStock});
 }
 
 /// @nodoc
@@ -818,6 +1143,7 @@ class _$SyncPushRequestCopyWithImpl<$Res, $Val extends SyncPushRequest>
     Object? ventes = null,
     Object? depenses = null,
     Object? entreesStock = null,
+    Object? mouvementsStock = null,
   }) {
     return _then(_value.copyWith(
       boutiqueId: null == boutiqueId
@@ -836,6 +1162,10 @@ class _$SyncPushRequestCopyWithImpl<$Res, $Val extends SyncPushRequest>
           ? _value.entreesStock
           : entreesStock // ignore: cast_nullable_to_non_nullable
               as List<dynamic>,
+      mouvementsStock: null == mouvementsStock
+          ? _value.mouvementsStock
+          : mouvementsStock // ignore: cast_nullable_to_non_nullable
+              as List<MouvementStockIn>,
     ) as $Val);
   }
 }
@@ -852,7 +1182,9 @@ abstract class _$$SyncPushRequestImplCopyWith<$Res>
       {@JsonKey(name: 'boutique_id') String boutiqueId,
       List<VenteIn> ventes,
       List<DepenseIn> depenses,
-      @JsonKey(name: 'entrees_stock') List<dynamic> entreesStock});
+      @JsonKey(name: 'entrees_stock') List<dynamic> entreesStock,
+      @JsonKey(name: 'mouvements_stock')
+      List<MouvementStockIn> mouvementsStock});
 }
 
 /// @nodoc
@@ -872,6 +1204,7 @@ class __$$SyncPushRequestImplCopyWithImpl<$Res>
     Object? ventes = null,
     Object? depenses = null,
     Object? entreesStock = null,
+    Object? mouvementsStock = null,
   }) {
     return _then(_$SyncPushRequestImpl(
       boutiqueId: null == boutiqueId
@@ -890,6 +1223,10 @@ class __$$SyncPushRequestImplCopyWithImpl<$Res>
           ? _value._entreesStock
           : entreesStock // ignore: cast_nullable_to_non_nullable
               as List<dynamic>,
+      mouvementsStock: null == mouvementsStock
+          ? _value._mouvementsStock
+          : mouvementsStock // ignore: cast_nullable_to_non_nullable
+              as List<MouvementStockIn>,
     ));
   }
 }
@@ -902,10 +1239,13 @@ class _$SyncPushRequestImpl implements _SyncPushRequest {
       final List<VenteIn> ventes = const [],
       final List<DepenseIn> depenses = const [],
       @JsonKey(name: 'entrees_stock')
-      final List<dynamic> entreesStock = const []})
+      final List<dynamic> entreesStock = const [],
+      @JsonKey(name: 'mouvements_stock')
+      final List<MouvementStockIn> mouvementsStock = const []})
       : _ventes = ventes,
         _depenses = depenses,
-        _entreesStock = entreesStock;
+        _entreesStock = entreesStock,
+        _mouvementsStock = mouvementsStock;
 
   factory _$SyncPushRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$SyncPushRequestImplFromJson(json);
@@ -940,9 +1280,18 @@ class _$SyncPushRequestImpl implements _SyncPushRequest {
     return EqualUnmodifiableListView(_entreesStock);
   }
 
+  final List<MouvementStockIn> _mouvementsStock;
+  @override
+  @JsonKey(name: 'mouvements_stock')
+  List<MouvementStockIn> get mouvementsStock {
+    if (_mouvementsStock is EqualUnmodifiableListView) return _mouvementsStock;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_mouvementsStock);
+  }
+
   @override
   String toString() {
-    return 'SyncPushRequest(boutiqueId: $boutiqueId, ventes: $ventes, depenses: $depenses, entreesStock: $entreesStock)';
+    return 'SyncPushRequest(boutiqueId: $boutiqueId, ventes: $ventes, depenses: $depenses, entreesStock: $entreesStock, mouvementsStock: $mouvementsStock)';
   }
 
   @override
@@ -955,7 +1304,9 @@ class _$SyncPushRequestImpl implements _SyncPushRequest {
             const DeepCollectionEquality().equals(other._ventes, _ventes) &&
             const DeepCollectionEquality().equals(other._depenses, _depenses) &&
             const DeepCollectionEquality()
-                .equals(other._entreesStock, _entreesStock));
+                .equals(other._entreesStock, _entreesStock) &&
+            const DeepCollectionEquality()
+                .equals(other._mouvementsStock, _mouvementsStock));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -965,7 +1316,8 @@ class _$SyncPushRequestImpl implements _SyncPushRequest {
       boutiqueId,
       const DeepCollectionEquality().hash(_ventes),
       const DeepCollectionEquality().hash(_depenses),
-      const DeepCollectionEquality().hash(_entreesStock));
+      const DeepCollectionEquality().hash(_entreesStock),
+      const DeepCollectionEquality().hash(_mouvementsStock));
 
   /// Create a copy of SyncPushRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -986,11 +1338,12 @@ class _$SyncPushRequestImpl implements _SyncPushRequest {
 
 abstract class _SyncPushRequest implements SyncPushRequest {
   const factory _SyncPushRequest(
-          {@JsonKey(name: 'boutique_id') required final String boutiqueId,
-          final List<VenteIn> ventes,
-          final List<DepenseIn> depenses,
-          @JsonKey(name: 'entrees_stock') final List<dynamic> entreesStock}) =
-      _$SyncPushRequestImpl;
+      {@JsonKey(name: 'boutique_id') required final String boutiqueId,
+      final List<VenteIn> ventes,
+      final List<DepenseIn> depenses,
+      @JsonKey(name: 'entrees_stock') final List<dynamic> entreesStock,
+      @JsonKey(name: 'mouvements_stock')
+      final List<MouvementStockIn> mouvementsStock}) = _$SyncPushRequestImpl;
 
   factory _SyncPushRequest.fromJson(Map<String, dynamic> json) =
       _$SyncPushRequestImpl.fromJson;
@@ -1005,6 +1358,9 @@ abstract class _SyncPushRequest implements SyncPushRequest {
   @override
   @JsonKey(name: 'entrees_stock')
   List<dynamic> get entreesStock;
+  @override
+  @JsonKey(name: 'mouvements_stock')
+  List<MouvementStockIn> get mouvementsStock;
 
   /// Create a copy of SyncPushRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -2115,6 +2471,242 @@ abstract class _AlerteStockItem implements AlerteStockItem {
       throw _privateConstructorUsedError;
 }
 
+MouvementStockPushResult _$MouvementStockPushResultFromJson(
+    Map<String, dynamic> json) {
+  return _MouvementStockPushResult.fromJson(json);
+}
+
+/// @nodoc
+mixin _$MouvementStockPushResult {
+  @JsonKey(name: 'id_local_smartphone')
+  String get idLocal => throw _privateConstructorUsedError;
+  @JsonKey(name: 'mouvement_id')
+  String get mouvementId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'deja_synchronise')
+  bool get dejaSynchronise => throw _privateConstructorUsedError;
+  @JsonKey(name: 'stock_actuel')
+  int? get stockActuel => throw _privateConstructorUsedError;
+
+  /// Serializes this MouvementStockPushResult to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of MouvementStockPushResult
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $MouvementStockPushResultCopyWith<MouvementStockPushResult> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $MouvementStockPushResultCopyWith<$Res> {
+  factory $MouvementStockPushResultCopyWith(MouvementStockPushResult value,
+          $Res Function(MouvementStockPushResult) then) =
+      _$MouvementStockPushResultCopyWithImpl<$Res, MouvementStockPushResult>;
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'id_local_smartphone') String idLocal,
+      @JsonKey(name: 'mouvement_id') String mouvementId,
+      @JsonKey(name: 'deja_synchronise') bool dejaSynchronise,
+      @JsonKey(name: 'stock_actuel') int? stockActuel});
+}
+
+/// @nodoc
+class _$MouvementStockPushResultCopyWithImpl<$Res,
+        $Val extends MouvementStockPushResult>
+    implements $MouvementStockPushResultCopyWith<$Res> {
+  _$MouvementStockPushResultCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of MouvementStockPushResult
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? idLocal = null,
+    Object? mouvementId = null,
+    Object? dejaSynchronise = null,
+    Object? stockActuel = freezed,
+  }) {
+    return _then(_value.copyWith(
+      idLocal: null == idLocal
+          ? _value.idLocal
+          : idLocal // ignore: cast_nullable_to_non_nullable
+              as String,
+      mouvementId: null == mouvementId
+          ? _value.mouvementId
+          : mouvementId // ignore: cast_nullable_to_non_nullable
+              as String,
+      dejaSynchronise: null == dejaSynchronise
+          ? _value.dejaSynchronise
+          : dejaSynchronise // ignore: cast_nullable_to_non_nullable
+              as bool,
+      stockActuel: freezed == stockActuel
+          ? _value.stockActuel
+          : stockActuel // ignore: cast_nullable_to_non_nullable
+              as int?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$MouvementStockPushResultImplCopyWith<$Res>
+    implements $MouvementStockPushResultCopyWith<$Res> {
+  factory _$$MouvementStockPushResultImplCopyWith(
+          _$MouvementStockPushResultImpl value,
+          $Res Function(_$MouvementStockPushResultImpl) then) =
+      __$$MouvementStockPushResultImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'id_local_smartphone') String idLocal,
+      @JsonKey(name: 'mouvement_id') String mouvementId,
+      @JsonKey(name: 'deja_synchronise') bool dejaSynchronise,
+      @JsonKey(name: 'stock_actuel') int? stockActuel});
+}
+
+/// @nodoc
+class __$$MouvementStockPushResultImplCopyWithImpl<$Res>
+    extends _$MouvementStockPushResultCopyWithImpl<$Res,
+        _$MouvementStockPushResultImpl>
+    implements _$$MouvementStockPushResultImplCopyWith<$Res> {
+  __$$MouvementStockPushResultImplCopyWithImpl(
+      _$MouvementStockPushResultImpl _value,
+      $Res Function(_$MouvementStockPushResultImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of MouvementStockPushResult
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? idLocal = null,
+    Object? mouvementId = null,
+    Object? dejaSynchronise = null,
+    Object? stockActuel = freezed,
+  }) {
+    return _then(_$MouvementStockPushResultImpl(
+      idLocal: null == idLocal
+          ? _value.idLocal
+          : idLocal // ignore: cast_nullable_to_non_nullable
+              as String,
+      mouvementId: null == mouvementId
+          ? _value.mouvementId
+          : mouvementId // ignore: cast_nullable_to_non_nullable
+              as String,
+      dejaSynchronise: null == dejaSynchronise
+          ? _value.dejaSynchronise
+          : dejaSynchronise // ignore: cast_nullable_to_non_nullable
+              as bool,
+      stockActuel: freezed == stockActuel
+          ? _value.stockActuel
+          : stockActuel // ignore: cast_nullable_to_non_nullable
+              as int?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$MouvementStockPushResultImpl implements _MouvementStockPushResult {
+  const _$MouvementStockPushResultImpl(
+      {@JsonKey(name: 'id_local_smartphone') required this.idLocal,
+      @JsonKey(name: 'mouvement_id') required this.mouvementId,
+      @JsonKey(name: 'deja_synchronise') this.dejaSynchronise = false,
+      @JsonKey(name: 'stock_actuel') this.stockActuel});
+
+  factory _$MouvementStockPushResultImpl.fromJson(Map<String, dynamic> json) =>
+      _$$MouvementStockPushResultImplFromJson(json);
+
+  @override
+  @JsonKey(name: 'id_local_smartphone')
+  final String idLocal;
+  @override
+  @JsonKey(name: 'mouvement_id')
+  final String mouvementId;
+  @override
+  @JsonKey(name: 'deja_synchronise')
+  final bool dejaSynchronise;
+  @override
+  @JsonKey(name: 'stock_actuel')
+  final int? stockActuel;
+
+  @override
+  String toString() {
+    return 'MouvementStockPushResult(idLocal: $idLocal, mouvementId: $mouvementId, dejaSynchronise: $dejaSynchronise, stockActuel: $stockActuel)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$MouvementStockPushResultImpl &&
+            (identical(other.idLocal, idLocal) || other.idLocal == idLocal) &&
+            (identical(other.mouvementId, mouvementId) ||
+                other.mouvementId == mouvementId) &&
+            (identical(other.dejaSynchronise, dejaSynchronise) ||
+                other.dejaSynchronise == dejaSynchronise) &&
+            (identical(other.stockActuel, stockActuel) ||
+                other.stockActuel == stockActuel));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, idLocal, mouvementId, dejaSynchronise, stockActuel);
+
+  /// Create a copy of MouvementStockPushResult
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$MouvementStockPushResultImplCopyWith<_$MouvementStockPushResultImpl>
+      get copyWith => __$$MouvementStockPushResultImplCopyWithImpl<
+          _$MouvementStockPushResultImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$MouvementStockPushResultImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _MouvementStockPushResult implements MouvementStockPushResult {
+  const factory _MouvementStockPushResult(
+          {@JsonKey(name: 'id_local_smartphone') required final String idLocal,
+          @JsonKey(name: 'mouvement_id') required final String mouvementId,
+          @JsonKey(name: 'deja_synchronise') final bool dejaSynchronise,
+          @JsonKey(name: 'stock_actuel') final int? stockActuel}) =
+      _$MouvementStockPushResultImpl;
+
+  factory _MouvementStockPushResult.fromJson(Map<String, dynamic> json) =
+      _$MouvementStockPushResultImpl.fromJson;
+
+  @override
+  @JsonKey(name: 'id_local_smartphone')
+  String get idLocal;
+  @override
+  @JsonKey(name: 'mouvement_id')
+  String get mouvementId;
+  @override
+  @JsonKey(name: 'deja_synchronise')
+  bool get dejaSynchronise;
+  @override
+  @JsonKey(name: 'stock_actuel')
+  int? get stockActuel;
+
+  /// Create a copy of MouvementStockPushResult
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$MouvementStockPushResultImplCopyWith<_$MouvementStockPushResultImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
 SyncPushResponse _$SyncPushResponseFromJson(Map<String, dynamic> json) {
   return _SyncPushResponse.fromJson(json);
 }
@@ -2123,6 +2715,9 @@ SyncPushResponse _$SyncPushResponseFromJson(Map<String, dynamic> json) {
 mixin _$SyncPushResponse {
   List<VentePushResult> get ventes => throw _privateConstructorUsedError;
   List<dynamic> get depenses => throw _privateConstructorUsedError;
+  @JsonKey(name: 'mouvements_stock')
+  List<MouvementStockPushResult> get mouvementsStock =>
+      throw _privateConstructorUsedError;
   @JsonKey(name: 'alertes_stock')
   List<AlerteStockItem> get alertesStock => throw _privateConstructorUsedError;
 
@@ -2145,6 +2740,8 @@ abstract class $SyncPushResponseCopyWith<$Res> {
   $Res call(
       {List<VentePushResult> ventes,
       List<dynamic> depenses,
+      @JsonKey(name: 'mouvements_stock')
+      List<MouvementStockPushResult> mouvementsStock,
       @JsonKey(name: 'alertes_stock') List<AlerteStockItem> alertesStock});
 }
 
@@ -2165,6 +2762,7 @@ class _$SyncPushResponseCopyWithImpl<$Res, $Val extends SyncPushResponse>
   $Res call({
     Object? ventes = null,
     Object? depenses = null,
+    Object? mouvementsStock = null,
     Object? alertesStock = null,
   }) {
     return _then(_value.copyWith(
@@ -2176,6 +2774,10 @@ class _$SyncPushResponseCopyWithImpl<$Res, $Val extends SyncPushResponse>
           ? _value.depenses
           : depenses // ignore: cast_nullable_to_non_nullable
               as List<dynamic>,
+      mouvementsStock: null == mouvementsStock
+          ? _value.mouvementsStock
+          : mouvementsStock // ignore: cast_nullable_to_non_nullable
+              as List<MouvementStockPushResult>,
       alertesStock: null == alertesStock
           ? _value.alertesStock
           : alertesStock // ignore: cast_nullable_to_non_nullable
@@ -2195,6 +2797,8 @@ abstract class _$$SyncPushResponseImplCopyWith<$Res>
   $Res call(
       {List<VentePushResult> ventes,
       List<dynamic> depenses,
+      @JsonKey(name: 'mouvements_stock')
+      List<MouvementStockPushResult> mouvementsStock,
       @JsonKey(name: 'alertes_stock') List<AlerteStockItem> alertesStock});
 }
 
@@ -2213,6 +2817,7 @@ class __$$SyncPushResponseImplCopyWithImpl<$Res>
   $Res call({
     Object? ventes = null,
     Object? depenses = null,
+    Object? mouvementsStock = null,
     Object? alertesStock = null,
   }) {
     return _then(_$SyncPushResponseImpl(
@@ -2224,6 +2829,10 @@ class __$$SyncPushResponseImplCopyWithImpl<$Res>
           ? _value._depenses
           : depenses // ignore: cast_nullable_to_non_nullable
               as List<dynamic>,
+      mouvementsStock: null == mouvementsStock
+          ? _value._mouvementsStock
+          : mouvementsStock // ignore: cast_nullable_to_non_nullable
+              as List<MouvementStockPushResult>,
       alertesStock: null == alertesStock
           ? _value._alertesStock
           : alertesStock // ignore: cast_nullable_to_non_nullable
@@ -2238,10 +2847,13 @@ class _$SyncPushResponseImpl implements _SyncPushResponse {
   const _$SyncPushResponseImpl(
       {final List<VentePushResult> ventes = const [],
       final List<dynamic> depenses = const [],
+      @JsonKey(name: 'mouvements_stock')
+      final List<MouvementStockPushResult> mouvementsStock = const [],
       @JsonKey(name: 'alertes_stock')
       final List<AlerteStockItem> alertesStock = const []})
       : _ventes = ventes,
         _depenses = depenses,
+        _mouvementsStock = mouvementsStock,
         _alertesStock = alertesStock;
 
   factory _$SyncPushResponseImpl.fromJson(Map<String, dynamic> json) =>
@@ -2265,6 +2877,15 @@ class _$SyncPushResponseImpl implements _SyncPushResponse {
     return EqualUnmodifiableListView(_depenses);
   }
 
+  final List<MouvementStockPushResult> _mouvementsStock;
+  @override
+  @JsonKey(name: 'mouvements_stock')
+  List<MouvementStockPushResult> get mouvementsStock {
+    if (_mouvementsStock is EqualUnmodifiableListView) return _mouvementsStock;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_mouvementsStock);
+  }
+
   final List<AlerteStockItem> _alertesStock;
   @override
   @JsonKey(name: 'alertes_stock')
@@ -2276,7 +2897,7 @@ class _$SyncPushResponseImpl implements _SyncPushResponse {
 
   @override
   String toString() {
-    return 'SyncPushResponse(ventes: $ventes, depenses: $depenses, alertesStock: $alertesStock)';
+    return 'SyncPushResponse(ventes: $ventes, depenses: $depenses, mouvementsStock: $mouvementsStock, alertesStock: $alertesStock)';
   }
 
   @override
@@ -2287,6 +2908,8 @@ class _$SyncPushResponseImpl implements _SyncPushResponse {
             const DeepCollectionEquality().equals(other._ventes, _ventes) &&
             const DeepCollectionEquality().equals(other._depenses, _depenses) &&
             const DeepCollectionEquality()
+                .equals(other._mouvementsStock, _mouvementsStock) &&
+            const DeepCollectionEquality()
                 .equals(other._alertesStock, _alertesStock));
   }
 
@@ -2296,6 +2919,7 @@ class _$SyncPushResponseImpl implements _SyncPushResponse {
       runtimeType,
       const DeepCollectionEquality().hash(_ventes),
       const DeepCollectionEquality().hash(_depenses),
+      const DeepCollectionEquality().hash(_mouvementsStock),
       const DeepCollectionEquality().hash(_alertesStock));
 
   /// Create a copy of SyncPushResponse
@@ -2319,6 +2943,8 @@ abstract class _SyncPushResponse implements SyncPushResponse {
   const factory _SyncPushResponse(
       {final List<VentePushResult> ventes,
       final List<dynamic> depenses,
+      @JsonKey(name: 'mouvements_stock')
+      final List<MouvementStockPushResult> mouvementsStock,
       @JsonKey(name: 'alertes_stock')
       final List<AlerteStockItem> alertesStock}) = _$SyncPushResponseImpl;
 
@@ -2329,6 +2955,9 @@ abstract class _SyncPushResponse implements SyncPushResponse {
   List<VentePushResult> get ventes;
   @override
   List<dynamic> get depenses;
+  @override
+  @JsonKey(name: 'mouvements_stock')
+  List<MouvementStockPushResult> get mouvementsStock;
   @override
   @JsonKey(name: 'alertes_stock')
   List<AlerteStockItem> get alertesStock;

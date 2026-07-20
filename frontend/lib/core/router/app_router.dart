@@ -7,6 +7,7 @@ import '../../features/auth/screens/register_screen.dart';
 import '../../features/abonnements/screens/pricing_screen.dart';
 import '../../features/caisse/screens/caisse_screen.dart';
 import '../../features/stock/screens/categories_screen.dart';
+import '../../features/stock/screens/mouvements_stock_screen.dart';
 import '../../features/stock/screens/stock_screen.dart';
 import '../../features/tiers/screens/tiers_screen.dart';
 import '../../features/sessions/screens/sessions_screen.dart';
@@ -22,6 +23,7 @@ abstract final class AppRoutes {
   static const register = '/register';
   static const caisse = '/caisse';
   static const stock = '/stock';
+  static const stockMouvements = '/stock/mouvements';
   static const categories = '/categories';
   static const settings = '/settings';
   static const tiers = '/tiers';
@@ -73,6 +75,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.stock,
             builder: (_, __) => const StockScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.stockMouvements,
+            builder: (_, __) => const MouvementsStockScreen(),
           ),
           GoRoute(
             path: AppRoutes.categories,

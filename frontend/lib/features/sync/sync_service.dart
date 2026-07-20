@@ -63,6 +63,33 @@ class SyncService {
         }
       }
 
+      // ── Mouvements de stock non sync ──────────────────────────────────────
+      final mouvementsPending = await db.getMouvementsNonSync(boutiqueId);
+      if (mouvementsPending.isNotEmpty) {
+        final mouvementsIn = mouvementsPending
+            .map((m) => MouvementStockIn(
+                  idLocal: m.id,
+                  produitId: m.produitId,
+                  produitNom: m.produitNom,
+                  typeMouvement: m.typeMouvement,
+                  quantite: m.quantite,
+                  motif: m.motif,
+                  auteurNom: m.auteurNom,
+                  dateMouvement: m.dateMouvement,
+                ))
+            .toList();
+
+        final respMvt = await syncApi.push(SyncPushRequest(
+          boutiqueId: boutiqueId,
+          mouvementsStock: mouvementsIn,
+        ));
+
+        for (final result in respMvt.mouvementsStock) {
+          await db.marquerMouvementSync(result.idLocal);
+          synced++;
+        }
+      }
+
       // ── Dépenses non sync ─────────────────────────────────────────────────
       final depensesPending = await db.getDepensesNonSync(boutiqueId);
       if (depensesPending.isNotEmpty) {

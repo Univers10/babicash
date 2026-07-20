@@ -46,12 +46,31 @@ class DepenseIn with _$DepenseIn {
 }
 
 @freezed
+class MouvementStockIn with _$MouvementStockIn {
+  const factory MouvementStockIn({
+    @JsonKey(name: 'id_local_smartphone') required String idLocal,
+    @JsonKey(name: 'produit_id') required String produitId,
+    @JsonKey(name: 'produit_nom') @Default('') String produitNom,
+    @JsonKey(name: 'type_mouvement') required String typeMouvement,
+    required int quantite,
+    required String motif,
+    @JsonKey(name: 'auteur_nom') @Default('') String auteurNom,
+    @JsonKey(name: 'date_mouvement') DateTime? dateMouvement,
+  }) = _MouvementStockIn;
+  factory MouvementStockIn.fromJson(Map<String, dynamic> json) =>
+      _$MouvementStockInFromJson(json);
+}
+
+@freezed
 class SyncPushRequest with _$SyncPushRequest {
   const factory SyncPushRequest({
     @JsonKey(name: 'boutique_id') required String boutiqueId,
     @Default([]) List<VenteIn> ventes,
     @Default([]) List<DepenseIn> depenses,
     @JsonKey(name: 'entrees_stock') @Default([]) List<dynamic> entreesStock,
+    @JsonKey(name: 'mouvements_stock')
+    @Default([])
+    List<MouvementStockIn> mouvementsStock,
   }) = _SyncPushRequest;
   factory SyncPushRequest.fromJson(Map<String, dynamic> json) =>
       _$SyncPushRequestFromJson(json);
@@ -118,10 +137,25 @@ class AlerteStockItem with _$AlerteStockItem {
 }
 
 @freezed
+class MouvementStockPushResult with _$MouvementStockPushResult {
+  const factory MouvementStockPushResult({
+    @JsonKey(name: 'id_local_smartphone') required String idLocal,
+    @JsonKey(name: 'mouvement_id') required String mouvementId,
+    @JsonKey(name: 'deja_synchronise') @Default(false) bool dejaSynchronise,
+    @JsonKey(name: 'stock_actuel') int? stockActuel,
+  }) = _MouvementStockPushResult;
+  factory MouvementStockPushResult.fromJson(Map<String, dynamic> json) =>
+      _$MouvementStockPushResultFromJson(json);
+}
+
+@freezed
 class SyncPushResponse with _$SyncPushResponse {
   const factory SyncPushResponse({
     @Default([]) List<VentePushResult> ventes,
     @Default([]) List<dynamic> depenses,
+    @JsonKey(name: 'mouvements_stock')
+    @Default([])
+    List<MouvementStockPushResult> mouvementsStock,
     @JsonKey(name: 'alertes_stock') @Default([]) List<AlerteStockItem> alertesStock,
   }) = _SyncPushResponse;
   factory SyncPushResponse.fromJson(Map<String, dynamic> json) =>
