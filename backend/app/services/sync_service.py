@@ -128,6 +128,8 @@ async def _process_vente(
                 prix_vendu_reel=ligne_in.prix_vendu_reel,
                 marge_calculee=marge,
                 vente_a_perte=ligne_a_perte,
+                lot_id=ligne_in.lot_id,
+                lot_nom=ligne_in.lot_nom,
             )
         )
         recu_lignes.append(

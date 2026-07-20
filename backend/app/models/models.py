@@ -235,6 +235,12 @@ class LigneVente(Base):
     vente_a_perte: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False
     )
+    # Lot (prix de groupe) : lignes vendues ensemble à un prix négocié réparti.
+    # NULL = ligne normale (toutes les ventes existantes).
+    lot_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True), nullable=True
+    )
+    lot_nom: Mapped[str | None] = mapped_column(String(120), nullable=True)
 
     vente: Mapped["Vente"] = relationship(back_populates="lignes")
 

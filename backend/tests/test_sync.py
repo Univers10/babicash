@@ -1,5 +1,9 @@
-import pytest
+import uuid
 
+import pytest
+from sqlalchemy import select
+
+from app.models import LigneVente
 from tests.conftest import login
 
 
@@ -117,6 +121,81 @@ async def test_alerte_stock_bas_dans_reponse(client, seeded):
     assert alerte["produit_id"] == seeded["produit_id"]
     assert alerte["stock_actuel"] == 2
     assert alerte["en_rupture"] is False
+
+
+@pytest.mark.asyncio
+async def test_push_vente_avec_lot(client, seeded, session_factory):
+    """Un lot (prix de groupe) persiste lot_id/lot_nom sur chaque ligne."""
+    token = await login(client, seeded["manager_email"], "gerant1234")
+    lot_id = "11111111-1111-1111-1111-111111111111"
+    payload = {
+        "boutique_id": seeded["boutique_id"],
+        "ventes": [
+            {
+                "id_local_smartphone": "local-lot",
+                "mode_paiement": "ESPECES",
+                "lignes": [
+                    {
+                        "produit_id": seeded["produit_id"],
+                        "quantite": 2,
+                        "prix_vendu_reel": "667.00",
+                        "lot_id": lot_id,
+                        "lot_nom": "Kit 3 bieres",
+                    },
+                    {
+                        "produit_id": seeded["produit_id"],
+                        "quantite": 1,
+                        "prix_vendu_reel": "666.00",
+                        "lot_id": lot_id,
+                        "lot_nom": "Kit 3 bieres",
+                    },
+                ],
+            }
+        ],
+    }
+    resp = await client.post(
+        "/api/v1/sync/push",
+        json=payload,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 200, resp.text
+    # 667*2 + 666*1 = 2000, la somme des lignes vaut exactement le prix du lot.
+    assert resp.json()["ventes"][0]["recu"]["montant_total"] == "2000.00"
+
+    async with session_factory() as db:
+        rows = (
+            await db.execute(
+                select(LigneVente).where(LigneVente.lot_id == uuid.UUID(lot_id))
+            )
+        ).scalars().all()
+        assert len(rows) == 2
+        assert all(r.lot_nom == "Kit 3 bieres" for r in rows)
+
+
+@pytest.mark.asyncio
+async def test_push_vente_sans_lot_retrocompatible(client, seeded, session_factory):
+    """Une vente sans champs de lot reste valide (lot_id/lot_nom = NULL)."""
+    token = await login(client, seeded["manager_email"], "gerant1234")
+    payload = _vente_payload(
+        seeded["boutique_id"], seeded["produit_id"], "local-nolot", "500.00"
+    )
+    resp = await client.post(
+        "/api/v1/sync/push",
+        json=payload,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 200, resp.text
+
+    async with session_factory() as db:
+        vente_id = uuid.UUID(resp.json()["ventes"][0]["vente_id"])
+        rows = (
+            await db.execute(
+                select(LigneVente).where(LigneVente.vente_id == vente_id)
+            )
+        ).scalars().all()
+        assert len(rows) == 1
+        assert rows[0].lot_id is None
+        assert rows[0].lot_nom is None
 
 
 @pytest.mark.asyncio
