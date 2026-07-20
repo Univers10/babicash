@@ -61,13 +61,14 @@ class _ProduitFormDialogState extends ConsumerState<ProduitFormDialog> {
           stockAlerte: stockAlerte,
         );
       } else {
+        // La quantité en stock n'est plus éditable ici (S2) :
+        // elle est recalculée via les mouvements d'entrée / sortie.
         await notifier.updateProduit(
           id: widget.produit!.id,
           nom: nom,
           categorieId: _categorieId,
           prixAchat: prixAchat,
           prixVente: prixVente,
-          stock: stock,
           stockAlerte: stockAlerte,
         );
       }
@@ -144,16 +145,21 @@ class _ProduitFormDialogState extends ConsumerState<ProduitFormDialog> {
               const VGap(AppSpacing.md),
               Row(
                 children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _stockController,
-                      decoration: const InputDecoration(labelText: 'Stock'),
-                      keyboardType: TextInputType.number,
-                      validator: (v) =>
-                          (int.tryParse(v ?? '') ?? -1) < 0 ? 'Invalide' : null,
+                  // Le stock initial n'est saisi qu'à la création (S2) ;
+                  // ensuite il évolue uniquement via les mouvements.
+                  if (widget.produit == null) ...[
+                    Expanded(
+                      child: TextFormField(
+                        controller: _stockController,
+                        decoration:
+                            const InputDecoration(labelText: 'Stock initial'),
+                        keyboardType: TextInputType.number,
+                        validator: (v) =>
+                            (int.tryParse(v ?? '') ?? -1) < 0 ? 'Invalide' : null,
+                      ),
                     ),
-                  ),
-                  const HGap(AppSpacing.md),
+                    const HGap(AppSpacing.md),
+                  ],
                   Expanded(
                     child: TextFormField(
                       controller: _alerteController,
@@ -165,6 +171,14 @@ class _ProduitFormDialogState extends ConsumerState<ProduitFormDialog> {
                   ),
                 ],
               ),
+              if (widget.produit != null) ...[
+                const VGap(AppSpacing.md),
+                Text(
+                  'Stock actuel : ${widget.produit!.stockActuel} — modifiable '
+                  'uniquement via « Entrée / Sortie de stock »',
+                  style: AppTextStyles.bodyMedium,
+                ),
+              ],
             ],
           ),
         ),

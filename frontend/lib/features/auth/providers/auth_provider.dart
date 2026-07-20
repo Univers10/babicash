@@ -269,6 +269,7 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
       await db.delete(db.localDepenses).go();
       await db.delete(db.localSessions).go();
       await db.delete(db.localTiers).go();
+      await db.delete(db.localMouvementsStock).go();
     } catch (_) {
       // Ignorer les erreurs de nettoyage
     }

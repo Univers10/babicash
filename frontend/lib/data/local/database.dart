@@ -98,6 +98,24 @@ class LocalTiers extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// Journal des mouvements de stock (entrées / sorties manuelles).
+class LocalMouvementsStock extends Table {
+  TextColumn get id => text()(); // UUID généré localement
+  TextColumn get boutiqueId => text()();
+  TextColumn get produitId => text()();
+  TextColumn get produitNom => text().withDefault(const Constant(''))();
+  TextColumn get typeMouvement => text()(); // ENTREE | SORTIE
+  IntColumn get quantite => integer()();
+  TextColumn get motif => text()();
+  TextColumn get auteurId => text().nullable()();
+  TextColumn get auteurNom => text()();
+  DateTimeColumn get dateMouvement => dateTime().withDefault(currentDateAndTime)();
+  BoolColumn get synced => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 // ── Database ──────────────────────────────────────────────────────────────────
 
 @DriftDatabase(tables: [
@@ -108,18 +126,37 @@ class LocalTiers extends Table {
   LocalDepenses,
   LocalSessions,
   LocalTiers,
+  LocalMouvementsStock,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) => m.createAll(),
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            // v2 : journal des mouvements de stock
+            await m.createTable(localMouvementsStock);
+          }
+        },
+      );
 
   // ── Produits ──────────────────────────────────────────────────────────────
 
   Future<List<LocalProduit>> getProduitsByBoutique(String boutiqueId) =>
       (select(localProduits)..where((p) => p.boutiqueId.equals(boutiqueId)))
           .get();
+
+  /// Stream réactif : l'UI stock reflète toujours l'état local (S1).
+  Stream<List<LocalProduit>> watchProduitsByBoutique(String boutiqueId) =>
+      (select(localProduits)
+            ..where((p) => p.boutiqueId.equals(boutiqueId))
+            ..orderBy([(p) => OrderingTerm.asc(p.nom)]))
+          .watch();
 
   Future<void> upsertProduit(LocalProduitsCompanion produit) =>
       into(localProduits).insertOnConflictUpdate(produit);
@@ -191,6 +228,43 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> upsertSession(LocalSessionsCompanion session) =>
       into(localSessions).insertOnConflictUpdate(session);
+
+  // ── Mouvements de stock ───────────────────────────────────────────────────
+
+  /// Stream du journal des mouvements, plus récents d'abord.
+  Stream<List<LocalMouvementsStockData>> watchMouvementsByBoutique(
+          String boutiqueId) =>
+      (select(localMouvementsStock)
+            ..where((m) => m.boutiqueId.equals(boutiqueId))
+            ..orderBy([(m) => OrderingTerm.desc(m.dateMouvement)]))
+          .watch();
+
+  Future<List<LocalMouvementsStockData>> getMouvementsNonSync(
+          String boutiqueId) =>
+      (select(localMouvementsStock)
+            ..where((m) =>
+                m.boutiqueId.equals(boutiqueId) & m.synced.equals(false)))
+          .get();
+
+  Future<void> insertMouvementStock(LocalMouvementsStockCompanion mouvement) =>
+      into(localMouvementsStock).insert(mouvement);
+
+  Future<void> marquerMouvementSync(String id) =>
+      (update(localMouvementsStock)..where((m) => m.id.equals(id)))
+          .write(const LocalMouvementsStockCompanion(synced: Value(true)));
+
+  /// Applique un mouvement de manière atomique : insertion dans le journal
+  /// (`synced = false`) + recalcul du stock du produit (offline-first).
+  Future<void> appliquerMouvementStock({
+    required LocalMouvementsStockCompanion mouvement,
+    required String produitId,
+    required int nouveauStock,
+  }) =>
+      transaction(() async {
+        await into(localMouvementsStock).insert(mouvement);
+        await (update(localProduits)..where((p) => p.id.equals(produitId)))
+            .write(LocalProduitsCompanion(stockActuel: Value(nouveauStock)));
+      });
 
   // ── Tiers ────────────────────────────────────────────────────────────────
 

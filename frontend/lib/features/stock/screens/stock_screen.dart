@@ -7,7 +7,9 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/widgets/menu_button.dart';
+import '../providers/mouvements_provider.dart';
 import '../providers/stock_provider.dart';
+import '../utils/categorie_couleur.dart';
 import '../widgets/produit_card.dart';
 import '../widgets/produit_form_dialog.dart';
 
@@ -31,6 +33,8 @@ class _StockScreenState extends ConsumerState<StockScreen> {
   Widget build(BuildContext context) {
     final stockAsync = ref.watch(stockProvider);
     final categoriesAsync = ref.watch(categoriesProvider);
+    // S4 : indicateur discret — mouvements de stock des dernières 24 h.
+    final mouvementsRecents = ref.watch(mouvementsRecentsCountProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -47,6 +51,16 @@ class _StockScreenState extends ConsumerState<StockScreen> {
             icon: const Icon(Symbols.category),
             onPressed: () => context.push(AppRoutes.categories),
             tooltip: 'Catégories',
+          ),
+          IconButton(
+            icon: Badge(
+              isLabelVisible: mouvementsRecents > 0,
+              label: Text('$mouvementsRecents'),
+              backgroundColor: AppColors.accent,
+              child: const Icon(Symbols.history),
+            ),
+            onPressed: () => context.push(AppRoutes.stockMouvements),
+            tooltip: 'Historique des mouvements',
           ),
           IconButton(
             icon: const Icon(Symbols.refresh),
@@ -297,10 +311,16 @@ class _StockScreenState extends ConsumerState<StockScreen> {
         Color stockColor = AppColors.success;
         if (enRupture) { stockColor = AppColors.error; }
         else if (enAlerte) { stockColor = AppColors.warning; }
+        // S5 : couleur de la catégorie (pastille + liseré)
+        final couleurCategorie = CategorieCouleur.pour(p.categorieId);
 
         return Card(
           clipBehavior: Clip.hardEdge,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: BorderSide(
+                color: couleurCategorie.withValues(alpha: 0.45), width: 1.2),
+          ),
           elevation: 1,
           child: InkWell(
             onTap: () => showDialog(
@@ -319,10 +339,11 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                         width: 36,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: AppColors.primaryContainer,
+                          color: couleurCategorie.withValues(alpha: 0.14),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(Symbols.inventory_2, color: AppColors.primary, size: 18),
+                        child: Icon(Symbols.inventory_2,
+                            color: couleurCategorie, size: 18),
                       ),
                       const Spacer(),
                       Container(

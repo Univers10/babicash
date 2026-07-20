@@ -66,6 +66,34 @@ Map<String, dynamic> _$$DepenseInImplToJson(_$DepenseInImpl instance) =>
       'date_transaction': instance.dateTransaction?.toIso8601String(),
     };
 
+_$MouvementStockInImpl _$$MouvementStockInImplFromJson(
+        Map<String, dynamic> json) =>
+    _$MouvementStockInImpl(
+      idLocal: json['id_local_smartphone'] as String,
+      produitId: json['produit_id'] as String,
+      produitNom: json['produit_nom'] as String? ?? '',
+      typeMouvement: json['type_mouvement'] as String,
+      quantite: (json['quantite'] as num).toInt(),
+      motif: json['motif'] as String,
+      auteurNom: json['auteur_nom'] as String? ?? '',
+      dateMouvement: json['date_mouvement'] == null
+          ? null
+          : DateTime.parse(json['date_mouvement'] as String),
+    );
+
+Map<String, dynamic> _$$MouvementStockInImplToJson(
+        _$MouvementStockInImpl instance) =>
+    <String, dynamic>{
+      'id_local_smartphone': instance.idLocal,
+      'produit_id': instance.produitId,
+      'produit_nom': instance.produitNom,
+      'type_mouvement': instance.typeMouvement,
+      'quantite': instance.quantite,
+      'motif': instance.motif,
+      'auteur_nom': instance.auteurNom,
+      'date_mouvement': instance.dateMouvement?.toIso8601String(),
+    };
+
 _$SyncPushRequestImpl _$$SyncPushRequestImplFromJson(
         Map<String, dynamic> json) =>
     _$SyncPushRequestImpl(
@@ -79,6 +107,10 @@ _$SyncPushRequestImpl _$$SyncPushRequestImplFromJson(
               .toList() ??
           const [],
       entreesStock: json['entrees_stock'] as List<dynamic>? ?? const [],
+      mouvementsStock: (json['mouvements_stock'] as List<dynamic>?)
+              ?.map((e) => MouvementStockIn.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$$SyncPushRequestImplToJson(
@@ -88,6 +120,8 @@ Map<String, dynamic> _$$SyncPushRequestImplToJson(
       'ventes': instance.ventes.map((e) => e.toJson()).toList(),
       'depenses': instance.depenses.map((e) => e.toJson()).toList(),
       'entrees_stock': instance.entreesStock,
+      'mouvements_stock':
+          instance.mouvementsStock.map((e) => e.toJson()).toList(),
     };
 
 _$RecuLigneImpl _$$RecuLigneImplFromJson(Map<String, dynamic> json) =>
@@ -176,6 +210,24 @@ Map<String, dynamic> _$$AlerteStockItemImplToJson(
       'en_rupture': instance.enRupture,
     };
 
+_$MouvementStockPushResultImpl _$$MouvementStockPushResultImplFromJson(
+        Map<String, dynamic> json) =>
+    _$MouvementStockPushResultImpl(
+      idLocal: json['id_local_smartphone'] as String,
+      mouvementId: json['mouvement_id'] as String,
+      dejaSynchronise: json['deja_synchronise'] as bool? ?? false,
+      stockActuel: (json['stock_actuel'] as num?)?.toInt(),
+    );
+
+Map<String, dynamic> _$$MouvementStockPushResultImplToJson(
+        _$MouvementStockPushResultImpl instance) =>
+    <String, dynamic>{
+      'id_local_smartphone': instance.idLocal,
+      'mouvement_id': instance.mouvementId,
+      'deja_synchronise': instance.dejaSynchronise,
+      'stock_actuel': instance.stockActuel,
+    };
+
 _$SyncPushResponseImpl _$$SyncPushResponseImplFromJson(
         Map<String, dynamic> json) =>
     _$SyncPushResponseImpl(
@@ -184,6 +236,11 @@ _$SyncPushResponseImpl _$$SyncPushResponseImplFromJson(
               .toList() ??
           const [],
       depenses: json['depenses'] as List<dynamic>? ?? const [],
+      mouvementsStock: (json['mouvements_stock'] as List<dynamic>?)
+              ?.map((e) =>
+                  MouvementStockPushResult.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
       alertesStock: (json['alertes_stock'] as List<dynamic>?)
               ?.map((e) => AlerteStockItem.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -195,6 +252,8 @@ Map<String, dynamic> _$$SyncPushResponseImplToJson(
     <String, dynamic>{
       'ventes': instance.ventes.map((e) => e.toJson()).toList(),
       'depenses': instance.depenses,
+      'mouvements_stock':
+          instance.mouvementsStock.map((e) => e.toJson()).toList(),
       'alertes_stock': instance.alertesStock.map((e) => e.toJson()).toList(),
     };
 
