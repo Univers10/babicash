@@ -1,5 +1,4 @@
 import uuid
-from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
@@ -10,6 +9,7 @@ from app.core.rate_limit import login_rate_limiter, pin_rate_limiter
 from app.core.security import create_access_token, hash_password, verify_password, verify_pin
 from app.deps import get_current_user
 from app.models import Abonnement, Boutique, User
+from app.services.abonnement_service import PLAN_CATALOG
 from app.schemas.auth import (
     CurrentUser,
     LoginIdRequest,
@@ -75,11 +75,14 @@ async def provision_owner_with_boutique(
     db.add(boutique)
     await db.flush()
 
+    cfg = PLAN_CATALOG["FREE"]
     abonnement = Abonnement(
         proprietaire_id=str(user.id),
         plan="FREE",
-        prix_base=Decimal("5000.00"),
-        quota_ventes_par_boutique=20,
+        prix_base=cfg["prix_base"],
+        quota_ventes_par_boutique=cfg["quota_ventes"],
+        nb_boutiques_max=cfg["nb_boutiques_max"],
+        nb_gerants_max=cfg["nb_gerants_max"],
     )
     db.add(abonnement)
 
