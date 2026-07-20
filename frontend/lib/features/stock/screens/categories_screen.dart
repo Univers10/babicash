@@ -5,6 +5,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/local/database.dart';
+import '../../../shared/utils/categorie_utils.dart';
 import '../../../shared/widgets/menu_button.dart';
 import '../providers/categories_crud_provider.dart';
 import '../providers/stock_provider.dart';
@@ -35,6 +36,9 @@ const _catIcons = [
   Symbols.shopping_bag,
   Symbols.category,
 ];
+
+/// Couleur neutre de la carte virtuelle « Sans catégorie ».
+const _sansCategorieColor = Color(0xFF9E9E9E);
 
 class CategoriesScreen extends ConsumerWidget {
   const CategoriesScreen({super.key});
@@ -100,7 +104,7 @@ class CategoriesScreen extends ConsumerWidget {
           }
 
           // Compter les produits par catégorie
-          final produits = stockAsync.valueOrNull ?? [];
+          final produits = stockAsync.valueOrNull ?? <LocalProduit>[];
           final countMap = <String, int>{};
           for (final p in produits) {
             if (p.categorieId != null) {
@@ -108,8 +112,16 @@ class CategoriesScreen extends ConsumerWidget {
             }
           }
 
+          // Groupe virtuel « Sans catégorie » (categorieId null ou inconnu),
+          // affiché en dernier — jamais créé en base.
+          final sansCategorie = produits
+              .where((p) => estProduitSansCategorie(p, categories))
+              .toList();
+
           final screenW = MediaQuery.of(context).size.width;
           final crossCount = screenW > 900 ? 4 : screenW > 600 ? 3 : 2;
+          final itemCount =
+              categories.length + (sansCategorie.isEmpty ? 0 : 1);
 
           return GridView.builder(
             padding: const EdgeInsets.all(16),
@@ -119,8 +131,25 @@ class CategoriesScreen extends ConsumerWidget {
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
             ),
-            itemCount: categories.length,
+            itemCount: itemCount,
             itemBuilder: (_, i) {
+              if (i == categories.length) {
+                // Carte virtuelle « Sans catégorie » — pas de menu
+                // modifier/supprimer.
+                return _CategoryCard(
+                  nom: sansCategorieLabel,
+                  color: _sansCategorieColor,
+                  icon: Symbols.label_off,
+                  productCount: sansCategorie.length,
+                  onTap: () => _showProduits(
+                    context,
+                    nom: sansCategorieLabel,
+                    produits: sansCategorie,
+                    color: _sansCategorieColor,
+                    icon: Symbols.label_off,
+                  ),
+                );
+              }
               final c = categories[i];
               final colorIdx = i % _catColors.length;
               final color = _catColors[colorIdx];
@@ -128,11 +157,19 @@ class CategoriesScreen extends ConsumerWidget {
               final count = countMap[c.id] ?? 0;
 
               return _CategoryCard(
-                categorie: c,
+                nom: c.nom,
                 color: color,
                 icon: icon,
                 productCount: count,
-                onTap: () => _showProduits(context, ref, c, color, icon),
+                onTap: () => _showProduits(
+                  context,
+                  nom: c.nom,
+                  produits: produits
+                      .where((p) => p.categorieId == c.id)
+                      .toList(),
+                  color: color,
+                  icon: icon,
+                ),
                 onEdit: () => _showCategorieDialog(context, ref, categorie: c),
                 onDelete: () => _deleteCategorie(context, ref, c.id),
               );
@@ -143,12 +180,13 @@ class CategoriesScreen extends ConsumerWidget {
     );
   }
 
-  void _showProduits(BuildContext context, WidgetRef ref,
-      LocalCategory categorie, Color color, IconData icon) {
-    final produits = (ref.read(stockProvider).valueOrNull ?? [])
-        .where((p) => p.categorieId == categorie.id)
-        .toList();
-
+  void _showProduits(
+    BuildContext context, {
+    required String nom,
+    required List<LocalProduit> produits,
+    required Color color,
+    required IconData icon,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -194,7 +232,7 @@ class CategoriesScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            categorie.nom,
+                            nom,
                             style: AppTextStyles.headlineSmall,
                           ),
                           Text(
@@ -386,21 +424,23 @@ String _extractErrorMessage(Object e) {
 
 class _CategoryCard extends StatelessWidget {
   const _CategoryCard({
-    required this.categorie,
+    required this.nom,
     required this.color,
     required this.icon,
     required this.productCount,
     required this.onTap,
-    required this.onEdit,
-    required this.onDelete,
+    this.onEdit,
+    this.onDelete,
   });
-  final LocalCategory categorie;
+  final String nom;
   final Color color;
   final IconData icon;
   final int productCount;
   final VoidCallback onTap;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
+
+  /// Absents pour la carte virtuelle « Sans catégorie » (menu masqué).
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -451,26 +491,27 @@ class _CategoryCard extends StatelessWidget {
                               child: Icon(icon, size: 16, color: Colors.white),
                             ),
                             const Spacer(),
-                            PopupMenuButton<String>(
-                              icon: Icon(Symbols.more_vert, color: Colors.white.withValues(alpha: 0.8), size: 16),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              onSelected: (v) {
-                                if (v == 'edit') onEdit();
-                                if (v == 'delete') onDelete();
-                              },
-                              itemBuilder: (_) => [
-                                const PopupMenuItem(value: 'edit', child: Text('Modifier')),
-                                const PopupMenuItem(value: 'delete', child: Text('Supprimer')),
-                              ],
-                            ),
+                            if (onEdit != null || onDelete != null)
+                              PopupMenuButton<String>(
+                                icon: Icon(Symbols.more_vert, color: Colors.white.withValues(alpha: 0.8), size: 16),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                onSelected: (v) {
+                                  if (v == 'edit') onEdit?.call();
+                                  if (v == 'delete') onDelete?.call();
+                                },
+                                itemBuilder: (_) => [
+                                  const PopupMenuItem(value: 'edit', child: Text('Modifier')),
+                                  const PopupMenuItem(value: 'delete', child: Text('Supprimer')),
+                                ],
+                              ),
                           ],
                         ),
                       ),
                       const Spacer(),
                       // Nom
                       Text(
-                        categorie.nom,
+                        nom,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
