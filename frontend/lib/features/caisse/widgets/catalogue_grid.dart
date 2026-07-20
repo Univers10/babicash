@@ -4,8 +4,10 @@ import 'package:material_symbols_icons/symbols.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/text_normalizer.dart';
 import '../../../data/local/database.dart';
 import '../../../features/stock/providers/stock_provider.dart';
+import '../../../shared/utils/categorie_utils.dart';
 import '../providers/caisse_provider.dart';
 
 // Provider pour la catégorie sélectionnée
@@ -18,20 +20,6 @@ const kSansCategorieId = '__sans_categorie__';
 // Couleurs neutres pour le regroupement virtuel « Sans catégorie »
 const _sansCategorieColor = Color(0xFF607D8B); // gris bleu
 const _sansCategorieBgColor = Color(0xFFECEFF1);
-
-/// Clé de tri alphabétique insensible à la casse et aux accents.
-String _sortKey(String s) {
-  const accents = 'àâäáãåçéèêëíìîïñóòôöõúùûüýÿ';
-  const sans = 'aaaaaaceeeeiiiinooooouuuuyy';
-  final lower = s.toLowerCase();
-  final buf = StringBuffer();
-  for (final rune in lower.runes) {
-    final ch = String.fromCharCode(rune);
-    final idx = accents.indexOf(ch);
-    buf.write(idx >= 0 ? sans[idx] : ch);
-  }
-  return buf.toString();
-}
 
 // Palette de couleurs pour les catégories (style Odoo POS)
 const _categoryColors = [
@@ -93,7 +81,7 @@ class CatalogueGrid extends ConsumerWidget {
     // Catégories triées (insensible à la casse et aux accents) ; les couleurs
     // suivent l'ordre trié pour rester cohérentes entre puces et tuiles.
     final categories = [...(categoriesAsync.valueOrNull ?? <LocalCategory>[])]
-      ..sort((a, b) => _sortKey(a.nom).compareTo(_sortKey(b.nom)));
+      ..sort((a, b) => comparerSansAccents(a.nom, b.nom));
     final catColorMap = <String, int>{};
     for (int i = 0; i < categories.length; i++) {
       catColorMap[categories[i].id] = i % _categoryColors.length;
@@ -134,7 +122,7 @@ class CatalogueGrid extends ConsumerWidget {
                   if (hasSansCategorie && i == itemCount - 1) {
                     final isSelected = selectedCatId == kSansCategorieId;
                     return _CategoryChip(
-                      label: 'Sans catégorie',
+                      label: sansCategorieLabel,
                       color: _sansCategorieColor,
                       isSelected: isSelected,
                       onTap: () => ref
