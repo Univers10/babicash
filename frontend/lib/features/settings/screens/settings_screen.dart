@@ -16,6 +16,7 @@ import '../../../features/boutiques/screens/boutiques_screen.dart';
 import '../../../features/sync/sync_service.dart';
 import '../../../features/users/providers/users_provider.dart';
 import '../../../features/users/screens/users_screen.dart';
+import 'printer_config_screen.dart';
 import '../../../shared/widgets/amount_text.dart';
 import '../../../shared/widgets/app_snackbar.dart';
 import '../../../shared/widgets/menu_button.dart';
@@ -155,6 +156,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                 : null,
             onTap: _syncing ? () {} : _sync,
+          ),
+          const VGap(AppSpacing.sm),
+          _SettingsTile(
+            icon: Symbols.print,
+            title: 'Configurer l\'imprimante',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const PrinterConfigScreen(),
+              ),
+            ),
           ),
           const VGap(AppSpacing.xl),
 
