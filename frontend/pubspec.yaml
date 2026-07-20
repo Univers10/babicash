@@ -30,6 +30,9 @@ dependencies:
   # Secure storage (JWT token)
   flutter_secure_storage: ^9.2.2
 
+  # Hachage local du PIN (verrouillage hors ligne)
+  crypto: ^3.0.3
+
   # Connexion sociale (Google / Apple)
   google_sign_in: ^6.2.1
   sign_in_with_apple: ^6.1.1

@@ -4,10 +4,26 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../../core/config/oauth_config.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/storage/secure_storage.dart';
+import '../../../core/utils/pin_hasher.dart';
 import '../../../data/local/database.dart';
 import '../../../data/models/auth_model.dart';
 import '../../../data/remote/auth_api.dart';
 import 'package:dio/dio.dart';
+
+// ── Mode de connexion ─────────────────────────────────────────────────────────
+
+/// Valeurs persistées dans le secure storage pour savoir comment
+/// l'utilisateur s'est connecté la dernière fois.
+abstract final class LoginMethod {
+  static const pin = 'pin';
+  static const email = 'email';
+}
+
+/// Renseigné quand le backend répond 401 (session expirée) : contient le
+/// mode de connexion de l'utilisateur éjecté ([LoginMethod.pin] ou
+/// [LoginMethod.email]) pour rediriger vers le bon écran de reconnexion.
+/// Remis à null après un login réussi.
+final sessionExpiredProvider = StateProvider<String?>((ref) => null);
 
 // ── État de session courante ──────────────────────────────────────────────────
 
@@ -48,6 +64,9 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
         nom: resp.nom,
         boutiqueId: resp.boutiqueId,
       );
+      await storage.saveLastLoginMethod(LoginMethod.email);
+      await storage.saveLastEmail(email);
+      _clearSessionExpired();
       state = AsyncData(SessionUser(
         token: resp.accessToken,
         role: resp.role,
@@ -75,6 +94,12 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
         nom: resp.nom,
         boutiqueId: resp.boutiqueId,
       );
+      // Artefacts du login PIN : téléphone (préremplissage après expiration)
+      // et empreinte du PIN (vérification hors ligne du verrouillage).
+      await storage.saveTelephone(telephone);
+      await storage.savePinHash(PinHasher.hash(codePin));
+      await storage.saveLastLoginMethod(LoginMethod.pin);
+      _clearSessionExpired();
       state = AsyncData(SessionUser(
         token: resp.accessToken,
         role: resp.role,
@@ -102,6 +127,8 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
         nom: resp.nom,
         boutiqueId: resp.boutiqueId,
       );
+      await storage.saveLastLoginMethod(LoginMethod.email);
+      _clearSessionExpired();
       state = AsyncData(SessionUser(
         token: resp.accessToken,
         role: resp.role,
@@ -139,6 +166,9 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
         nom: resp.nom,
         boutiqueId: resp.boutiqueId,
       );
+      await storage.saveLastLoginMethod(LoginMethod.email);
+      await storage.saveLastEmail(email);
+      _clearSessionExpired();
       state = AsyncData(SessionUser(
         token: resp.accessToken,
         role: resp.role,
@@ -162,6 +192,11 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
       boutiqueId: resp.boutiqueId,
       email: resp.email,
     );
+    await storage.saveLastLoginMethod(LoginMethod.email);
+    if (resp.email != null && resp.email!.isNotEmpty) {
+      await storage.saveLastEmail(resp.email!);
+    }
+    _clearSessionExpired();
     state = AsyncData(SessionUser(
       token: resp.accessToken,
       role: resp.role,
@@ -169,6 +204,29 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
       boutiqueId: resp.boutiqueId,
       email: resp.email,
     ));
+  }
+
+  void _clearSessionExpired() {
+    ref.read(sessionExpiredProvider.notifier).state = null;
+  }
+
+  /// Appelé par l'intercepteur Dio quand le backend répond 401 : la session
+  /// est expirée. Bascule l'état à « déconnecté » et mémorise le mode de
+  /// connexion pour que le routeur redirige vers le bon écran (PIN prérempli
+  /// pour un gérant, email pour un propriétaire). La base locale n'est PAS
+  /// effacée : l'utilisateur retrouve ses données après reconnexion.
+  Future<void> onSessionExpired() async {
+    final current = state.valueOrNull;
+    // 401 d'une tentative de login (mauvais identifiants) : ne rien faire.
+    if (current == null) return;
+    final storage = ref.read(secureStorageProvider);
+    final method = await storage.getLastLoginMethod();
+    ref.read(sessionExpiredProvider.notifier).state =
+        method ?? (current.isManager ? LoginMethod.pin : LoginMethod.email);
+    // Le token est déjà effacé par l'intercepteur ; on s'assure que le
+    // reste de la session l'est aussi (idempotent).
+    await storage.clearSession();
+    state = const AsyncData(null);
   }
 
   Future<void> loginWithGoogle() async {
@@ -279,6 +337,7 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
       // Pas de session Google active : rien à faire
     }
     await ref.read(secureStorageProvider).clearSession();
+    _clearSessionExpired();
     state = const AsyncData(null);
   }
 

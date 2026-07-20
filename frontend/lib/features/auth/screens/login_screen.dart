@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/router/app_router.dart';
+import '../../../core/storage/secure_storage.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -26,6 +27,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _idProprietaireCtrl = TextEditingController();
   bool _obscure = true;
   bool _useIdLogin = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _prefillEmail();
+  }
+
+  /// Préremplit l'email depuis le secure storage (dernier login email).
+  Future<void> _prefillEmail() async {
+    final email = await ref.read(secureStorageProvider).getLastEmail();
+    if (!mounted || email == null || email.isEmpty) return;
+    if (_emailCtrl.text.isEmpty) {
+      setState(() => _emailCtrl.text = email);
+    }
+  }
 
   @override
   void dispose() {
