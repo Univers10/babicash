@@ -7,6 +7,15 @@ const _kBoutiqueIdKey = 'babicash_boutique_id';
 const _kNomKey = 'babicash_nom';
 const _kEmailKey = 'babicash_email';
 
+// Empreinte locale du PIN (verrouillage hors ligne) — durée de vie = session.
+const _kPinHashKey = 'babicash_pin_hash';
+
+// Clés persistantes (survivent à clearSession) : préremplissage des écrans
+// de connexion après expiration de session ou déconnexion.
+const _kTelephoneKey = 'babicash_telephone';
+const _kLastEmailKey = 'babicash_last_email';
+const _kLastLoginMethodKey = 'babicash_last_login_method';
+
 class SecureStorageService {
   const SecureStorageService(this._storage);
 
@@ -57,6 +66,37 @@ class SecureStorageService {
     return token != null && token.isNotEmpty;
   }
 
+  // ── Verrouillage hors ligne (empreinte du PIN) ─────────────────────────────
+
+  Future<void> savePinHash(String pinHash) => _storage.write(
+      key: _kPinHashKey, value: pinHash, aOptions: _androidOptions, iOptions: _iosOptions);
+
+  Future<String?> getPinHash() =>
+      _storage.read(key: _kPinHashKey, aOptions: _androidOptions, iOptions: _iosOptions);
+
+  // ── Préremplissage des écrans de connexion (persistant) ────────────────────
+
+  Future<void> saveTelephone(String telephone) => _storage.write(
+      key: _kTelephoneKey, value: telephone, aOptions: _androidOptions, iOptions: _iosOptions);
+
+  Future<String?> getTelephone() =>
+      _storage.read(key: _kTelephoneKey, aOptions: _androidOptions, iOptions: _iosOptions);
+
+  Future<void> saveLastEmail(String email) => _storage.write(
+      key: _kLastEmailKey, value: email, aOptions: _androidOptions, iOptions: _iosOptions);
+
+  Future<String?> getLastEmail() =>
+      _storage.read(key: _kLastEmailKey, aOptions: _androidOptions, iOptions: _iosOptions);
+
+  Future<void> saveLastLoginMethod(String method) => _storage.write(
+      key: _kLastLoginMethodKey, value: method, aOptions: _androidOptions, iOptions: _iosOptions);
+
+  Future<String?> getLastLoginMethod() =>
+      _storage.read(key: _kLastLoginMethodKey, aOptions: _androidOptions, iOptions: _iosOptions);
+
+  /// Efface la session courante. Les clés de préremplissage (téléphone,
+  /// dernier email, mode de connexion) sont volontairement conservées pour
+  /// faciliter la reconnexion ; l'empreinte du PIN est supprimée.
   Future<void> clearSession() async {
     await Future.wait([
       _storage.delete(key: _kTokenKey, aOptions: _androidOptions, iOptions: _iosOptions),
@@ -64,6 +104,7 @@ class SecureStorageService {
       _storage.delete(key: _kBoutiqueIdKey, aOptions: _androidOptions, iOptions: _iosOptions),
       _storage.delete(key: _kNomKey, aOptions: _androidOptions, iOptions: _iosOptions),
       _storage.delete(key: _kEmailKey, aOptions: _androidOptions, iOptions: _iosOptions),
+      _storage.delete(key: _kPinHashKey, aOptions: _androidOptions, iOptions: _iosOptions),
     ]);
   }
 }
