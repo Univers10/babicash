@@ -5,6 +5,8 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+from app.core.config import settings
+from app.core.csrf import generate_csrf_token
 from app.core.db import Base, get_db
 from app.core.security import hash_password
 from app.main import app
@@ -84,17 +86,31 @@ async def client(session_factory):
             yield db
 
     app.dependency_overrides[get_db] = override_get_db
+    # Tests en HTTP : le cookie admin ne doit pas être marqué Secure,
+    # sinon httpx ne le renvoie pas et l'auth admin échoue (307).
+    settings.SECURE_COOKIES = False
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:
         yield c
     app.dependency_overrides.clear()
 
 
+async def _csrf(client: AsyncClient) -> str:
+    """Récupère un token CSRF valide.
+
+    Le GET /admin/login pose l'éventuel cookie de session ; le token est
+    ensuite dérivé du même session_id que celui vérifié par le serveur.
+    """
+    await client.get("/admin/login")
+    session_id = client.cookies.get("admin_session_id", "")
+    return generate_csrf_token(session_id)
+
+
 async def admin_login(client: AsyncClient, email: str, mdp: str) -> dict:
     """Login admin, retourne les cookies."""
     resp = await client.post(
         "/admin/login",
-        data={"email": email, "mot_de_passe": mdp},
+        data={"email": email, "mot_de_passe": mdp, "csrf_token": await _csrf(client)},
         follow_redirects=False,
     )
     assert resp.status_code == 303, resp.text
@@ -116,7 +132,11 @@ async def test_login_succes(client, admin_seeded):
     """Login admin avec bons identifiants → redirect vers dashboard."""
     r = await client.post(
         "/admin/login",
-        data={"email": admin_seeded["admin_email"], "mot_de_passe": admin_seeded["admin_mdp"]},
+        data={
+            "email": admin_seeded["admin_email"],
+            "mot_de_passe": admin_seeded["admin_mdp"],
+            "csrf_token": await _csrf(client),
+        },
         follow_redirects=False,
     )
     assert r.status_code == 303
@@ -129,7 +149,11 @@ async def test_login_mauvais_mdp(client, admin_seeded):
     """Login avec mauvais mot de passe → redirect avec error."""
     r = await client.post(
         "/admin/login",
-        data={"email": admin_seeded["admin_email"], "mot_de_passe": "mauvais"},
+        data={
+            "email": admin_seeded["admin_email"],
+            "mot_de_passe": "mauvais",
+            "csrf_token": await _csrf(client),
+        },
         follow_redirects=False,
     )
     assert r.status_code == 303
@@ -141,7 +165,11 @@ async def test_login_owner_rejete(client, admin_seeded):
     """Un OWNER ne peut pas se connecter en admin."""
     r = await client.post(
         "/admin/login",
-        data={"email": admin_seeded["owner_email"], "mot_de_passe": "boss1234"},
+        data={
+            "email": admin_seeded["owner_email"],
+            "mot_de_passe": "boss1234",
+            "csrf_token": await _csrf(client),
+        },
         follow_redirects=False,
     )
     assert r.status_code == 303
@@ -204,6 +232,7 @@ async def test_owner_toggle(client, admin_seeded):
     await admin_login(client, admin_seeded["admin_email"], admin_seeded["admin_mdp"])
     r = await client.post(
         f"/admin/owners/{admin_seeded['owner_id']}/toggle",
+        data={"csrf_token": await _csrf(client)},
         follow_redirects=False,
     )
     assert r.status_code == 303
@@ -219,7 +248,7 @@ async def test_owner_change_plan(client, admin_seeded):
     await admin_login(client, admin_seeded["admin_email"], admin_seeded["admin_mdp"])
     r = await client.post(
         f"/admin/owners/{admin_seeded['owner_id']}/plan",
-        data={"plan": "BOUTIQUE"},
+        data={"plan": "BOUTIQUE", "csrf_token": await _csrf(client)},
         follow_redirects=False,
     )
     assert r.status_code == 303
