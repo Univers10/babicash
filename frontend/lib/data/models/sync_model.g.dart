@@ -293,6 +293,7 @@ _$ProduitModelLiteImpl _$$ProduitModelLiteImplFromJson(
       stockActuel: (json['stock_actuel'] as num).toInt(),
       stockAlerte: (json['stock_alerte'] as num).toInt(),
       categorieId: json['categorie_id'] as String?,
+      imageUrl: json['image_url'] as String?,
     );
 
 Map<String, dynamic> _$$ProduitModelLiteImplToJson(
@@ -305,6 +306,7 @@ Map<String, dynamic> _$$ProduitModelLiteImplToJson(
       'stock_actuel': instance.stockActuel,
       'stock_alerte': instance.stockAlerte,
       'categorie_id': instance.categorieId,
+      'image_url': instance.imageUrl,
     };
 
 _$CategorieModelLiteImpl _$$CategorieModelLiteImplFromJson(

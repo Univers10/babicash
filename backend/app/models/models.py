@@ -66,6 +66,8 @@ class Boutique(Base):
     adresse: Mapped[str | None] = mapped_column(String(255), nullable=True)
     telephone: Mapped[str | None] = mapped_column(String(30), nullable=True)
     type_commerce: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    # URL du logo de la boutique (upload serveur, servi via /static).
+    logo_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     date_creation: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -113,6 +115,8 @@ class Produit(Base):
     )
     stock_actuel: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     stock_alerte: Mapped[int] = mapped_column(Integer, nullable=False, default=5)
+    # URL de l'image du produit (upload serveur, servie via /static).
+    image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     boutique: Mapped["Boutique"] = relationship(back_populates="produits")
 

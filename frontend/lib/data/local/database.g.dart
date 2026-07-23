@@ -63,6 +63,12 @@ class $LocalProduitsTable extends LocalProduits
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(5));
+  static const VerificationMeta _imageUrlMeta =
+      const VerificationMeta('imageUrl');
+  @override
+  late final GeneratedColumn<String> imageUrl = GeneratedColumn<String>(
+      'image_url', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _updatedAtMeta =
       const VerificationMeta('updatedAt');
   @override
@@ -81,6 +87,7 @@ class $LocalProduitsTable extends LocalProduits
         prixVenteSuggere,
         stockActuel,
         stockAlerte,
+        imageUrl,
         updatedAt
       ];
   @override
@@ -142,6 +149,10 @@ class $LocalProduitsTable extends LocalProduits
           stockAlerte.isAcceptableOrUnknown(
               data['stock_alerte']!, _stockAlerteMeta));
     }
+    if (data.containsKey('image_url')) {
+      context.handle(_imageUrlMeta,
+          imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta));
+    }
     if (data.containsKey('updated_at')) {
       context.handle(_updatedAtMeta,
           updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
@@ -171,6 +182,8 @@ class $LocalProduitsTable extends LocalProduits
           .read(DriftSqlType.int, data['${effectivePrefix}stock_actuel'])!,
       stockAlerte: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}stock_alerte'])!,
+      imageUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}image_url']),
       updatedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
     );
@@ -191,6 +204,7 @@ class LocalProduit extends DataClass implements Insertable<LocalProduit> {
   final double prixVenteSuggere;
   final int stockActuel;
   final int stockAlerte;
+  final String? imageUrl;
   final DateTime updatedAt;
   const LocalProduit(
       {required this.id,
@@ -201,6 +215,7 @@ class LocalProduit extends DataClass implements Insertable<LocalProduit> {
       required this.prixVenteSuggere,
       required this.stockActuel,
       required this.stockAlerte,
+      this.imageUrl,
       required this.updatedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -215,6 +230,9 @@ class LocalProduit extends DataClass implements Insertable<LocalProduit> {
     map['prix_vente_suggere'] = Variable<double>(prixVenteSuggere);
     map['stock_actuel'] = Variable<int>(stockActuel);
     map['stock_alerte'] = Variable<int>(stockAlerte);
+    if (!nullToAbsent || imageUrl != null) {
+      map['image_url'] = Variable<String>(imageUrl);
+    }
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
   }
@@ -231,6 +249,9 @@ class LocalProduit extends DataClass implements Insertable<LocalProduit> {
       prixVenteSuggere: Value(prixVenteSuggere),
       stockActuel: Value(stockActuel),
       stockAlerte: Value(stockAlerte),
+      imageUrl: imageUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imageUrl),
       updatedAt: Value(updatedAt),
     );
   }
@@ -247,6 +268,7 @@ class LocalProduit extends DataClass implements Insertable<LocalProduit> {
       prixVenteSuggere: serializer.fromJson<double>(json['prixVenteSuggere']),
       stockActuel: serializer.fromJson<int>(json['stockActuel']),
       stockAlerte: serializer.fromJson<int>(json['stockAlerte']),
+      imageUrl: serializer.fromJson<String?>(json['imageUrl']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
   }
@@ -262,6 +284,7 @@ class LocalProduit extends DataClass implements Insertable<LocalProduit> {
       'prixVenteSuggere': serializer.toJson<double>(prixVenteSuggere),
       'stockActuel': serializer.toJson<int>(stockActuel),
       'stockAlerte': serializer.toJson<int>(stockAlerte),
+      'imageUrl': serializer.toJson<String?>(imageUrl),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
@@ -275,6 +298,7 @@ class LocalProduit extends DataClass implements Insertable<LocalProduit> {
           double? prixVenteSuggere,
           int? stockActuel,
           int? stockAlerte,
+          Value<String?> imageUrl = const Value.absent(),
           DateTime? updatedAt}) =>
       LocalProduit(
         id: id ?? this.id,
@@ -285,6 +309,7 @@ class LocalProduit extends DataClass implements Insertable<LocalProduit> {
         prixVenteSuggere: prixVenteSuggere ?? this.prixVenteSuggere,
         stockActuel: stockActuel ?? this.stockActuel,
         stockAlerte: stockAlerte ?? this.stockAlerte,
+        imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
         updatedAt: updatedAt ?? this.updatedAt,
       );
   LocalProduit copyWithCompanion(LocalProduitsCompanion data) {
@@ -305,6 +330,7 @@ class LocalProduit extends DataClass implements Insertable<LocalProduit> {
           data.stockActuel.present ? data.stockActuel.value : this.stockActuel,
       stockAlerte:
           data.stockAlerte.present ? data.stockAlerte.value : this.stockAlerte,
+      imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
@@ -320,14 +346,24 @@ class LocalProduit extends DataClass implements Insertable<LocalProduit> {
           ..write('prixVenteSuggere: $prixVenteSuggere, ')
           ..write('stockActuel: $stockActuel, ')
           ..write('stockAlerte: $stockAlerte, ')
+          ..write('imageUrl: $imageUrl, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, boutiqueId, categorieId, nom,
-      prixAchatMoyen, prixVenteSuggere, stockActuel, stockAlerte, updatedAt);
+  int get hashCode => Object.hash(
+      id,
+      boutiqueId,
+      categorieId,
+      nom,
+      prixAchatMoyen,
+      prixVenteSuggere,
+      stockActuel,
+      stockAlerte,
+      imageUrl,
+      updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -340,6 +376,7 @@ class LocalProduit extends DataClass implements Insertable<LocalProduit> {
           other.prixVenteSuggere == this.prixVenteSuggere &&
           other.stockActuel == this.stockActuel &&
           other.stockAlerte == this.stockAlerte &&
+          other.imageUrl == this.imageUrl &&
           other.updatedAt == this.updatedAt);
 }
 
@@ -352,6 +389,7 @@ class LocalProduitsCompanion extends UpdateCompanion<LocalProduit> {
   final Value<double> prixVenteSuggere;
   final Value<int> stockActuel;
   final Value<int> stockAlerte;
+  final Value<String?> imageUrl;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
   const LocalProduitsCompanion({
@@ -363,6 +401,7 @@ class LocalProduitsCompanion extends UpdateCompanion<LocalProduit> {
     this.prixVenteSuggere = const Value.absent(),
     this.stockActuel = const Value.absent(),
     this.stockAlerte = const Value.absent(),
+    this.imageUrl = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -375,6 +414,7 @@ class LocalProduitsCompanion extends UpdateCompanion<LocalProduit> {
     this.prixVenteSuggere = const Value.absent(),
     this.stockActuel = const Value.absent(),
     this.stockAlerte = const Value.absent(),
+    this.imageUrl = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -389,6 +429,7 @@ class LocalProduitsCompanion extends UpdateCompanion<LocalProduit> {
     Expression<double>? prixVenteSuggere,
     Expression<int>? stockActuel,
     Expression<int>? stockAlerte,
+    Expression<String>? imageUrl,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
   }) {
@@ -401,6 +442,7 @@ class LocalProduitsCompanion extends UpdateCompanion<LocalProduit> {
       if (prixVenteSuggere != null) 'prix_vente_suggere': prixVenteSuggere,
       if (stockActuel != null) 'stock_actuel': stockActuel,
       if (stockAlerte != null) 'stock_alerte': stockAlerte,
+      if (imageUrl != null) 'image_url': imageUrl,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -415,6 +457,7 @@ class LocalProduitsCompanion extends UpdateCompanion<LocalProduit> {
       Value<double>? prixVenteSuggere,
       Value<int>? stockActuel,
       Value<int>? stockAlerte,
+      Value<String?>? imageUrl,
       Value<DateTime>? updatedAt,
       Value<int>? rowid}) {
     return LocalProduitsCompanion(
@@ -426,6 +469,7 @@ class LocalProduitsCompanion extends UpdateCompanion<LocalProduit> {
       prixVenteSuggere: prixVenteSuggere ?? this.prixVenteSuggere,
       stockActuel: stockActuel ?? this.stockActuel,
       stockAlerte: stockAlerte ?? this.stockAlerte,
+      imageUrl: imageUrl ?? this.imageUrl,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
     );
@@ -458,6 +502,9 @@ class LocalProduitsCompanion extends UpdateCompanion<LocalProduit> {
     if (stockAlerte.present) {
       map['stock_alerte'] = Variable<int>(stockAlerte.value);
     }
+    if (imageUrl.present) {
+      map['image_url'] = Variable<String>(imageUrl.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -478,6 +525,7 @@ class LocalProduitsCompanion extends UpdateCompanion<LocalProduit> {
           ..write('prixVenteSuggere: $prixVenteSuggere, ')
           ..write('stockActuel: $stockActuel, ')
           ..write('stockAlerte: $stockAlerte, ')
+          ..write('imageUrl: $imageUrl, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -3530,6 +3578,7 @@ typedef $$LocalProduitsTableCreateCompanionBuilder = LocalProduitsCompanion
   Value<double> prixVenteSuggere,
   Value<int> stockActuel,
   Value<int> stockAlerte,
+  Value<String?> imageUrl,
   Value<DateTime> updatedAt,
   Value<int> rowid,
 });
@@ -3543,6 +3592,7 @@ typedef $$LocalProduitsTableUpdateCompanionBuilder = LocalProduitsCompanion
   Value<double> prixVenteSuggere,
   Value<int> stockActuel,
   Value<int> stockAlerte,
+  Value<String?> imageUrl,
   Value<DateTime> updatedAt,
   Value<int> rowid,
 });
@@ -3581,6 +3631,9 @@ class $$LocalProduitsTableFilterComposer
 
   ColumnFilters<int> get stockAlerte => $composableBuilder(
       column: $table.stockAlerte, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get imageUrl => $composableBuilder(
+      column: $table.imageUrl, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnFilters(column));
@@ -3621,6 +3674,9 @@ class $$LocalProduitsTableOrderingComposer
   ColumnOrderings<int> get stockAlerte => $composableBuilder(
       column: $table.stockAlerte, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get imageUrl => $composableBuilder(
+      column: $table.imageUrl, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 }
@@ -3657,6 +3713,9 @@ class $$LocalProduitsTableAnnotationComposer
 
   GeneratedColumn<int> get stockAlerte => $composableBuilder(
       column: $table.stockAlerte, builder: (column) => column);
+
+  GeneratedColumn<String> get imageUrl =>
+      $composableBuilder(column: $table.imageUrl, builder: (column) => column);
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
@@ -3696,6 +3755,7 @@ class $$LocalProduitsTableTableManager extends RootTableManager<
             Value<double> prixVenteSuggere = const Value.absent(),
             Value<int> stockActuel = const Value.absent(),
             Value<int> stockAlerte = const Value.absent(),
+            Value<String?> imageUrl = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -3708,6 +3768,7 @@ class $$LocalProduitsTableTableManager extends RootTableManager<
             prixVenteSuggere: prixVenteSuggere,
             stockActuel: stockActuel,
             stockAlerte: stockAlerte,
+            imageUrl: imageUrl,
             updatedAt: updatedAt,
             rowid: rowid,
           ),
@@ -3720,6 +3781,7 @@ class $$LocalProduitsTableTableManager extends RootTableManager<
             Value<double> prixVenteSuggere = const Value.absent(),
             Value<int> stockActuel = const Value.absent(),
             Value<int> stockAlerte = const Value.absent(),
+            Value<String?> imageUrl = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -3732,6 +3794,7 @@ class $$LocalProduitsTableTableManager extends RootTableManager<
             prixVenteSuggere: prixVenteSuggere,
             stockActuel: stockActuel,
             stockAlerte: stockAlerte,
+            imageUrl: imageUrl,
             updatedAt: updatedAt,
             rowid: rowid,
           ),

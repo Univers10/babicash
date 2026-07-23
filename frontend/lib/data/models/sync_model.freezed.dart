@@ -3276,6 +3276,8 @@ mixin _$ProduitModelLite {
   int get stockAlerte => throw _privateConstructorUsedError;
   @JsonKey(name: 'categorie_id')
   String? get categorieId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'image_url')
+  String? get imageUrl => throw _privateConstructorUsedError;
 
   /// Serializes this ProduitModelLite to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -3302,7 +3304,8 @@ abstract class $ProduitModelLiteCopyWith<$Res> {
       double prixVenteSuggere,
       @JsonKey(name: 'stock_actuel') int stockActuel,
       @JsonKey(name: 'stock_alerte') int stockAlerte,
-      @JsonKey(name: 'categorie_id') String? categorieId});
+      @JsonKey(name: 'categorie_id') String? categorieId,
+      @JsonKey(name: 'image_url') String? imageUrl});
 }
 
 /// @nodoc
@@ -3327,6 +3330,7 @@ class _$ProduitModelLiteCopyWithImpl<$Res, $Val extends ProduitModelLite>
     Object? stockActuel = null,
     Object? stockAlerte = null,
     Object? categorieId = freezed,
+    Object? imageUrl = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -3357,6 +3361,10 @@ class _$ProduitModelLiteCopyWithImpl<$Res, $Val extends ProduitModelLite>
           ? _value.categorieId
           : categorieId // ignore: cast_nullable_to_non_nullable
               as String?,
+      imageUrl: freezed == imageUrl
+          ? _value.imageUrl
+          : imageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -3378,7 +3386,8 @@ abstract class _$$ProduitModelLiteImplCopyWith<$Res>
       double prixVenteSuggere,
       @JsonKey(name: 'stock_actuel') int stockActuel,
       @JsonKey(name: 'stock_alerte') int stockAlerte,
-      @JsonKey(name: 'categorie_id') String? categorieId});
+      @JsonKey(name: 'categorie_id') String? categorieId,
+      @JsonKey(name: 'image_url') String? imageUrl});
 }
 
 /// @nodoc
@@ -3401,6 +3410,7 @@ class __$$ProduitModelLiteImplCopyWithImpl<$Res>
     Object? stockActuel = null,
     Object? stockAlerte = null,
     Object? categorieId = freezed,
+    Object? imageUrl = freezed,
   }) {
     return _then(_$ProduitModelLiteImpl(
       id: null == id
@@ -3431,6 +3441,10 @@ class __$$ProduitModelLiteImplCopyWithImpl<$Res>
           ? _value.categorieId
           : categorieId // ignore: cast_nullable_to_non_nullable
               as String?,
+      imageUrl: freezed == imageUrl
+          ? _value.imageUrl
+          : imageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -3447,7 +3461,8 @@ class _$ProduitModelLiteImpl implements _ProduitModelLite {
       required this.prixVenteSuggere,
       @JsonKey(name: 'stock_actuel') required this.stockActuel,
       @JsonKey(name: 'stock_alerte') required this.stockAlerte,
-      @JsonKey(name: 'categorie_id') this.categorieId});
+      @JsonKey(name: 'categorie_id') this.categorieId,
+      @JsonKey(name: 'image_url') this.imageUrl});
 
   factory _$ProduitModelLiteImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProduitModelLiteImplFromJson(json);
@@ -3471,10 +3486,13 @@ class _$ProduitModelLiteImpl implements _ProduitModelLite {
   @override
   @JsonKey(name: 'categorie_id')
   final String? categorieId;
+  @override
+  @JsonKey(name: 'image_url')
+  final String? imageUrl;
 
   @override
   String toString() {
-    return 'ProduitModelLite(id: $id, nom: $nom, prixAchatMoyen: $prixAchatMoyen, prixVenteSuggere: $prixVenteSuggere, stockActuel: $stockActuel, stockAlerte: $stockAlerte, categorieId: $categorieId)';
+    return 'ProduitModelLite(id: $id, nom: $nom, prixAchatMoyen: $prixAchatMoyen, prixVenteSuggere: $prixVenteSuggere, stockActuel: $stockActuel, stockAlerte: $stockAlerte, categorieId: $categorieId, imageUrl: $imageUrl)';
   }
 
   @override
@@ -3493,13 +3511,15 @@ class _$ProduitModelLiteImpl implements _ProduitModelLite {
             (identical(other.stockAlerte, stockAlerte) ||
                 other.stockAlerte == stockAlerte) &&
             (identical(other.categorieId, categorieId) ||
-                other.categorieId == categorieId));
+                other.categorieId == categorieId) &&
+            (identical(other.imageUrl, imageUrl) ||
+                other.imageUrl == imageUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, id, nom, prixAchatMoyen,
-      prixVenteSuggere, stockActuel, stockAlerte, categorieId);
+      prixVenteSuggere, stockActuel, stockAlerte, categorieId, imageUrl);
 
   /// Create a copy of ProduitModelLite
   /// with the given fields replaced by the non-null parameter values.
@@ -3528,7 +3548,8 @@ abstract class _ProduitModelLite implements ProduitModelLite {
           required final double prixVenteSuggere,
           @JsonKey(name: 'stock_actuel') required final int stockActuel,
           @JsonKey(name: 'stock_alerte') required final int stockAlerte,
-          @JsonKey(name: 'categorie_id') final String? categorieId}) =
+          @JsonKey(name: 'categorie_id') final String? categorieId,
+          @JsonKey(name: 'image_url') final String? imageUrl}) =
       _$ProduitModelLiteImpl;
 
   factory _ProduitModelLite.fromJson(Map<String, dynamic> json) =
@@ -3553,6 +3574,9 @@ abstract class _ProduitModelLite implements ProduitModelLite {
   @override
   @JsonKey(name: 'categorie_id')
   String? get categorieId;
+  @override
+  @JsonKey(name: 'image_url')
+  String? get imageUrl;
 
   /// Create a copy of ProduitModelLite
   /// with the given fields replaced by the non-null parameter values.

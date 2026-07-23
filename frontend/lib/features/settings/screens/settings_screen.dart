@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -16,7 +17,9 @@ import '../../../features/boutiques/screens/boutiques_screen.dart';
 import '../../../features/sync/sync_service.dart';
 import '../../../features/users/providers/users_provider.dart';
 import '../../../features/users/screens/users_screen.dart';
+import '../../../shared/images/media_url.dart';
 import 'printer_config_screen.dart';
+import 'receipt_config_screen.dart';
 import '../../../shared/widgets/amount_text.dart';
 import '../../../shared/widgets/app_snackbar.dart';
 import '../../../shared/widgets/menu_button.dart';
@@ -164,6 +167,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => const PrinterConfigScreen(),
+              ),
+            ),
+          ),
+          const VGap(AppSpacing.sm),
+          _SettingsTile(
+            icon: Symbols.receipt_long,
+            title: 'Personnaliser le reçu',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const ReceiptConfigScreen(),
               ),
             ),
           ),
@@ -465,13 +478,14 @@ class _ProfileCard extends StatelessWidget {
   }
 }
 
-class _BoutiqueCard extends StatelessWidget {
+class _BoutiqueCard extends ConsumerWidget {
   const _BoutiqueCard({required this.boutique});
   final BoutiqueModel boutique;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final fmt = DateFormat('dd/MM/yyyy');
+    final logoUrl = absoluteMediaUrl(ref.watch(apiOriginProvider), boutique.logoUrl);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -481,14 +495,25 @@ class _BoutiqueCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: 44,
+              height: 44,
               color: AppColors.primaryContainer,
-              borderRadius: BorderRadius.circular(12),
+              child: logoUrl.isEmpty
+                  ? const Icon(Symbols.store, color: AppColors.primary, size: 22)
+                  : CachedNetworkImage(
+                      imageUrl: logoUrl,
+                      width: 44,
+                      height: 44,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => const Icon(Symbols.store,
+                          color: AppColors.primary, size: 22),
+                      errorWidget: (_, __, ___) => const Icon(Symbols.store,
+                          color: AppColors.primary, size: 22),
+                    ),
             ),
-            child: const Icon(Symbols.store, color: AppColors.primary, size: 22),
           ),
           const SizedBox(width: 14),
           Expanded(

@@ -21,6 +21,9 @@ import '../widgets/catalogue_grid.dart';
 import '../widgets/lot_dialog.dart';
 import '../../../features/stock/providers/stock_provider.dart';
 import '../../../features/sessions/providers/sessions_provider.dart';
+import '../../../features/settings/models/receipt_config.dart';
+import '../../../features/settings/providers/receipt_config_provider.dart';
+import '../../../shared/images/media_url.dart';
 import '../models/panier_item.dart';
 
 // ── POS Screen ────────────────────────────────────────────────────────────────
@@ -1169,10 +1172,11 @@ class _MobilePanierSheet extends ConsumerWidget {
                 _ClientBouton(panier: panier),
                 const SizedBox(width: 4),
                 TextButton(
-                  onPressed: () {
-                    ref.read(panierProvider.notifier).clear();
-                    Navigator.pop(context);
-                  },
+                  // clear() vide le panier → le ref.listen ci-dessus ferme la
+                  // sheet. Ne PAS pop ici aussi : ça retirerait une 2e route
+                  // (l'écran caisse en dessous) → écran noir.
+                  onPressed: () =>
+                      ref.read(panierProvider.notifier).clear(),
                   child: const Text('Vider',
                       style: TextStyle(
                           color: AppColors.error, fontSize: 13)),
@@ -1298,6 +1302,8 @@ class _PaiementDialogState extends ConsumerState<_PaiementDialog> {
     final sousTotal = sousTotalPanier(panier);
     final total = sousTotal * (1 - remiseGlobale / 100);
     final isLoading = ref.watch(caisseLoadingProvider);
+    // Pré-charge la personnalisation du reçu (lue dans _confirmer).
+    ref.watch(receiptConfigProvider);
 
     final isCredit = _modes.contains('CREDIT');
     final isMulti = _modes.contains('ESPECES') && _modes.contains('MOBILE_MONEY');
@@ -1608,6 +1614,20 @@ class _PaiementDialogState extends ConsumerState<_PaiementDialog> {
     final monnaie = montantRecu > total ? montantRecu - total : 0.0;
 
     final caissierNom = ref.read(authStateProvider).value?.nom;
+
+    // Personnalisation du reçu : valeurs saisies dans Paramètres, avec repli
+    // sur les infos de la boutique active si un champ n'a pas été renseigné.
+    final recu = ref.read(receiptConfigProvider).valueOrNull ?? const ReceiptConfig();
+    final boutique = ref.read(boutiqueInfoProvider).valueOrNull;
+    final logoAbs =
+        absoluteMediaUrl(ref.read(apiOriginProvider), boutique?.logoUrl);
+    String? orBoutique(String saisi, String? boutiqueVal) {
+      final v = saisi.trim();
+      if (v.isNotEmpty) return v;
+      final b = boutiqueVal?.trim();
+      return (b != null && b.isNotEmpty) ? b : null;
+    }
+
     final vente = VenteResume(
       lignes: List.from(panier),
       sousTotal: sousTotal,
@@ -1617,8 +1637,15 @@ class _PaiementDialogState extends ConsumerState<_PaiementDialog> {
       montantRecu: montantRecu,
       monnaie: monnaie,
       date: DateTime.now(),
+      nomBoutique: orBoutique(recu.nomBoutique, boutique?.nom) ?? 'BabiCash',
+      adresse: orBoutique(recu.adresse, boutique?.adresse),
+      telephone: orBoutique(recu.telephone, boutique?.telephone),
+      entete: recu.entete,
+      piedMessage: recu.piedMessage,
+      afficherLogo: recu.afficherLogo,
+      logoUrl: logoAbs.isEmpty ? null : logoAbs,
       clientNom: client?.nom,
-      caissierNom: caissierNom,
+      caissierNom: recu.afficherVendeur ? caissierNom : null,
     );
 
     final nav = Navigator.of(context);

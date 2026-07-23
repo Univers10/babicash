@@ -142,6 +142,7 @@ class ProduitOut(BaseModel):
     prix_vente_suggere: Decimal
     stock_actuel: int
     stock_alerte: int
+    image_url: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

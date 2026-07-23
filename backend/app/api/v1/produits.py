@@ -66,6 +66,7 @@ async def create_produit(
         prix_vente_suggere=payload.prix_vente_suggere,
         stock_actuel=payload.stock_actuel,
         stock_alerte=payload.stock_alerte,
+        image_url=payload.image_url,
     )
     db.add(produit)
     await db.commit()

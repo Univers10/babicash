@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -7,6 +8,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/text_normalizer.dart';
 import '../../../data/local/database.dart';
 import '../../../features/stock/providers/stock_provider.dart';
+import '../../../shared/images/media_url.dart';
 import '../../../shared/utils/categorie_utils.dart';
 import '../providers/caisse_provider.dart';
 
@@ -64,6 +66,7 @@ class CatalogueGrid extends ConsumerWidget {
     final stockAsync = ref.watch(stockProvider);
     final categoriesAsync = ref.watch(categoriesProvider);
     final selectedCatId = ref.watch(_selectedCategoryProvider);
+    final apiOrigin = ref.watch(apiOriginProvider);
     // C3 : quantités du panier par produit — badge mis à jour en temps réel
     final panier = ref.watch(panierProvider);
     final qteAuPanier = <String, int>{};
@@ -211,6 +214,7 @@ class CatalogueGrid extends ConsumerWidget {
                   final cIdx = catColorMap[p.categorieId];
                   return _ProduitTile(
                     produit: p,
+                    imageUrl: absoluteMediaUrl(apiOrigin, p.imageUrl),
                     accentColor:
                         cIdx != null ? _categoryColors[cIdx] : _sansCategorieColor,
                     bgColor: cIdx != null
@@ -274,12 +278,14 @@ class _CategoryChip extends StatelessWidget {
 class _ProduitTile extends StatelessWidget {
   const _ProduitTile({
     required this.produit,
+    required this.imageUrl,
     required this.accentColor,
     required this.bgColor,
     required this.quantiteAuPanier,
     required this.onTap,
   });
   final LocalProduit produit;
+  final String imageUrl;
   final Color accentColor;
   final Color bgColor;
   final int quantiteAuPanier;
@@ -305,18 +311,31 @@ class _ProduitTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Icône produit
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
+                  // Image produit (ou icône en repli) — grisée si en rupture
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      width: 36,
+                      height: 36,
                       color: effectiveAccent.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Symbols.inventory_2,
-                      size: 18,
-                      color: effectiveAccent,
+                      child: imageUrl.isEmpty
+                          ? Icon(Symbols.inventory_2,
+                              size: 18, color: effectiveAccent)
+                          : Opacity(
+                              opacity: enRupture ? 0.4 : 1,
+                              child: CachedNetworkImage(
+                                imageUrl: imageUrl,
+                                width: 36,
+                                height: 36,
+                                fit: BoxFit.cover,
+                                placeholder: (_, __) => Icon(Symbols.inventory_2,
+                                    size: 18, color: effectiveAccent),
+                                errorWidget: (_, __, ___) => Icon(
+                                    Symbols.inventory_2,
+                                    size: 18,
+                                    color: effectiveAccent),
+                              ),
+                            ),
                     ),
                   ),
                   const Spacer(),

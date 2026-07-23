@@ -18,6 +18,8 @@ class LocalProduits extends Table {
   RealColumn get prixVenteSuggere => real().withDefault(const Constant(0))();
   IntColumn get stockActuel => integer().withDefault(const Constant(0))();
   IntColumn get stockAlerte => integer().withDefault(const Constant(5))();
+  // URL de l'image du produit (upload serveur) — nullable, catalogue offline.
+  TextColumn get imageUrl => text().nullable()();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
@@ -136,7 +138,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -151,6 +153,10 @@ class AppDatabase extends _$AppDatabase {
             // les ventes locales existantes gardent lot_id/lot_nom = null.
             await m.addColumn(localLignesVente, localLignesVente.lotId);
             await m.addColumn(localLignesVente, localLignesVente.lotNom);
+          }
+          if (from < 4) {
+            // v4 : image produit — colonne additive nullable.
+            await m.addColumn(localProduits, localProduits.imageUrl);
           }
         },
       );

@@ -13,6 +13,7 @@ from app.api.v1 import (
     sessions,
     sync,
     tiers,
+    uploads,
     users,
     ventes,
 )
@@ -29,6 +30,7 @@ api_router.include_router(tiers.router, prefix="/tiers", tags=["tiers"])
 api_router.include_router(users.router, prefix="/users", tags=["users"])
 api_router.include_router(sessions.router, prefix="/sessions", tags=["sessions"])
 api_router.include_router(sync.router, prefix="/sync", tags=["sync"])
+api_router.include_router(uploads.router, prefix="/uploads", tags=["uploads"])
 api_router.include_router(
     mouvements_stock.router,
     prefix="/mouvements-stock",

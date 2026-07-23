@@ -17,6 +17,7 @@ class ProduitModel with _$ProduitModel {
     required double prixVenteSuggere,
     @JsonKey(name: 'stock_actuel') required int stockActuel,
     @JsonKey(name: 'stock_alerte') required int stockAlerte,
+    @JsonKey(name: 'image_url') String? imageUrl,
   }) = _ProduitModel;
   factory ProduitModel.fromJson(Map<String, dynamic> json) =>
       _$ProduitModelFromJson(json);
@@ -43,6 +44,7 @@ class ProduitCreateRequest with _$ProduitCreateRequest {
     @JsonKey(name: 'prix_vente_suggere') required double prixVenteSuggere,
     @JsonKey(name: 'stock_actuel') required int stockActuel,
     @JsonKey(name: 'stock_alerte') required int stockAlerte,
+    @JsonKey(name: 'image_url', includeIfNull: false) String? imageUrl,
   }) = _ProduitCreateRequest;
   factory ProduitCreateRequest.fromJson(Map<String, dynamic> json) =>
       _$ProduitCreateRequestFromJson(json);
@@ -57,6 +59,9 @@ class ProduitUpdateRequest with _$ProduitUpdateRequest {
     @JsonKey(name: 'prix_vente_suggere') double? prixVenteSuggere,
     @JsonKey(name: 'stock_actuel') int? stockActuel,
     @JsonKey(name: 'stock_alerte') int? stockAlerte,
+    // Toujours sérialisé : l'appelant envoie l'état final (URL, ou `null`
+    // pour retirer l'image) — même logique que `categorie_id`.
+    @JsonKey(name: 'image_url') String? imageUrl,
   }) = _ProduitUpdateRequest;
   factory ProduitUpdateRequest.fromJson(Map<String, dynamic> json) =>
       _$ProduitUpdateRequestFromJson(json);

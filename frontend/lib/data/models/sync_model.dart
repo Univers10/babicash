@@ -190,6 +190,7 @@ class ProduitModelLite with _$ProduitModelLite {
     @JsonKey(name: 'stock_actuel') required int stockActuel,
     @JsonKey(name: 'stock_alerte') required int stockAlerte,
     @JsonKey(name: 'categorie_id') String? categorieId,
+    @JsonKey(name: 'image_url') String? imageUrl,
   }) = _ProduitModelLite;
   factory ProduitModelLite.fromJson(Map<String, dynamic> json) =>
       _$ProduitModelLiteFromJson(json);

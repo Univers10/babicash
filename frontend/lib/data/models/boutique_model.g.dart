@@ -14,6 +14,7 @@ _$BoutiqueModelImpl _$$BoutiqueModelImplFromJson(Map<String, dynamic> json) =>
       adresse: json['adresse'] as String?,
       telephone: json['telephone'] as String?,
       typeCommerce: json['type_commerce'] as String?,
+      logoUrl: json['logo_url'] as String?,
       dateCreation: DateTime.parse(json['date_creation'] as String),
     );
 
@@ -25,5 +26,6 @@ Map<String, dynamic> _$$BoutiqueModelImplToJson(_$BoutiqueModelImpl instance) =>
       'adresse': instance.adresse,
       'telephone': instance.telephone,
       'type_commerce': instance.typeCommerce,
+      'logo_url': instance.logoUrl,
       'date_creation': instance.dateCreation.toIso8601String(),
     };

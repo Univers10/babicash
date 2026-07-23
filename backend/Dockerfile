@@ -39,10 +39,12 @@ COPY scripts/ scripts/
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh /app/scripts/*.sh
 
-# Fix ownership for non-root user
+# Fix ownership for non-root user.
+# `static/uploads` est créé ici (propriété babicash) pour que le volume
+# persistant monté à cet emplacement hérite des bons droits d'écriture.
 RUN chown -R babicash:babicash /app && \
-    mkdir -p /backups /app/logs && \
-    chown -R babicash:babicash /backups /app/logs
+    mkdir -p /backups /app/logs /app/static/uploads && \
+    chown -R babicash:babicash /backups /app/logs /app/static/uploads
 
 USER babicash
 

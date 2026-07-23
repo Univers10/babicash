@@ -1,20 +1,23 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/local/database.dart';
+import '../../../shared/images/media_url.dart';
 import '../../../shared/widgets/amount_text.dart';
 import '../utils/categorie_couleur.dart';
 import 'mouvement_stock_dialog.dart';
 import 'produit_form_dialog.dart';
 
-class ProduitCard extends StatelessWidget {
+class ProduitCard extends ConsumerWidget {
   const ProduitCard({super.key, required this.produit});
   final LocalProduit produit;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final enRupture = produit.stockActuel <= 0;
     final enAlerte =
         !enRupture && produit.stockActuel <= produit.stockAlerte;
@@ -25,6 +28,7 @@ class ProduitCard extends StatelessWidget {
 
     // S5 : la carte reprend la couleur de la catégorie (bordure + pastille).
     final couleurCategorie = CategorieCouleur.pour(produit.categorieId);
+    final imageUrl = absoluteMediaUrl(ref.watch(apiOriginProvider), produit.imageUrl);
 
     return Card(
       clipBehavior: Clip.hardEdge,
@@ -43,18 +47,30 @@ class ProduitCard extends StatelessWidget {
                   padding: AppSpacing.cardPadding,
                   child: Row(
                     children: [
-                      // Pastille produit à la couleur de la catégorie
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
+                      // Image produit (ou pastille catégorie en repli)
+                      ClipRRect(
+                        borderRadius: AppSpacing.borderRadiusMd,
+                        child: Container(
+                          width: 44,
+                          height: 44,
                           color: couleurCategorie.withValues(alpha: 0.14),
-                          borderRadius: AppSpacing.borderRadiusMd,
-                        ),
-                        child: Icon(
-                          Symbols.inventory_2,
-                          color: couleurCategorie,
-                          size: 22,
+                          child: imageUrl.isEmpty
+                              ? Icon(Symbols.inventory_2,
+                                  color: couleurCategorie, size: 22)
+                              : CachedNetworkImage(
+                                  imageUrl: imageUrl,
+                                  width: 44,
+                                  height: 44,
+                                  fit: BoxFit.cover,
+                                  placeholder: (_, __) => Icon(
+                                      Symbols.inventory_2,
+                                      color: couleurCategorie,
+                                      size: 22),
+                                  errorWidget: (_, __, ___) => Icon(
+                                      Symbols.inventory_2,
+                                      color: couleurCategorie,
+                                      size: 22),
+                                ),
                         ),
                       ),
                       const HGap(AppSpacing.md),

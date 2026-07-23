@@ -34,6 +34,8 @@ mixin _$ProduitModel {
   int get stockActuel => throw _privateConstructorUsedError;
   @JsonKey(name: 'stock_alerte')
   int get stockAlerte => throw _privateConstructorUsedError;
+  @JsonKey(name: 'image_url')
+  String? get imageUrl => throw _privateConstructorUsedError;
 
   /// Serializes this ProduitModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -61,7 +63,8 @@ abstract class $ProduitModelCopyWith<$Res> {
       @JsonKey(name: 'prix_vente_suggere', fromJson: parseDouble)
       double prixVenteSuggere,
       @JsonKey(name: 'stock_actuel') int stockActuel,
-      @JsonKey(name: 'stock_alerte') int stockAlerte});
+      @JsonKey(name: 'stock_alerte') int stockAlerte,
+      @JsonKey(name: 'image_url') String? imageUrl});
 }
 
 /// @nodoc
@@ -87,6 +90,7 @@ class _$ProduitModelCopyWithImpl<$Res, $Val extends ProduitModel>
     Object? prixVenteSuggere = null,
     Object? stockActuel = null,
     Object? stockAlerte = null,
+    Object? imageUrl = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -121,6 +125,10 @@ class _$ProduitModelCopyWithImpl<$Res, $Val extends ProduitModel>
           ? _value.stockAlerte
           : stockAlerte // ignore: cast_nullable_to_non_nullable
               as int,
+      imageUrl: freezed == imageUrl
+          ? _value.imageUrl
+          : imageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -143,7 +151,8 @@ abstract class _$$ProduitModelImplCopyWith<$Res>
       @JsonKey(name: 'prix_vente_suggere', fromJson: parseDouble)
       double prixVenteSuggere,
       @JsonKey(name: 'stock_actuel') int stockActuel,
-      @JsonKey(name: 'stock_alerte') int stockAlerte});
+      @JsonKey(name: 'stock_alerte') int stockAlerte,
+      @JsonKey(name: 'image_url') String? imageUrl});
 }
 
 /// @nodoc
@@ -167,6 +176,7 @@ class __$$ProduitModelImplCopyWithImpl<$Res>
     Object? prixVenteSuggere = null,
     Object? stockActuel = null,
     Object? stockAlerte = null,
+    Object? imageUrl = freezed,
   }) {
     return _then(_$ProduitModelImpl(
       id: null == id
@@ -201,6 +211,10 @@ class __$$ProduitModelImplCopyWithImpl<$Res>
           ? _value.stockAlerte
           : stockAlerte // ignore: cast_nullable_to_non_nullable
               as int,
+      imageUrl: freezed == imageUrl
+          ? _value.imageUrl
+          : imageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -218,7 +232,8 @@ class _$ProduitModelImpl implements _ProduitModel {
       @JsonKey(name: 'prix_vente_suggere', fromJson: parseDouble)
       required this.prixVenteSuggere,
       @JsonKey(name: 'stock_actuel') required this.stockActuel,
-      @JsonKey(name: 'stock_alerte') required this.stockAlerte});
+      @JsonKey(name: 'stock_alerte') required this.stockAlerte,
+      @JsonKey(name: 'image_url') this.imageUrl});
 
   factory _$ProduitModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProduitModelImplFromJson(json);
@@ -245,10 +260,13 @@ class _$ProduitModelImpl implements _ProduitModel {
   @override
   @JsonKey(name: 'stock_alerte')
   final int stockAlerte;
+  @override
+  @JsonKey(name: 'image_url')
+  final String? imageUrl;
 
   @override
   String toString() {
-    return 'ProduitModel(id: $id, boutiqueId: $boutiqueId, categorieId: $categorieId, nom: $nom, prixAchatMoyen: $prixAchatMoyen, prixVenteSuggere: $prixVenteSuggere, stockActuel: $stockActuel, stockAlerte: $stockAlerte)';
+    return 'ProduitModel(id: $id, boutiqueId: $boutiqueId, categorieId: $categorieId, nom: $nom, prixAchatMoyen: $prixAchatMoyen, prixVenteSuggere: $prixVenteSuggere, stockActuel: $stockActuel, stockAlerte: $stockAlerte, imageUrl: $imageUrl)';
   }
 
   @override
@@ -269,13 +287,15 @@ class _$ProduitModelImpl implements _ProduitModel {
             (identical(other.stockActuel, stockActuel) ||
                 other.stockActuel == stockActuel) &&
             (identical(other.stockAlerte, stockAlerte) ||
-                other.stockAlerte == stockAlerte));
+                other.stockAlerte == stockAlerte) &&
+            (identical(other.imageUrl, imageUrl) ||
+                other.imageUrl == imageUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, id, boutiqueId, categorieId, nom,
-      prixAchatMoyen, prixVenteSuggere, stockActuel, stockAlerte);
+      prixAchatMoyen, prixVenteSuggere, stockActuel, stockAlerte, imageUrl);
 
   /// Create a copy of ProduitModel
   /// with the given fields replaced by the non-null parameter values.
@@ -295,17 +315,17 @@ class _$ProduitModelImpl implements _ProduitModel {
 
 abstract class _ProduitModel implements ProduitModel {
   const factory _ProduitModel(
-          {required final String id,
-          @JsonKey(name: 'boutique_id') required final String boutiqueId,
-          @JsonKey(name: 'categorie_id') final String? categorieId,
-          required final String nom,
-          @JsonKey(name: 'prix_achat_moyen', fromJson: parseDouble)
-          required final double prixAchatMoyen,
-          @JsonKey(name: 'prix_vente_suggere', fromJson: parseDouble)
-          required final double prixVenteSuggere,
-          @JsonKey(name: 'stock_actuel') required final int stockActuel,
-          @JsonKey(name: 'stock_alerte') required final int stockAlerte}) =
-      _$ProduitModelImpl;
+      {required final String id,
+      @JsonKey(name: 'boutique_id') required final String boutiqueId,
+      @JsonKey(name: 'categorie_id') final String? categorieId,
+      required final String nom,
+      @JsonKey(name: 'prix_achat_moyen', fromJson: parseDouble)
+      required final double prixAchatMoyen,
+      @JsonKey(name: 'prix_vente_suggere', fromJson: parseDouble)
+      required final double prixVenteSuggere,
+      @JsonKey(name: 'stock_actuel') required final int stockActuel,
+      @JsonKey(name: 'stock_alerte') required final int stockAlerte,
+      @JsonKey(name: 'image_url') final String? imageUrl}) = _$ProduitModelImpl;
 
   factory _ProduitModel.fromJson(Map<String, dynamic> json) =
       _$ProduitModelImpl.fromJson;
@@ -332,6 +352,9 @@ abstract class _ProduitModel implements ProduitModel {
   @override
   @JsonKey(name: 'stock_alerte')
   int get stockAlerte;
+  @override
+  @JsonKey(name: 'image_url')
+  String? get imageUrl;
 
   /// Create a copy of ProduitModel
   /// with the given fields replaced by the non-null parameter values.
@@ -554,6 +577,8 @@ mixin _$ProduitCreateRequest {
   int get stockActuel => throw _privateConstructorUsedError;
   @JsonKey(name: 'stock_alerte')
   int get stockAlerte => throw _privateConstructorUsedError;
+  @JsonKey(name: 'image_url', includeIfNull: false)
+  String? get imageUrl => throw _privateConstructorUsedError;
 
   /// Serializes this ProduitCreateRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -578,7 +603,8 @@ abstract class $ProduitCreateRequestCopyWith<$Res> {
       @JsonKey(name: 'prix_achat_moyen') double prixAchatMoyen,
       @JsonKey(name: 'prix_vente_suggere') double prixVenteSuggere,
       @JsonKey(name: 'stock_actuel') int stockActuel,
-      @JsonKey(name: 'stock_alerte') int stockAlerte});
+      @JsonKey(name: 'stock_alerte') int stockAlerte,
+      @JsonKey(name: 'image_url', includeIfNull: false) String? imageUrl});
 }
 
 /// @nodoc
@@ -604,6 +630,7 @@ class _$ProduitCreateRequestCopyWithImpl<$Res,
     Object? prixVenteSuggere = null,
     Object? stockActuel = null,
     Object? stockAlerte = null,
+    Object? imageUrl = freezed,
   }) {
     return _then(_value.copyWith(
       boutiqueId: null == boutiqueId
@@ -634,6 +661,10 @@ class _$ProduitCreateRequestCopyWithImpl<$Res,
           ? _value.stockAlerte
           : stockAlerte // ignore: cast_nullable_to_non_nullable
               as int,
+      imageUrl: freezed == imageUrl
+          ? _value.imageUrl
+          : imageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -653,7 +684,8 @@ abstract class _$$ProduitCreateRequestImplCopyWith<$Res>
       @JsonKey(name: 'prix_achat_moyen') double prixAchatMoyen,
       @JsonKey(name: 'prix_vente_suggere') double prixVenteSuggere,
       @JsonKey(name: 'stock_actuel') int stockActuel,
-      @JsonKey(name: 'stock_alerte') int stockAlerte});
+      @JsonKey(name: 'stock_alerte') int stockAlerte,
+      @JsonKey(name: 'image_url', includeIfNull: false) String? imageUrl});
 }
 
 /// @nodoc
@@ -676,6 +708,7 @@ class __$$ProduitCreateRequestImplCopyWithImpl<$Res>
     Object? prixVenteSuggere = null,
     Object? stockActuel = null,
     Object? stockAlerte = null,
+    Object? imageUrl = freezed,
   }) {
     return _then(_$ProduitCreateRequestImpl(
       boutiqueId: null == boutiqueId
@@ -706,6 +739,10 @@ class __$$ProduitCreateRequestImplCopyWithImpl<$Res>
           ? _value.stockAlerte
           : stockAlerte // ignore: cast_nullable_to_non_nullable
               as int,
+      imageUrl: freezed == imageUrl
+          ? _value.imageUrl
+          : imageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -720,7 +757,8 @@ class _$ProduitCreateRequestImpl implements _ProduitCreateRequest {
       @JsonKey(name: 'prix_achat_moyen') required this.prixAchatMoyen,
       @JsonKey(name: 'prix_vente_suggere') required this.prixVenteSuggere,
       @JsonKey(name: 'stock_actuel') required this.stockActuel,
-      @JsonKey(name: 'stock_alerte') required this.stockAlerte});
+      @JsonKey(name: 'stock_alerte') required this.stockAlerte,
+      @JsonKey(name: 'image_url', includeIfNull: false) this.imageUrl});
 
   factory _$ProduitCreateRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProduitCreateRequestImplFromJson(json);
@@ -745,10 +783,13 @@ class _$ProduitCreateRequestImpl implements _ProduitCreateRequest {
   @override
   @JsonKey(name: 'stock_alerte')
   final int stockAlerte;
+  @override
+  @JsonKey(name: 'image_url', includeIfNull: false)
+  final String? imageUrl;
 
   @override
   String toString() {
-    return 'ProduitCreateRequest(boutiqueId: $boutiqueId, categorieId: $categorieId, nom: $nom, prixAchatMoyen: $prixAchatMoyen, prixVenteSuggere: $prixVenteSuggere, stockActuel: $stockActuel, stockAlerte: $stockAlerte)';
+    return 'ProduitCreateRequest(boutiqueId: $boutiqueId, categorieId: $categorieId, nom: $nom, prixAchatMoyen: $prixAchatMoyen, prixVenteSuggere: $prixVenteSuggere, stockActuel: $stockActuel, stockAlerte: $stockAlerte, imageUrl: $imageUrl)';
   }
 
   @override
@@ -768,13 +809,15 @@ class _$ProduitCreateRequestImpl implements _ProduitCreateRequest {
             (identical(other.stockActuel, stockActuel) ||
                 other.stockActuel == stockActuel) &&
             (identical(other.stockAlerte, stockAlerte) ||
-                other.stockAlerte == stockAlerte));
+                other.stockAlerte == stockAlerte) &&
+            (identical(other.imageUrl, imageUrl) ||
+                other.imageUrl == imageUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, boutiqueId, categorieId, nom,
-      prixAchatMoyen, prixVenteSuggere, stockActuel, stockAlerte);
+      prixAchatMoyen, prixVenteSuggere, stockActuel, stockAlerte, imageUrl);
 
   /// Create a copy of ProduitCreateRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -803,8 +846,9 @@ abstract class _ProduitCreateRequest implements ProduitCreateRequest {
       @JsonKey(name: 'prix_vente_suggere')
       required final double prixVenteSuggere,
       @JsonKey(name: 'stock_actuel') required final int stockActuel,
-      @JsonKey(name: 'stock_alerte')
-      required final int stockAlerte}) = _$ProduitCreateRequestImpl;
+      @JsonKey(name: 'stock_alerte') required final int stockAlerte,
+      @JsonKey(name: 'image_url', includeIfNull: false)
+      final String? imageUrl}) = _$ProduitCreateRequestImpl;
 
   factory _ProduitCreateRequest.fromJson(Map<String, dynamic> json) =
       _$ProduitCreateRequestImpl.fromJson;
@@ -829,6 +873,9 @@ abstract class _ProduitCreateRequest implements ProduitCreateRequest {
   @override
   @JsonKey(name: 'stock_alerte')
   int get stockAlerte;
+  @override
+  @JsonKey(name: 'image_url', includeIfNull: false)
+  String? get imageUrl;
 
   /// Create a copy of ProduitCreateRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -854,7 +901,11 @@ mixin _$ProduitUpdateRequest {
   @JsonKey(name: 'stock_actuel')
   int? get stockActuel => throw _privateConstructorUsedError;
   @JsonKey(name: 'stock_alerte')
-  int? get stockAlerte => throw _privateConstructorUsedError;
+  int? get stockAlerte =>
+      throw _privateConstructorUsedError; // Toujours sérialisé : l'appelant envoie l'état final (URL, ou `null`
+// pour retirer l'image) — même logique que `categorie_id`.
+  @JsonKey(name: 'image_url')
+  String? get imageUrl => throw _privateConstructorUsedError;
 
   /// Serializes this ProduitUpdateRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -878,7 +929,8 @@ abstract class $ProduitUpdateRequestCopyWith<$Res> {
       @JsonKey(name: 'prix_achat_moyen') double? prixAchatMoyen,
       @JsonKey(name: 'prix_vente_suggere') double? prixVenteSuggere,
       @JsonKey(name: 'stock_actuel') int? stockActuel,
-      @JsonKey(name: 'stock_alerte') int? stockAlerte});
+      @JsonKey(name: 'stock_alerte') int? stockAlerte,
+      @JsonKey(name: 'image_url') String? imageUrl});
 }
 
 /// @nodoc
@@ -903,6 +955,7 @@ class _$ProduitUpdateRequestCopyWithImpl<$Res,
     Object? prixVenteSuggere = freezed,
     Object? stockActuel = freezed,
     Object? stockAlerte = freezed,
+    Object? imageUrl = freezed,
   }) {
     return _then(_value.copyWith(
       categorieId: freezed == categorieId
@@ -929,6 +982,10 @@ class _$ProduitUpdateRequestCopyWithImpl<$Res,
           ? _value.stockAlerte
           : stockAlerte // ignore: cast_nullable_to_non_nullable
               as int?,
+      imageUrl: freezed == imageUrl
+          ? _value.imageUrl
+          : imageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -947,7 +1004,8 @@ abstract class _$$ProduitUpdateRequestImplCopyWith<$Res>
       @JsonKey(name: 'prix_achat_moyen') double? prixAchatMoyen,
       @JsonKey(name: 'prix_vente_suggere') double? prixVenteSuggere,
       @JsonKey(name: 'stock_actuel') int? stockActuel,
-      @JsonKey(name: 'stock_alerte') int? stockAlerte});
+      @JsonKey(name: 'stock_alerte') int? stockAlerte,
+      @JsonKey(name: 'image_url') String? imageUrl});
 }
 
 /// @nodoc
@@ -969,6 +1027,7 @@ class __$$ProduitUpdateRequestImplCopyWithImpl<$Res>
     Object? prixVenteSuggere = freezed,
     Object? stockActuel = freezed,
     Object? stockAlerte = freezed,
+    Object? imageUrl = freezed,
   }) {
     return _then(_$ProduitUpdateRequestImpl(
       categorieId: freezed == categorieId
@@ -995,6 +1054,10 @@ class __$$ProduitUpdateRequestImplCopyWithImpl<$Res>
           ? _value.stockAlerte
           : stockAlerte // ignore: cast_nullable_to_non_nullable
               as int?,
+      imageUrl: freezed == imageUrl
+          ? _value.imageUrl
+          : imageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -1008,7 +1071,8 @@ class _$ProduitUpdateRequestImpl implements _ProduitUpdateRequest {
       @JsonKey(name: 'prix_achat_moyen') this.prixAchatMoyen,
       @JsonKey(name: 'prix_vente_suggere') this.prixVenteSuggere,
       @JsonKey(name: 'stock_actuel') this.stockActuel,
-      @JsonKey(name: 'stock_alerte') this.stockAlerte});
+      @JsonKey(name: 'stock_alerte') this.stockAlerte,
+      @JsonKey(name: 'image_url') this.imageUrl});
 
   factory _$ProduitUpdateRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProduitUpdateRequestImplFromJson(json);
@@ -1030,10 +1094,15 @@ class _$ProduitUpdateRequestImpl implements _ProduitUpdateRequest {
   @override
   @JsonKey(name: 'stock_alerte')
   final int? stockAlerte;
+// Toujours sérialisé : l'appelant envoie l'état final (URL, ou `null`
+// pour retirer l'image) — même logique que `categorie_id`.
+  @override
+  @JsonKey(name: 'image_url')
+  final String? imageUrl;
 
   @override
   String toString() {
-    return 'ProduitUpdateRequest(categorieId: $categorieId, nom: $nom, prixAchatMoyen: $prixAchatMoyen, prixVenteSuggere: $prixVenteSuggere, stockActuel: $stockActuel, stockAlerte: $stockAlerte)';
+    return 'ProduitUpdateRequest(categorieId: $categorieId, nom: $nom, prixAchatMoyen: $prixAchatMoyen, prixVenteSuggere: $prixVenteSuggere, stockActuel: $stockActuel, stockAlerte: $stockAlerte, imageUrl: $imageUrl)';
   }
 
   @override
@@ -1051,13 +1120,15 @@ class _$ProduitUpdateRequestImpl implements _ProduitUpdateRequest {
             (identical(other.stockActuel, stockActuel) ||
                 other.stockActuel == stockActuel) &&
             (identical(other.stockAlerte, stockAlerte) ||
-                other.stockAlerte == stockAlerte));
+                other.stockAlerte == stockAlerte) &&
+            (identical(other.imageUrl, imageUrl) ||
+                other.imageUrl == imageUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, categorieId, nom, prixAchatMoyen,
-      prixVenteSuggere, stockActuel, stockAlerte);
+      prixVenteSuggere, stockActuel, stockAlerte, imageUrl);
 
   /// Create a copy of ProduitUpdateRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -1084,7 +1155,8 @@ abstract class _ProduitUpdateRequest implements ProduitUpdateRequest {
           @JsonKey(name: 'prix_achat_moyen') final double? prixAchatMoyen,
           @JsonKey(name: 'prix_vente_suggere') final double? prixVenteSuggere,
           @JsonKey(name: 'stock_actuel') final int? stockActuel,
-          @JsonKey(name: 'stock_alerte') final int? stockAlerte}) =
+          @JsonKey(name: 'stock_alerte') final int? stockAlerte,
+          @JsonKey(name: 'image_url') final String? imageUrl}) =
       _$ProduitUpdateRequestImpl;
 
   factory _ProduitUpdateRequest.fromJson(Map<String, dynamic> json) =
@@ -1106,7 +1178,12 @@ abstract class _ProduitUpdateRequest implements ProduitUpdateRequest {
   int? get stockActuel;
   @override
   @JsonKey(name: 'stock_alerte')
-  int? get stockAlerte;
+  int?
+      get stockAlerte; // Toujours sérialisé : l'appelant envoie l'état final (URL, ou `null`
+// pour retirer l'image) — même logique que `categorie_id`.
+  @override
+  @JsonKey(name: 'image_url')
+  String? get imageUrl;
 
   /// Create a copy of ProduitUpdateRequest
   /// with the given fields replaced by the non-null parameter values.

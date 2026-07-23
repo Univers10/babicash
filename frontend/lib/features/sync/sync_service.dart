@@ -147,6 +147,7 @@ class SyncService {
                 stockActuel: drift.Value(p.stockActuel),
                 stockAlerte: drift.Value(p.stockAlerte),
                 categorieId: drift.Value(p.categorieId),
+                imageUrl: drift.Value(p.imageUrl),
               ))
           .toList());
 
