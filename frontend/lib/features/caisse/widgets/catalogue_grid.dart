@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -200,14 +201,14 @@ class CatalogueGrid extends ConsumerWidget {
                 );
               }
 
-              return GridView.builder(
+              // Grille à hauteur adaptative : chaque tuile prend la hauteur
+              // qu'il lui faut → le nom complet s'affiche, même long, sans
+              // troncature ni débordement.
+              return MasonryGridView.count(
                 padding: EdgeInsets.fromLTRB(12, 8, 12, 12 + bottomPadding),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossCount,
-                  childAspectRatio: 0.72,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                ),
+                crossAxisCount: crossCount,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
                 itemCount: produits.length,
                 itemBuilder: (_, i) {
                   final p = produits[i];
@@ -314,8 +315,10 @@ class _ProduitTile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ── Image : occupe tout l'espace au-dessus du nom (style fast-food)
-            Expanded(
+            // ── Image carrée en haut (style fast-food) ; hauteur fixe pour
+            // que seule la zone texte varie selon la longueur du nom.
+            AspectRatio(
+              aspectRatio: 1,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -404,6 +407,8 @@ class _ProduitTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Nom complet : pas de limite de lignes, il s'enroule et la
+                  // tuile s'agrandit en conséquence (grille masonry).
                   Text(
                     produit.nom,
                     style: TextStyle(
@@ -414,8 +419,7 @@ class _ProduitTile extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       height: 1.2,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                    softWrap: true,
                   ),
                   const SizedBox(height: 2),
                   Text(
