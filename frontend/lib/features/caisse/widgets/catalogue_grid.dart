@@ -204,7 +204,7 @@ class CatalogueGrid extends ConsumerWidget {
                 padding: EdgeInsets.fromLTRB(12, 8, 12, 12 + bottomPadding),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: crossCount,
-                  childAspectRatio: 0.8,
+                  childAspectRatio: 0.72,
                   crossAxisSpacing: 8,
                   mainAxisSpacing: 8,
                 ),
@@ -297,49 +297,113 @@ class _ProduitTile extends StatelessWidget {
     final effectiveAccent = enRupture ? AppColors.textDisabled : accentColor;
     final effectiveBg = enRupture ? AppColors.surfaceVariant : bgColor;
 
+    // Repli sans image : fond teinté + icône centrée (remplit toute la zone).
+    Widget fallback() => Container(
+          color: effectiveAccent.withValues(alpha: 0.12),
+          alignment: Alignment.center,
+          child: Icon(Symbols.inventory_2, size: 34, color: effectiveAccent),
+        );
+
     return Material(
       color: effectiveBg,
       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: enRupture ? null : onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         splashColor: effectiveAccent.withValues(alpha: 0.1),
-        child: Stack(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            // ── Image : occupe tout l'espace au-dessus du nom (style fast-food)
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
                 children: [
-                  // Image produit (ou icône en repli) — grisée si en rupture
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      color: effectiveAccent.withValues(alpha: 0.15),
-                      child: imageUrl.isEmpty
-                          ? Icon(Symbols.inventory_2,
-                              size: 18, color: effectiveAccent)
-                          : Opacity(
-                              opacity: enRupture ? 0.4 : 1,
-                              child: CachedNetworkImage(
-                                imageUrl: imageUrl,
-                                width: 36,
-                                height: 36,
-                                fit: BoxFit.cover,
-                                placeholder: (_, __) => Icon(Symbols.inventory_2,
-                                    size: 18, color: effectiveAccent),
-                                errorWidget: (_, __, ___) => Icon(
-                                    Symbols.inventory_2,
-                                    size: 18,
-                                    color: effectiveAccent),
-                              ),
+                  if (imageUrl.isEmpty)
+                    fallback()
+                  else
+                    Opacity(
+                      opacity: enRupture ? 0.45 : 1,
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => fallback(),
+                        errorWidget: (_, __, ___) => fallback(),
+                      ),
+                    ),
+                  // Badges (stock + quantité au panier)
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Badge rupture
+                        if (enRupture)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.error,
+                              borderRadius: BorderRadius.circular(4),
                             ),
+                            child: const Text(
+                              'Rupture',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                        // Badge stock faible
+                        if (!enRupture &&
+                            produit.stockActuel <= produit.stockAlerte)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.warning,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text('⚠',
+                                style: TextStyle(fontSize: 9)),
+                          ),
+                        // Badge quantité au panier (C3) — temps réel
+                        if (quantiteAuPanier > 0) ...[
+                          if (enRupture ||
+                              produit.stockActuel <= produit.stockAlerte)
+                            const SizedBox(width: AppSpacing.xs),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            constraints: const BoxConstraints(minWidth: 20),
+                            decoration: const BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: AppSpacing.borderRadiusFull,
+                            ),
+                            child: Text(
+                              '$quantiteAuPanier',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
-                  const Spacer(),
-                  // Nom
+                ],
+              ),
+            ),
+            // ── Nom + prix
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Text(
                     produit.nom,
                     style: TextStyle(
@@ -353,8 +417,7 @@ class _ProduitTile extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
-                  // Prix
+                  const SizedBox(height: 2),
                   Text(
                     '${produit.prixVenteSuggere.toStringAsFixed(0)} F',
                     style: TextStyle(
@@ -363,72 +426,6 @@ class _ProduitTile extends StatelessWidget {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                ],
-              ),
-            ),
-            // Badges (stock + quantité au panier)
-            Positioned(
-              top: 6,
-              right: 6,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Badge rupture
-                  if (enRupture)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.error,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Text(
-                        'Rupture',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  // Badge stock faible
-                  if (!enRupture &&
-                      produit.stockActuel <= produit.stockAlerte)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.warning,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Text(
-                        '⚠',
-                        style: TextStyle(fontSize: 9),
-                      ),
-                    ),
-                  // Badge quantité au panier (C3) — temps réel
-                  if (quantiteAuPanier > 0) ...[
-                    if (enRupture ||
-                        produit.stockActuel <= produit.stockAlerte)
-                      const SizedBox(width: AppSpacing.xs),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      constraints:
-                          const BoxConstraints(minWidth: 20),
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: AppSpacing.borderRadiusFull,
-                      ),
-                      child: Text(
-                        '$quantiteAuPanier',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
