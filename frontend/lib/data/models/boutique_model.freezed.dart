@@ -28,6 +28,8 @@ mixin _$BoutiqueModel {
   String? get telephone => throw _privateConstructorUsedError;
   @JsonKey(name: 'type_commerce')
   String? get typeCommerce => throw _privateConstructorUsedError;
+  @JsonKey(name: 'logo_url')
+  String? get logoUrl => throw _privateConstructorUsedError;
   @JsonKey(name: 'date_creation')
   DateTime get dateCreation => throw _privateConstructorUsedError;
 
@@ -54,6 +56,7 @@ abstract class $BoutiqueModelCopyWith<$Res> {
       String? adresse,
       String? telephone,
       @JsonKey(name: 'type_commerce') String? typeCommerce,
+      @JsonKey(name: 'logo_url') String? logoUrl,
       @JsonKey(name: 'date_creation') DateTime dateCreation});
 }
 
@@ -78,6 +81,7 @@ class _$BoutiqueModelCopyWithImpl<$Res, $Val extends BoutiqueModel>
     Object? adresse = freezed,
     Object? telephone = freezed,
     Object? typeCommerce = freezed,
+    Object? logoUrl = freezed,
     Object? dateCreation = null,
   }) {
     return _then(_value.copyWith(
@@ -105,6 +109,10 @@ class _$BoutiqueModelCopyWithImpl<$Res, $Val extends BoutiqueModel>
           ? _value.typeCommerce
           : typeCommerce // ignore: cast_nullable_to_non_nullable
               as String?,
+      logoUrl: freezed == logoUrl
+          ? _value.logoUrl
+          : logoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
       dateCreation: null == dateCreation
           ? _value.dateCreation
           : dateCreation // ignore: cast_nullable_to_non_nullable
@@ -128,6 +136,7 @@ abstract class _$$BoutiqueModelImplCopyWith<$Res>
       String? adresse,
       String? telephone,
       @JsonKey(name: 'type_commerce') String? typeCommerce,
+      @JsonKey(name: 'logo_url') String? logoUrl,
       @JsonKey(name: 'date_creation') DateTime dateCreation});
 }
 
@@ -150,6 +159,7 @@ class __$$BoutiqueModelImplCopyWithImpl<$Res>
     Object? adresse = freezed,
     Object? telephone = freezed,
     Object? typeCommerce = freezed,
+    Object? logoUrl = freezed,
     Object? dateCreation = null,
   }) {
     return _then(_$BoutiqueModelImpl(
@@ -177,6 +187,10 @@ class __$$BoutiqueModelImplCopyWithImpl<$Res>
           ? _value.typeCommerce
           : typeCommerce // ignore: cast_nullable_to_non_nullable
               as String?,
+      logoUrl: freezed == logoUrl
+          ? _value.logoUrl
+          : logoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
       dateCreation: null == dateCreation
           ? _value.dateCreation
           : dateCreation // ignore: cast_nullable_to_non_nullable
@@ -195,6 +209,7 @@ class _$BoutiqueModelImpl implements _BoutiqueModel {
       this.adresse,
       this.telephone,
       @JsonKey(name: 'type_commerce') this.typeCommerce,
+      @JsonKey(name: 'logo_url') this.logoUrl,
       @JsonKey(name: 'date_creation') required this.dateCreation});
 
   factory _$BoutiqueModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -215,12 +230,15 @@ class _$BoutiqueModelImpl implements _BoutiqueModel {
   @JsonKey(name: 'type_commerce')
   final String? typeCommerce;
   @override
+  @JsonKey(name: 'logo_url')
+  final String? logoUrl;
+  @override
   @JsonKey(name: 'date_creation')
   final DateTime dateCreation;
 
   @override
   String toString() {
-    return 'BoutiqueModel(id: $id, nom: $nom, proprietaireId: $proprietaireId, adresse: $adresse, telephone: $telephone, typeCommerce: $typeCommerce, dateCreation: $dateCreation)';
+    return 'BoutiqueModel(id: $id, nom: $nom, proprietaireId: $proprietaireId, adresse: $adresse, telephone: $telephone, typeCommerce: $typeCommerce, logoUrl: $logoUrl, dateCreation: $dateCreation)';
   }
 
   @override
@@ -237,6 +255,7 @@ class _$BoutiqueModelImpl implements _BoutiqueModel {
                 other.telephone == telephone) &&
             (identical(other.typeCommerce, typeCommerce) ||
                 other.typeCommerce == typeCommerce) &&
+            (identical(other.logoUrl, logoUrl) || other.logoUrl == logoUrl) &&
             (identical(other.dateCreation, dateCreation) ||
                 other.dateCreation == dateCreation));
   }
@@ -244,7 +263,7 @@ class _$BoutiqueModelImpl implements _BoutiqueModel {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, id, nom, proprietaireId, adresse,
-      telephone, typeCommerce, dateCreation);
+      telephone, typeCommerce, logoUrl, dateCreation);
 
   /// Create a copy of BoutiqueModel
   /// with the given fields replaced by the non-null parameter values.
@@ -270,6 +289,7 @@ abstract class _BoutiqueModel implements BoutiqueModel {
       final String? adresse,
       final String? telephone,
       @JsonKey(name: 'type_commerce') final String? typeCommerce,
+      @JsonKey(name: 'logo_url') final String? logoUrl,
       @JsonKey(name: 'date_creation')
       required final DateTime dateCreation}) = _$BoutiqueModelImpl;
 
@@ -290,6 +310,9 @@ abstract class _BoutiqueModel implements BoutiqueModel {
   @override
   @JsonKey(name: 'type_commerce')
   String? get typeCommerce;
+  @override
+  @JsonKey(name: 'logo_url')
+  String? get logoUrl;
   @override
   @JsonKey(name: 'date_creation')
   DateTime get dateCreation;

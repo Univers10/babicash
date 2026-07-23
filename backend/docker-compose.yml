@@ -38,7 +38,10 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - babicash_backups:/backups
+      # Persistance des images uploadées (produits, logos) entre redéploiements.
+      - babicash_uploads:/app/static/uploads
 
 volumes:
   babicash_pgdata:
   babicash_backups:
+  babicash_uploads:

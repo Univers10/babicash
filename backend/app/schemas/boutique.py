@@ -13,4 +13,5 @@ class BoutiqueOut(BaseModel):
     adresse: str | None
     telephone: str | None
     type_commerce: str | None
+    logo_url: str | None = None
     date_creation: datetime

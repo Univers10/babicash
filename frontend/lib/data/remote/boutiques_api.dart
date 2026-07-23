@@ -41,18 +41,22 @@ class BoutiquesApi {
     return BoutiqueModel.fromJson(resp.data!);
   }
 
+  /// [logoUrl] : `null` = ne pas modifier · `''` = retirer le logo ·
+  /// une URL = (re)définir le logo.
   Future<BoutiqueModel> updateBoutique(
     String boutiqueId, {
     String? nom,
     String? adresse,
     String? telephone,
     String? typeCommerce,
+    String? logoUrl,
   }) async {
     final data = <String, dynamic>{};
     if (nom != null) data['nom'] = nom;
     if (adresse != null) data['adresse'] = adresse;
     if (telephone != null) data['telephone'] = telephone;
     if (typeCommerce != null) data['type_commerce'] = typeCommerce;
+    if (logoUrl != null) data['logo_url'] = logoUrl;
     final resp = await _dio.patch<Map<String, dynamic>>(
       '$_baseUrl/boutiques/$boutiqueId',
       data: data,

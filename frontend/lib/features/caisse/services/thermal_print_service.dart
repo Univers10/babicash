@@ -104,6 +104,15 @@ class ThermalPrintService {
     final b = EscPosBuilder();
     b.init();
     b.text(vente.nomBoutique, align: PosAlign.center, bold: true);
+    for (final ligne in vente.enteteLignes) {
+      b.text(ligne, align: PosAlign.center);
+    }
+    if ((vente.adresse ?? '').trim().isNotEmpty) {
+      b.text(vente.adresse!.trim(), align: PosAlign.center);
+    }
+    if ((vente.telephone ?? '').trim().isNotEmpty) {
+      b.text('Tel: ${vente.telephone!.trim()}', align: PosAlign.center);
+    }
     if (vente.caissierNom != null) {
       b.text('Vendeur: ${vente.caissierNom}', align: PosAlign.center);
     }
@@ -146,8 +155,10 @@ class ThermalPrintService {
       }
     }
 
-    b.feed(1);
-    b.text('Merci pour votre achat !', align: PosAlign.center);
+    if (vente.piedMessage.trim().isNotEmpty) {
+      b.feed(1);
+      b.text(vente.piedMessage.trim(), align: PosAlign.center);
+    }
     b.feed(3);
     b.cut();
 

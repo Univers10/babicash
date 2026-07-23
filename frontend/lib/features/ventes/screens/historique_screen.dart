@@ -10,6 +10,9 @@ import '../../../data/remote/ventes_api.dart';
 import '../../../features/boutiques/providers/boutique_provider.dart';
 import '../../../features/caisse/models/panier_item.dart';
 import '../../../features/caisse/screens/ticket_screen.dart';
+import '../../../features/settings/models/receipt_config.dart';
+import '../../../features/settings/providers/receipt_config_provider.dart';
+import '../../../shared/images/media_url.dart';
 import '../../../shared/widgets/amount_text.dart';
 
 // ── Provider ─────────────────────────────────────────────────────────────────
@@ -451,6 +454,21 @@ class _VenteTileState extends ConsumerState<_VenteTile> {
       quantite: l.quantite,
       remise: 0,
     )).toList();
+
+    // Applique la personnalisation du reçu (infos boutique, en-tête, pied de
+    // page, options), avec repli sur les infos de la boutique active.
+    final recu =
+        ref.read(receiptConfigProvider).valueOrNull ?? const ReceiptConfig();
+    final boutique = ref.read(boutiqueInfoProvider).valueOrNull;
+    final logoAbs =
+        absoluteMediaUrl(ref.read(apiOriginProvider), boutique?.logoUrl);
+    String? orBoutique(String saisi, String? boutiqueVal) {
+      final v = saisi.trim();
+      if (v.isNotEmpty) return v;
+      final b = boutiqueVal?.trim();
+      return (b != null && b.isNotEmpty) ? b : null;
+    }
+
     return VenteResume(
       lignes: lignes,
       sousTotal: vente.montantTotal,
@@ -460,8 +478,15 @@ class _VenteTileState extends ConsumerState<_VenteTile> {
       montantRecu: 0,
       monnaie: 0,
       date: vente.dateVente,
+      nomBoutique: orBoutique(recu.nomBoutique, boutique?.nom) ?? 'BabiCash',
+      adresse: orBoutique(recu.adresse, boutique?.adresse),
+      telephone: orBoutique(recu.telephone, boutique?.telephone),
+      entete: recu.entete,
+      piedMessage: recu.piedMessage,
+      afficherLogo: recu.afficherLogo,
+      logoUrl: logoAbs.isEmpty ? null : logoAbs,
       clientNom: vente.clientNom,
-      caissierNom: vente.caissierNom,
+      caissierNom: recu.afficherVendeur ? vente.caissierNom : null,
     );
   }
 
@@ -560,6 +585,8 @@ class _VenteTileState extends ConsumerState<_VenteTile> {
 
   @override
   Widget build(BuildContext context) {
+    // Pré-charge la personnalisation du reçu (lue dans _toResume).
+    ref.watch(receiptConfigProvider);
     return ExpansionTile(
       tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
       childrenPadding:

@@ -1,9 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/local/database.dart';
+import '../../../shared/images/image_picker_field.dart';
+import '../../../shared/images/image_upload_api.dart';
+import '../../../shared/widgets/app_snackbar.dart';
 import '../providers/produits_crud_provider.dart';
 import '../providers/stock_provider.dart';
 import 'categorie_selector_field.dart';
@@ -31,6 +36,10 @@ class _ProduitFormDialogState extends ConsumerState<ProduitFormDialog> {
   late String? _categorieId = widget.produit?.categorieId;
   bool _isLoading = false;
 
+  // Image : octets fraîchement choisis (à uploader) et indicateur de retrait.
+  Uint8List? _pickedBytes;
+  bool _imageRemoved = false;
+
   @override
   void dispose() {
     _nomController.dispose();
@@ -52,6 +61,19 @@ class _ProduitFormDialogState extends ConsumerState<ProduitFormDialog> {
     final stockAlerte = int.tryParse(_alerteController.text) ?? 5;
 
     try {
+      // Upload de l'image si une nouvelle a été choisie, puis calcul de
+      // l'URL finale (nouvelle / retirée / inchangée).
+      String? imageUrl;
+      if (_pickedBytes != null) {
+        imageUrl = await ref
+            .read(imageUploadApiProvider)
+            .uploadImage(_pickedBytes!, kind: 'produits');
+      } else if (widget.produit != null && !_imageRemoved) {
+        imageUrl = widget.produit!.imageUrl; // inchangée
+      } else {
+        imageUrl = null; // sans image / retirée
+      }
+
       final notifier = ref.read(produitsCrudProvider.notifier);
       if (widget.produit == null) {
         await notifier.createProduit(
@@ -61,6 +83,7 @@ class _ProduitFormDialogState extends ConsumerState<ProduitFormDialog> {
           prixVente: prixVente,
           stock: stock,
           stockAlerte: stockAlerte,
+          imageUrl: imageUrl,
         );
       } else {
         // La quantité en stock n'est plus éditable ici (S2) :
@@ -72,14 +95,13 @@ class _ProduitFormDialogState extends ConsumerState<ProduitFormDialog> {
           prixAchat: prixAchat,
           prixVente: prixVente,
           stockAlerte: stockAlerte,
+          imageUrl: imageUrl,
         );
       }
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lors de la sauvegarde')),
-        );
+        AppSnackbar.error(context, 'Erreur lors de la sauvegarde du produit.');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -98,6 +120,22 @@ class _ProduitFormDialogState extends ConsumerState<ProduitFormDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Image du produit (recadrage carré + compression à l'import)
+              Center(
+                child: ImagePickerField(
+                  imageUrl: _imageRemoved ? null : widget.produit?.imageUrl,
+                  pickedBytes: _pickedBytes,
+                  onPicked: (bytes) => setState(() {
+                    _pickedBytes = bytes;
+                    _imageRemoved = false;
+                  }),
+                  onRemoved: () => setState(() {
+                    _pickedBytes = null;
+                    _imageRemoved = true;
+                  }),
+                ),
+              ),
+              const VGap(AppSpacing.md),
               TextFormField(
                 controller: _nomController,
                 decoration: const InputDecoration(labelText: 'Nom'),

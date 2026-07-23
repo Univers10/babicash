@@ -12,6 +12,10 @@ class LigneVenteIn(BaseModel):
     produit_id: uuid.UUID | None = None
     quantite: int = Field(default=1, ge=1)
     prix_vendu_reel: Decimal = Field(ge=0)
+    # Lot (prix de groupe) : optionnels et rétro-compatibles — un client
+    # antérieur qui ne les envoie pas continue de fonctionner.
+    lot_id: uuid.UUID | None = None
+    lot_nom: str | None = None
 
 
 class VenteIn(BaseModel):
@@ -138,6 +142,7 @@ class ProduitOut(BaseModel):
     prix_vente_suggere: Decimal
     stock_actuel: int
     stock_alerte: int
+    image_url: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

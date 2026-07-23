@@ -12,6 +12,7 @@ class BoutiqueModel with _$BoutiqueModel {
     String? adresse,
     String? telephone,
     @JsonKey(name: 'type_commerce') String? typeCommerce,
+    @JsonKey(name: 'logo_url') String? logoUrl,
     @JsonKey(name: 'date_creation') required DateTime dateCreation,
   }) = _BoutiqueModel;
   factory BoutiqueModel.fromJson(Map<String, dynamic> json) =>

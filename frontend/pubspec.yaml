@@ -66,6 +66,11 @@ dependencies:
   cached_network_image: ^3.3.1
   shimmer: ^3.0.0
 
+  # Images : sélection, recadrage in-app (carré) et compression
+  image_picker: ^1.1.0
+  crop_your_image: ^2.0.0
+  flutter_image_compress: ^2.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

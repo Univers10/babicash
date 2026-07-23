@@ -99,6 +99,8 @@ async def update_boutique(
         boutique.telephone = payload.telephone
     if payload.type_commerce is not None:
         boutique.type_commerce = payload.type_commerce
+    if payload.logo_url is not None:
+        boutique.logo_url = payload.logo_url
     await db.commit()
     await db.refresh(boutique)
     return boutique

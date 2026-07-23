@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +10,9 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/boutique_model.dart';
 import '../../../data/remote/boutiques_api.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../shared/images/image_picker_field.dart';
+import '../../../shared/images/image_upload_api.dart';
+import '../../../shared/images/media_url.dart';
 import '../../../shared/widgets/app_snackbar.dart';
 import '../providers/boutique_provider.dart';
 
@@ -106,6 +112,10 @@ class _BoutiqueFormDialogState extends ConsumerState<_BoutiqueFormDialog> {
   late final TextEditingController _typeCommerce;
   bool _loading = false;
 
+  // Logo : octets fraîchement choisis (à uploader) + indicateur de retrait.
+  Uint8List? _pickedLogo;
+  bool _logoRemoved = false;
+
   bool get _isEdit => widget.boutique != null;
 
   @override
@@ -136,21 +146,36 @@ class _BoutiqueFormDialogState extends ConsumerState<_BoutiqueFormDialog> {
       final telephone = _telephone.text.trim();
       final typeCommerce = _typeCommerce.text.trim();
 
+      // Upload du logo si une nouvelle image a été choisie.
+      String? uploadedLogo;
+      if (_pickedLogo != null) {
+        uploadedLogo = await ref
+            .read(imageUploadApiProvider)
+            .uploadImage(_pickedLogo!, kind: 'logos');
+      }
+
       if (_isEdit) {
+        // logoUrl : nouvelle URL · '' pour retirer · null = inchangé.
+        final logoUrl = uploadedLogo ?? (_logoRemoved ? '' : null);
         await api.updateBoutique(
           widget.boutique!.id,
           nom: nom,
           adresse: adresse,
           telephone: telephone,
           typeCommerce: typeCommerce,
+          logoUrl: logoUrl,
         );
       } else {
-        await api.createBoutique(
+        final created = await api.createBoutique(
           nom: nom,
           adresse: adresse.isNotEmpty ? adresse : null,
           telephone: telephone.isNotEmpty ? telephone : null,
           typeCommerce: typeCommerce.isNotEmpty ? typeCommerce : null,
         );
+        // Le logo se pose après coup (l'endpoint de création ne le gère pas).
+        if (uploadedLogo != null) {
+          await api.updateBoutique(created.id, logoUrl: uploadedLogo);
+        }
       }
 
       ref.invalidate(mesBoutiquesProvider);
@@ -192,6 +217,27 @@ class _BoutiqueFormDialogState extends ConsumerState<_BoutiqueFormDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Logo de la boutique (recadrage carré + compression)
+                Center(
+                  child: ImagePickerField(
+                    imageUrl: _logoRemoved ? null : widget.boutique?.logoUrl,
+                    pickedBytes: _pickedLogo,
+                    placeholderIcon: Symbols.storefront,
+                    onPicked: (bytes) => setState(() {
+                      _pickedLogo = bytes;
+                      _logoRemoved = false;
+                    }),
+                    onRemoved: () => setState(() {
+                      _pickedLogo = null;
+                      _logoRemoved = true;
+                    }),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text('Logo de la boutique',
+                    style: AppTextStyles.caption
+                        .copyWith(color: AppColors.textTertiary)),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _nom,
                   decoration: InputDecoration(
@@ -260,14 +306,15 @@ class _BoutiqueFormDialogState extends ConsumerState<_BoutiqueFormDialog> {
 
 // ── Carte boutique ──────────────────────────────────────────────────────────
 
-class _BoutiqueCard extends StatelessWidget {
+class _BoutiqueCard extends ConsumerWidget {
   const _BoutiqueCard({required this.boutique, required this.onEdit});
 
   final BoutiqueModel boutique;
   final VoidCallback onEdit;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final logoUrl = absoluteMediaUrl(ref.watch(apiOriginProvider), boutique.logoUrl);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -277,14 +324,25 @@ class _BoutiqueCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: 44,
+              height: 44,
               color: AppColors.primaryContainer,
-              borderRadius: BorderRadius.circular(12),
+              child: logoUrl.isEmpty
+                  ? const Icon(Symbols.store, color: AppColors.primary, size: 22)
+                  : CachedNetworkImage(
+                      imageUrl: logoUrl,
+                      width: 44,
+                      height: 44,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => const Icon(Symbols.store,
+                          color: AppColors.primary, size: 22),
+                      errorWidget: (_, __, ___) => const Icon(Symbols.store,
+                          color: AppColors.primary, size: 22),
+                    ),
             ),
-            child: const Icon(Symbols.store, color: AppColors.primary, size: 22),
           ),
           const SizedBox(width: 14),
           Expanded(

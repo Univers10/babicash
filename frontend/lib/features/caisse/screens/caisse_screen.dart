@@ -18,8 +18,12 @@ import '../../../data/remote/tiers_api.dart';
 import '../../../data/models/tier_model.dart';
 import 'ticket_screen.dart';
 import '../widgets/catalogue_grid.dart';
+import '../widgets/lot_dialog.dart';
 import '../../../features/stock/providers/stock_provider.dart';
 import '../../../features/sessions/providers/sessions_provider.dart';
+import '../../../features/settings/models/receipt_config.dart';
+import '../../../features/settings/providers/receipt_config_provider.dart';
+import '../../../shared/images/media_url.dart';
 import '../models/panier_item.dart';
 
 // ── POS Screen ────────────────────────────────────────────────────────────────
@@ -45,7 +49,7 @@ class _CaisseScreenState extends ConsumerState<CaisseScreen> {
   Widget build(BuildContext context) {
     final panier = ref.watch(panierProvider);
     final remiseGlobale = ref.watch(remiseGlobaleProvider);
-    final sousTotal = panier.fold(0.0, (s, i) => s + i.total);
+    final sousTotal = sousTotalPanier(panier);
     final total = sousTotal * (1 - remiseGlobale / 100);
     final quotaAsync = ref.watch(quotaProvider);
     final isTablet = MediaQuery.of(context).size.width > 720;
@@ -368,7 +372,7 @@ class _PanierPaneState extends ConsumerState<_PanierPane> {
   Widget build(BuildContext context) {
     final panier = widget.panier;
     final remiseGlobale = ref.watch(remiseGlobaleProvider);
-    final sousTotal = panier.fold(0.0, (s, i) => s + i.total);
+    final sousTotal = sousTotalPanier(panier);
     final totalFinal = sousTotal * (1 - remiseGlobale / 100);
 
     return ClipRect(
@@ -624,11 +628,56 @@ class _PanierLigne extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final hasRemise = item.remise > 0;
 
+    // Part affichée pour un article en lot : proportionnelle au prix normal
+    // (informatif — la répartition exacte au franc se fait à l'enregistrement).
+    double montantLigne = item.total;
+    if (item.estDansLot) {
+      final panier = ref.watch(panierProvider);
+      final naturel = panier
+          .where((i) => i.lotId == item.lotId)
+          .fold<double>(0, (s, i) => s + i.total);
+      montantLigne =
+          naturel > 0 ? (item.lotPrixTotal ?? 0) * item.total / naturel : 0;
+    }
+
     return InkWell(
-      onTap: () => showDialog(
-        context: context,
-        builder: (_) => _LigneEditDialog(item: item, index: index),
-      ),
+      onTap: item.estDansLot
+          ? null
+          : () => showDialog(
+                context: context,
+                builder: (_) => _LigneEditDialog(item: item, index: index),
+              ),
+      onLongPress: () {
+        if (item.estDansLot) {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Dissoudre le lot ?'),
+              content: Text(
+                'Les articles de « ${item.lotNom ?? 'Lot'} » redeviennent des lignes normales.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Annuler'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    ref.read(panierProvider.notifier).dissoudreLot(item.lotId!);
+                    Navigator.of(ctx).pop();
+                  },
+                  child: const Text('Dissoudre'),
+                ),
+              ],
+            ),
+          );
+        } else {
+          showDialog(
+            context: context,
+            builder: (_) => LotDialog(indexInitial: index),
+          );
+        }
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: const BoxDecoration(
@@ -675,39 +724,79 @@ class _PanierLigne extends ConsumerWidget {
                           ),
                         ),
                       ],
+                      if (item.estDansLot) ...[
+                        const SizedBox(width: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Symbols.sell,
+                                  size: 10, color: AppColors.primary),
+                              const SizedBox(width: 2),
+                              Text(
+                                item.lotNom ?? 'Lot',
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ],
               ),
             ),
-            // Contrôle quantité
-            Row(
-              children: [
-                _QteBtn(
-                  icon: Symbols.remove,
-                  onTap: () => ref
-                      .read(panierProvider.notifier)
-                      .updateQuantite(index, item.quantite - 1),
+            // Contrôle quantité (figée si l'article appartient à un lot)
+            if (item.estDansLot)
+              Container(
+                width: 32,
+                alignment: Alignment.center,
+                child: Text(
+                  '×${item.quantite}',
+                  style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14),
                 ),
-                Container(
-                  width: 32,
-                  alignment: Alignment.center,
-                  child: Text(
-                    '${item.quantite}',
-                    style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14),
+              )
+            else
+              Row(
+                children: [
+                  _QteBtn(
+                    icon: Symbols.remove,
+                    onTap: () => ref
+                        .read(panierProvider.notifier)
+                        .updateQuantite(index, item.quantite - 1),
                   ),
-                ),
-                _QteBtn(
-                  icon: Symbols.add,
-                  onTap: () => ref
-                      .read(panierProvider.notifier)
-                      .updateQuantite(index, item.quantite + 1),
-                ),
-              ],
-            ),
+                  Container(
+                    width: 32,
+                    alignment: Alignment.center,
+                    child: Text(
+                      '${item.quantite}',
+                      style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14),
+                    ),
+                  ),
+                  _QteBtn(
+                    icon: Symbols.add,
+                    onTap: () => ref
+                        .read(panierProvider.notifier)
+                        .updateQuantite(index, item.quantite + 1),
+                  ),
+                ],
+              ),
             const SizedBox(width: 8),
             // Total ligne
             SizedBox(
@@ -716,7 +805,7 @@ class _PanierLigne extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '${item.total.toStringAsFixed(0)} F',
+                    '${montantLigne.toStringAsFixed(0)} F',
                     style: AppTextStyles.labelLarge.copyWith(
                         color: AppColors.primary, fontWeight: FontWeight.w700),
                   ),
@@ -1041,7 +1130,7 @@ class _MobilePanierSheet extends ConsumerWidget {
     // de ligne...) au lieu d'afficher une copie figée à l'ouverture.
     final panier = ref.watch(panierProvider);
     final remiseGlobale = ref.watch(remiseGlobaleProvider);
-    final sousTotal = panier.fold(0.0, (s, i) => s + i.total);
+    final sousTotal = sousTotalPanier(panier);
     final total = sousTotal * (1 - remiseGlobale / 100);
 
     // Fermer la sheet si le panier se vide (dernière ligne supprimée).
@@ -1083,10 +1172,11 @@ class _MobilePanierSheet extends ConsumerWidget {
                 _ClientBouton(panier: panier),
                 const SizedBox(width: 4),
                 TextButton(
-                  onPressed: () {
-                    ref.read(panierProvider.notifier).clear();
-                    Navigator.pop(context);
-                  },
+                  // clear() vide le panier → le ref.listen ci-dessus ferme la
+                  // sheet. Ne PAS pop ici aussi : ça retirerait une 2e route
+                  // (l'écran caisse en dessous) → écran noir.
+                  onPressed: () =>
+                      ref.read(panierProvider.notifier).clear(),
                   child: const Text('Vider',
                       style: TextStyle(
                           color: AppColors.error, fontSize: 13)),
@@ -1209,9 +1299,11 @@ class _PaiementDialogState extends ConsumerState<_PaiementDialog> {
     final panier = ref.watch(panierProvider);
     final remiseGlobale = ref.watch(remiseGlobaleProvider);
     final client = ref.watch(clientSelectionneProvider);
-    final sousTotal = panier.fold(0.0, (sum, item) => sum + item.total);
+    final sousTotal = sousTotalPanier(panier);
     final total = sousTotal * (1 - remiseGlobale / 100);
     final isLoading = ref.watch(caisseLoadingProvider);
+    // Pré-charge la personnalisation du reçu (lue dans _confirmer).
+    ref.watch(receiptConfigProvider);
 
     final isCredit = _modes.contains('CREDIT');
     final isMulti = _modes.contains('ESPECES') && _modes.contains('MOBILE_MONEY');
@@ -1511,7 +1603,7 @@ class _PaiementDialogState extends ConsumerState<_PaiementDialog> {
     final panier = ref.read(panierProvider);
     final remiseGlobale = ref.read(remiseGlobaleProvider);
     final client = ref.read(clientSelectionneProvider);
-    final sousTotal = panier.fold(0.0, (s, i) => s + i.total);
+    final sousTotal = sousTotalPanier(panier);
     final total = sousTotal * (1 - remiseGlobale / 100);
     final mEspeces = double.tryParse(_montantEspecesCtrl.text) ?? 0.0;
     final mMobile = double.tryParse(_montantMobileCtrl.text) ?? 0.0;
@@ -1522,6 +1614,20 @@ class _PaiementDialogState extends ConsumerState<_PaiementDialog> {
     final monnaie = montantRecu > total ? montantRecu - total : 0.0;
 
     final caissierNom = ref.read(authStateProvider).value?.nom;
+
+    // Personnalisation du reçu : valeurs saisies dans Paramètres, avec repli
+    // sur les infos de la boutique active si un champ n'a pas été renseigné.
+    final recu = ref.read(receiptConfigProvider).valueOrNull ?? const ReceiptConfig();
+    final boutique = ref.read(boutiqueInfoProvider).valueOrNull;
+    final logoAbs =
+        absoluteMediaUrl(ref.read(apiOriginProvider), boutique?.logoUrl);
+    String? orBoutique(String saisi, String? boutiqueVal) {
+      final v = saisi.trim();
+      if (v.isNotEmpty) return v;
+      final b = boutiqueVal?.trim();
+      return (b != null && b.isNotEmpty) ? b : null;
+    }
+
     final vente = VenteResume(
       lignes: List.from(panier),
       sousTotal: sousTotal,
@@ -1531,8 +1637,15 @@ class _PaiementDialogState extends ConsumerState<_PaiementDialog> {
       montantRecu: montantRecu,
       monnaie: monnaie,
       date: DateTime.now(),
+      nomBoutique: orBoutique(recu.nomBoutique, boutique?.nom) ?? 'BabiCash',
+      adresse: orBoutique(recu.adresse, boutique?.adresse),
+      telephone: orBoutique(recu.telephone, boutique?.telephone),
+      entete: recu.entete,
+      piedMessage: recu.piedMessage,
+      afficherLogo: recu.afficherLogo,
+      logoUrl: logoAbs.isEmpty ? null : logoAbs,
       clientNom: client?.nom,
-      caissierNom: caissierNom,
+      caissierNom: recu.afficherVendeur ? caissierNom : null,
     );
 
     final nav = Navigator.of(context);

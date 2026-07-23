@@ -18,6 +18,8 @@ class LocalProduits extends Table {
   RealColumn get prixVenteSuggere => real().withDefault(const Constant(0))();
   IntColumn get stockActuel => integer().withDefault(const Constant(0))();
   IntColumn get stockAlerte => integer().withDefault(const Constant(5))();
+  // URL de l'image du produit (upload serveur) — nullable, catalogue offline.
+  TextColumn get imageUrl => text().nullable()();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
@@ -55,6 +57,10 @@ class LocalLignesVente extends Table {
   IntColumn get quantite => integer().withDefault(const Constant(1))();
   RealColumn get prixVenduReel => real()();
   RealColumn get margeCalculee => real().withDefault(const Constant(0))();
+  // Lot (prix de groupe) : lignes vendues ensemble à un prix négocié réparti.
+  // null = ligne normale (toutes les ventes existantes).
+  TextColumn get lotId => text().nullable()();
+  TextColumn get lotNom => text().nullable()();
 }
 
 class LocalDepenses extends Table {
@@ -132,7 +138,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -141,6 +147,16 @@ class AppDatabase extends _$AppDatabase {
           if (from < 2) {
             // v2 : journal des mouvements de stock
             await m.createTable(localMouvementsStock);
+          }
+          if (from < 3) {
+            // v3 : lot (prix de groupe) — colonnes additives nullable,
+            // les ventes locales existantes gardent lot_id/lot_nom = null.
+            await m.addColumn(localLignesVente, localLignesVente.lotId);
+            await m.addColumn(localLignesVente, localLignesVente.lotNom);
+          }
+          if (from < 4) {
+            // v4 : image produit — colonne additive nullable.
+            await m.addColumn(localProduits, localProduits.imageUrl);
           }
         },
       );

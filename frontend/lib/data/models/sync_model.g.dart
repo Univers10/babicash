@@ -11,6 +11,8 @@ _$LigneVenteInImpl _$$LigneVenteInImplFromJson(Map<String, dynamic> json) =>
       produitId: json['produit_id'] as String?,
       quantite: (json['quantite'] as num?)?.toInt() ?? 1,
       prixVenduReel: (json['prix_vendu_reel'] as num).toDouble(),
+      lotId: json['lot_id'] as String?,
+      lotNom: json['lot_nom'] as String?,
     );
 
 Map<String, dynamic> _$$LigneVenteInImplToJson(_$LigneVenteInImpl instance) =>
@@ -18,6 +20,8 @@ Map<String, dynamic> _$$LigneVenteInImplToJson(_$LigneVenteInImpl instance) =>
       'produit_id': instance.produitId,
       'quantite': instance.quantite,
       'prix_vendu_reel': instance.prixVenduReel,
+      'lot_id': instance.lotId,
+      'lot_nom': instance.lotNom,
     };
 
 _$VenteInImpl _$$VenteInImplFromJson(Map<String, dynamic> json) =>
@@ -289,6 +293,7 @@ _$ProduitModelLiteImpl _$$ProduitModelLiteImplFromJson(
       stockActuel: (json['stock_actuel'] as num).toInt(),
       stockAlerte: (json['stock_alerte'] as num).toInt(),
       categorieId: json['categorie_id'] as String?,
+      imageUrl: json['image_url'] as String?,
     );
 
 Map<String, dynamic> _$$ProduitModelLiteImplToJson(
@@ -301,6 +306,7 @@ Map<String, dynamic> _$$ProduitModelLiteImplToJson(
       'stock_actuel': instance.stockActuel,
       'stock_alerte': instance.stockAlerte,
       'categorie_id': instance.categorieId,
+      'image_url': instance.imageUrl,
     };
 
 _$CategorieModelLiteImpl _$$CategorieModelLiteImplFromJson(

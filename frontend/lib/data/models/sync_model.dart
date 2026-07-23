@@ -12,6 +12,8 @@ class LigneVenteIn with _$LigneVenteIn {
     @JsonKey(name: 'produit_id') String? produitId,
     @Default(1) int quantite,
     @JsonKey(name: 'prix_vendu_reel') required double prixVenduReel,
+    @JsonKey(name: 'lot_id') String? lotId,
+    @JsonKey(name: 'lot_nom') String? lotNom,
   }) = _LigneVenteIn;
   factory LigneVenteIn.fromJson(Map<String, dynamic> json) =>
       _$LigneVenteInFromJson(json);
@@ -188,6 +190,7 @@ class ProduitModelLite with _$ProduitModelLite {
     @JsonKey(name: 'stock_actuel') required int stockActuel,
     @JsonKey(name: 'stock_alerte') required int stockAlerte,
     @JsonKey(name: 'categorie_id') String? categorieId,
+    @JsonKey(name: 'image_url') String? imageUrl,
   }) = _ProduitModelLite;
   factory ProduitModelLite.fromJson(Map<String, dynamic> json) =>
       _$ProduitModelLiteFromJson(json);

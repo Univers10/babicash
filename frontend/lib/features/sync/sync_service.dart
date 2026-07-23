@@ -47,6 +47,8 @@ class SyncService {
                       produitId: l.produitId,
                       quantite: l.quantite,
                       prixVenduReel: l.prixVenduReel,
+                      lotId: l.lotId,
+                      lotNom: l.lotNom,
                     ))
                 .toList(),
           ));
@@ -145,6 +147,7 @@ class SyncService {
                 stockActuel: drift.Value(p.stockActuel),
                 stockAlerte: drift.Value(p.stockAlerte),
                 categorieId: drift.Value(p.categorieId),
+                imageUrl: drift.Value(p.imageUrl),
               ))
           .toList());
 

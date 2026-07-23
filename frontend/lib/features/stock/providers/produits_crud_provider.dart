@@ -17,6 +17,7 @@ class ProduitsCrudNotifier extends AsyncNotifier<void> {
     required double prixVente,
     required int stock,
     required int stockAlerte,
+    String? imageUrl,
   }) async {
     final boutiqueId = await ref.read(currentBoutiqueIdProvider.future);
     if (boutiqueId == null) throw Exception('Aucune boutique sélectionnée');
@@ -31,6 +32,7 @@ class ProduitsCrudNotifier extends AsyncNotifier<void> {
         prixVenteSuggere: prixVente,
         stockActuel: stock,
         stockAlerte: stockAlerte,
+        imageUrl: imageUrl,
       ),
     );
 
@@ -44,6 +46,7 @@ class ProduitsCrudNotifier extends AsyncNotifier<void> {
       stockActuel: drift.Value(produit.stockActuel),
       stockAlerte: drift.Value(produit.stockAlerte),
       categorieId: drift.Value(produit.categorieId),
+      imageUrl: drift.Value(produit.imageUrl),
     ));
 
     ref.invalidate(stockProvider);
@@ -53,6 +56,8 @@ class ProduitsCrudNotifier extends AsyncNotifier<void> {
   /// « Sans catégorie » (et non « ne pas modifier »). Le PATCH backend
   /// utilise `exclude_unset`, mais `categorie_id` étant toujours présent
   /// dans le JSON, la valeur envoyée (y compris `null`) fait foi.
+  /// [imageUrl] suit la même logique que [categorieId] : la valeur passée est
+  /// TOUJOURS appliquée — `null` retire l'image, une URL la (re)définit.
   Future<void> updateProduit({
     required String id,
     required String? categorieId,
@@ -61,6 +66,7 @@ class ProduitsCrudNotifier extends AsyncNotifier<void> {
     double? prixVente,
     int? stock,
     int? stockAlerte,
+    required String? imageUrl,
   }) async {
     final boutiqueId = await ref.read(currentBoutiqueIdProvider.future);
     if (boutiqueId == null) throw Exception('Aucune boutique sélectionnée');
@@ -74,6 +80,7 @@ class ProduitsCrudNotifier extends AsyncNotifier<void> {
         prixVenteSuggere: prixVente,
         stockActuel: stock,
         stockAlerte: stockAlerte,
+        imageUrl: imageUrl,
       ),
     );
 
@@ -92,6 +99,7 @@ class ProduitsCrudNotifier extends AsyncNotifier<void> {
       stockActuel: drift.Value(stock ?? existing.stockActuel),
       stockAlerte: drift.Value(stockAlerte ?? existing.stockAlerte),
       categorieId: drift.Value(categorieId),
+      imageUrl: drift.Value(imageUrl),
     ));
 
     ref.invalidate(stockProvider);

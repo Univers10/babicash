@@ -17,6 +17,7 @@ class BoutiqueUpdate(BaseModel):
     adresse: str | None = Field(default=None, max_length=255)
     telephone: str | None = Field(default=None, max_length=30)
     type_commerce: str | None = Field(default=None, max_length=100)
+    logo_url: str | None = Field(default=None, max_length=500)
 
 
 # ----- Catégorie -----
@@ -46,6 +47,7 @@ class ProduitCreate(BaseModel):
     prix_vente_suggere: Decimal = Field(default=Decimal("0.00"), ge=0)
     stock_actuel: int = Field(default=0, ge=0)
     stock_alerte: int = Field(default=5, ge=0)
+    image_url: str | None = Field(default=None, max_length=500)
 
 
 class ProduitUpdate(BaseModel):
@@ -55,6 +57,7 @@ class ProduitUpdate(BaseModel):
     prix_vente_suggere: Decimal | None = Field(default=None, ge=0)
     stock_actuel: int | None = Field(default=None, ge=0)
     stock_alerte: int | None = Field(default=None, ge=0)
+    image_url: str | None = Field(default=None, max_length=500)
 
 
 class ProduitOut(BaseModel):
@@ -68,6 +71,7 @@ class ProduitOut(BaseModel):
     prix_vente_suggere: Decimal
     stock_actuel: int
     stock_alerte: int
+    image_url: str | None = None
 
 
 # ----- Compte tiers (Client / Fournisseur) -----

@@ -21,7 +21,12 @@ mixin _$PanierItem {
   double get prixUnitaire => throw _privateConstructorUsedError;
   double get prixAchat => throw _privateConstructorUsedError;
   int get quantite => throw _privateConstructorUsedError;
-  double get remise => throw _privateConstructorUsedError;
+  double get remise => throw _privateConstructorUsedError; // pourcentage 0-100
+// Lot (prix de groupe) : les items partageant un même lotId sont vendus
+// ensemble à lotPrixTotal, réparti à l'enregistrement. null = item normal.
+  String? get lotId => throw _privateConstructorUsedError;
+  String? get lotNom => throw _privateConstructorUsedError;
+  double? get lotPrixTotal => throw _privateConstructorUsedError;
 
   /// Create a copy of PanierItem
   /// with the given fields replaced by the non-null parameter values.
@@ -42,7 +47,10 @@ abstract class $PanierItemCopyWith<$Res> {
       double prixUnitaire,
       double prixAchat,
       int quantite,
-      double remise});
+      double remise,
+      String? lotId,
+      String? lotNom,
+      double? lotPrixTotal});
 }
 
 /// @nodoc
@@ -66,6 +74,9 @@ class _$PanierItemCopyWithImpl<$Res, $Val extends PanierItem>
     Object? prixAchat = null,
     Object? quantite = null,
     Object? remise = null,
+    Object? lotId = freezed,
+    Object? lotNom = freezed,
+    Object? lotPrixTotal = freezed,
   }) {
     return _then(_value.copyWith(
       produitId: freezed == produitId
@@ -92,6 +103,18 @@ class _$PanierItemCopyWithImpl<$Res, $Val extends PanierItem>
           ? _value.remise
           : remise // ignore: cast_nullable_to_non_nullable
               as double,
+      lotId: freezed == lotId
+          ? _value.lotId
+          : lotId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      lotNom: freezed == lotNom
+          ? _value.lotNom
+          : lotNom // ignore: cast_nullable_to_non_nullable
+              as String?,
+      lotPrixTotal: freezed == lotPrixTotal
+          ? _value.lotPrixTotal
+          : lotPrixTotal // ignore: cast_nullable_to_non_nullable
+              as double?,
     ) as $Val);
   }
 }
@@ -110,7 +133,10 @@ abstract class _$$PanierItemImplCopyWith<$Res>
       double prixUnitaire,
       double prixAchat,
       int quantite,
-      double remise});
+      double remise,
+      String? lotId,
+      String? lotNom,
+      double? lotPrixTotal});
 }
 
 /// @nodoc
@@ -132,6 +158,9 @@ class __$$PanierItemImplCopyWithImpl<$Res>
     Object? prixAchat = null,
     Object? quantite = null,
     Object? remise = null,
+    Object? lotId = freezed,
+    Object? lotNom = freezed,
+    Object? lotPrixTotal = freezed,
   }) {
     return _then(_$PanierItemImpl(
       produitId: freezed == produitId
@@ -158,6 +187,18 @@ class __$$PanierItemImplCopyWithImpl<$Res>
           ? _value.remise
           : remise // ignore: cast_nullable_to_non_nullable
               as double,
+      lotId: freezed == lotId
+          ? _value.lotId
+          : lotId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      lotNom: freezed == lotNom
+          ? _value.lotNom
+          : lotNom // ignore: cast_nullable_to_non_nullable
+              as String?,
+      lotPrixTotal: freezed == lotPrixTotal
+          ? _value.lotPrixTotal
+          : lotPrixTotal // ignore: cast_nullable_to_non_nullable
+              as double?,
     ));
   }
 }
@@ -171,7 +212,10 @@ class _$PanierItemImpl extends _PanierItem {
       required this.prixUnitaire,
       required this.prixAchat,
       this.quantite = 1,
-      this.remise = 0.0})
+      this.remise = 0.0,
+      this.lotId,
+      this.lotNom,
+      this.lotPrixTotal})
       : super._();
 
   @override
@@ -188,10 +232,19 @@ class _$PanierItemImpl extends _PanierItem {
   @override
   @JsonKey()
   final double remise;
+// pourcentage 0-100
+// Lot (prix de groupe) : les items partageant un même lotId sont vendus
+// ensemble à lotPrixTotal, réparti à l'enregistrement. null = item normal.
+  @override
+  final String? lotId;
+  @override
+  final String? lotNom;
+  @override
+  final double? lotPrixTotal;
 
   @override
   String toString() {
-    return 'PanierItem(produitId: $produitId, nom: $nom, prixUnitaire: $prixUnitaire, prixAchat: $prixAchat, quantite: $quantite, remise: $remise)';
+    return 'PanierItem(produitId: $produitId, nom: $nom, prixUnitaire: $prixUnitaire, prixAchat: $prixAchat, quantite: $quantite, remise: $remise, lotId: $lotId, lotNom: $lotNom, lotPrixTotal: $lotPrixTotal)';
   }
 
   @override
@@ -208,12 +261,16 @@ class _$PanierItemImpl extends _PanierItem {
                 other.prixAchat == prixAchat) &&
             (identical(other.quantite, quantite) ||
                 other.quantite == quantite) &&
-            (identical(other.remise, remise) || other.remise == remise));
+            (identical(other.remise, remise) || other.remise == remise) &&
+            (identical(other.lotId, lotId) || other.lotId == lotId) &&
+            (identical(other.lotNom, lotNom) || other.lotNom == lotNom) &&
+            (identical(other.lotPrixTotal, lotPrixTotal) ||
+                other.lotPrixTotal == lotPrixTotal));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, produitId, nom, prixUnitaire, prixAchat, quantite, remise);
+  int get hashCode => Object.hash(runtimeType, produitId, nom, prixUnitaire,
+      prixAchat, quantite, remise, lotId, lotNom, lotPrixTotal);
 
   /// Create a copy of PanierItem
   /// with the given fields replaced by the non-null parameter values.
@@ -231,7 +288,10 @@ abstract class _PanierItem extends PanierItem {
       required final double prixUnitaire,
       required final double prixAchat,
       final int quantite,
-      final double remise}) = _$PanierItemImpl;
+      final double remise,
+      final String? lotId,
+      final String? lotNom,
+      final double? lotPrixTotal}) = _$PanierItemImpl;
   const _PanierItem._() : super._();
 
   @override
@@ -245,7 +305,15 @@ abstract class _PanierItem extends PanierItem {
   @override
   int get quantite;
   @override
-  double get remise;
+  double get remise; // pourcentage 0-100
+// Lot (prix de groupe) : les items partageant un même lotId sont vendus
+// ensemble à lotPrixTotal, réparti à l'enregistrement. null = item normal.
+  @override
+  String? get lotId;
+  @override
+  String? get lotNom;
+  @override
+  double? get lotPrixTotal;
 
   /// Create a copy of PanierItem
   /// with the given fields replaced by the non-null parameter values.

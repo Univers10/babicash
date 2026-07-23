@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -26,6 +27,12 @@ class VenteResume {
     required this.monnaie,
     required this.date,
     this.nomBoutique = 'BabiCash',
+    this.adresse,
+    this.telephone,
+    this.entete,
+    this.piedMessage = 'Merci pour votre achat !',
+    this.afficherLogo = true,
+    this.logoUrl,
     this.clientNom,
     this.caissierNom,
   });
@@ -38,9 +45,40 @@ class VenteResume {
   final double montantRecu;
   final double monnaie;
   final DateTime date;
+
+  /// Nom de la boutique affiché en tête du reçu.
   final String nomBoutique;
+
+  /// Adresse de la boutique (facultative).
+  final String? adresse;
+
+  /// Téléphone de la boutique (facultatif).
+  final String? telephone;
+
+  /// En-tête libre multi-lignes (slogan, RCCM, NCC…), facultatif.
+  final String? entete;
+
+  /// Message de pied de reçu (vide = masqué).
+  final String piedMessage;
+
+  /// Afficher le logo en tête du reçu.
+  final bool afficherLogo;
+
+  /// URL absolue du logo de la boutique — utilisé si présent, sinon le logo
+  /// de l'application sert de repli.
+  final String? logoUrl;
+
   final String? clientNom;
+
+  /// Nom du vendeur — `null` si masqué par la personnalisation.
   final String? caissierNom;
+
+  /// Lignes non vides de l'en-tête libre.
+  List<String> get enteteLignes => (entete ?? '')
+      .split('\n')
+      .map((l) => l.trim())
+      .where((l) => l.isNotEmpty)
+      .toList();
 }
 
 // ── Dialog ticket ─────────────────────────────────────────────────────────────
@@ -180,7 +218,16 @@ class _TicketDialogState extends State<TicketDialog> {
                 child: Column(
                   children: [
                     // En-tête boutique
-                    _TicketHeader(nom: vente.nomBoutique, date: fmt.format(vente.date), caissierNom: vente.caissierNom),
+                    _TicketHeader(
+                      nom: vente.nomBoutique,
+                      date: fmt.format(vente.date),
+                      adresse: vente.adresse,
+                      telephone: vente.telephone,
+                      enteteLignes: vente.enteteLignes,
+                      afficherLogo: vente.afficherLogo,
+                      logoUrl: vente.logoUrl,
+                      caissierNom: vente.caissierNom,
+                    ),
                     const _Divider(),
 
                     // Lignes articles
@@ -234,11 +281,14 @@ class _TicketDialogState extends State<TicketDialog> {
                     const _Divider(),
 
                     // Pied de ticket
-                    const SizedBox(height: 4),
-                    Text('Merci pour votre achat !',
-                        style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.textTertiary,
-                            fontStyle: FontStyle.italic)),
+                    if (vente.piedMessage.trim().isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(vente.piedMessage,
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.textTertiary,
+                              fontStyle: FontStyle.italic)),
+                    ],
                   ],
                 ),
               ),
@@ -402,8 +452,20 @@ class _TicketDialogState extends State<TicketDialog> {
   Future<void> _imprimerPdf(BuildContext context) async {
     final doc = pw.Document();
     final fmt = DateFormat('dd/MM/yyyy HH:mm');
-    final logoBytes = await rootBundle.load('assets/images/logo.png');
-    final logoImage = pw.MemoryImage(logoBytes.buffer.asUint8List());
+
+    // Logo boutique (réseau) si disponible, sinon logo de l'application.
+    Future<pw.ImageProvider> loadAsset() async {
+      final logoBytes = await rootBundle.load('assets/images/logo.png');
+      return pw.MemoryImage(logoBytes.buffer.asUint8List());
+    }
+
+    pw.ImageProvider logoImage;
+    final logoUrl = vente.logoUrl?.trim() ?? '';
+    try {
+      logoImage = logoUrl.isNotEmpty ? await networkImage(logoUrl) : await loadAsset();
+    } catch (_) {
+      logoImage = await loadAsset();
+    }
 
     doc.addPage(
       pw.Page(
@@ -417,13 +479,33 @@ class _TicketDialogState extends State<TicketDialog> {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               // En-tête
-              pw.Center(child: pw.Image(logoImage, width: 60, height: 60)),
-              pw.SizedBox(height: 4),
+              if (vente.afficherLogo) ...[
+                pw.Center(child: pw.Image(logoImage, width: 60, height: 60)),
+                pw.SizedBox(height: 4),
+              ],
               pw.Center(
                 child: pw.Text(vente.nomBoutique,
+                    textAlign: pw.TextAlign.center,
                     style: const pw.TextStyle(
                         fontWeight: pw.FontWeight.bold, fontSize: 14)),
               ),
+              for (final ligne in vente.enteteLignes)
+                pw.Center(
+                  child: pw.Text(ligne,
+                      textAlign: pw.TextAlign.center,
+                      style: const pw.TextStyle(fontSize: 8)),
+                ),
+              if ((vente.adresse ?? '').trim().isNotEmpty)
+                pw.Center(
+                  child: pw.Text(vente.adresse!.trim(),
+                      textAlign: pw.TextAlign.center,
+                      style: const pw.TextStyle(fontSize: 8)),
+                ),
+              if ((vente.telephone ?? '').trim().isNotEmpty)
+                pw.Center(
+                  child: pw.Text('Tél : ${vente.telephone!.trim()}',
+                      style: const pw.TextStyle(fontSize: 8)),
+                ),
               if (vente.caissierNom != null)
                 pw.Center(
                   child: pw.Text('Vendeur : ${vente.caissierNom}',
@@ -499,12 +581,15 @@ class _TicketDialogState extends State<TicketDialog> {
               ],
 
               pw.Divider(),
-              pw.SizedBox(height: 4),
-              pw.Center(
-                child: pw.Text('Merci pour votre achat !',
-                    style: const pw.TextStyle(
-                        fontSize: 8, fontStyle: pw.FontStyle.italic)),
-              ),
+              if (vente.piedMessage.trim().isNotEmpty) ...[
+                pw.SizedBox(height: 4),
+                pw.Center(
+                  child: pw.Text(vente.piedMessage.trim(),
+                      textAlign: pw.TextAlign.center,
+                      style: const pw.TextStyle(
+                          fontSize: 8, fontStyle: pw.FontStyle.italic)),
+                ),
+              ],
             ],
           );
         },
@@ -531,30 +616,90 @@ class _TicketDialogState extends State<TicketDialog> {
 // ── Sous-widgets ticket ───────────────────────────────────────────────────────
 
 class _TicketHeader extends StatelessWidget {
-  const _TicketHeader({required this.nom, required this.date, this.caissierNom});
+  const _TicketHeader({
+    required this.nom,
+    required this.date,
+    this.adresse,
+    this.telephone,
+    this.enteteLignes = const [],
+    this.afficherLogo = true,
+    this.logoUrl,
+    this.caissierNom,
+  });
   final String nom;
   final String date;
+  final String? adresse;
+  final String? telephone;
+  final List<String> enteteLignes;
+  final bool afficherLogo;
+  final String? logoUrl;
   final String? caissierNom;
+
+  Widget _logo() {
+    const asset = Image(
+      image: AssetImage('assets/images/logo.png'),
+      width: 72,
+      height: 72,
+    );
+    final url = logoUrl?.trim() ?? '';
+    if (url.isEmpty) return asset;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: CachedNetworkImage(
+        imageUrl: url,
+        width: 72,
+        height: 72,
+        fit: BoxFit.cover,
+        placeholder: (_, __) => asset,
+        errorWidget: (_, __, ___) => asset,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final adr = adresse?.trim() ?? '';
+    final tel = telephone?.trim() ?? '';
     return Column(
       children: [
-        Image.asset('assets/images/logo.png', width: 72, height: 72),
-        const SizedBox(height: 4),
+        if (afficherLogo) ...[
+          _logo(),
+          const SizedBox(height: 4),
+        ],
         Text(nom,
+            textAlign: TextAlign.center,
             style: AppTextStyles.labelLarge.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w800,
                 fontSize: 16)),
-        if (caissierNom != null) ...
-          [
-            const SizedBox(height: 2),
-            Text('Vendeur : $caissierNom',
-                style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w600)),
-          ],
+        for (final ligne in enteteLignes) ...[
+          const SizedBox(height: 2),
+          Text(ligne,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+        ],
+        if (adr.isNotEmpty) ...[
+          const SizedBox(height: 2),
+          Text(adr,
+              textAlign: TextAlign.center,
+              style:
+                  AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+        ],
+        if (tel.isNotEmpty) ...[
+          const SizedBox(height: 2),
+          Text('Tél : $tel',
+              textAlign: TextAlign.center,
+              style:
+                  AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+        ],
+        if (caissierNom != null) ...[
+          const SizedBox(height: 2),
+          Text('Vendeur : $caissierNom',
+              style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w600)),
+        ],
         const SizedBox(height: 2),
         Text(date,
             style:

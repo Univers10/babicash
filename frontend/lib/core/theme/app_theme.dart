@@ -38,6 +38,14 @@ abstract final class AppTheme {
       inversePrimary: AppColors.primaryLight,
     );
 
+    // Style de texte des boutons avec inherit:false pour matcher les styles
+    // géométriques Material (Typography, inherit:false). Sans ça, le
+    // AnimatedDefaultTextStyle interne des boutons tente d'interpoler entre un
+    // TextStyle inherit:true (le nôtre) et inherit:false (défaut Material) et
+    // lève « Failed to interpolate TextStyles with different inherit values ».
+    // La couleur du label provient de foregroundColor, pas du textStyle.
+    final buttonTextStyle = AppTextStyles.button.copyWith(inherit: false);
+
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
@@ -82,7 +90,7 @@ abstract final class AppTheme {
             borderRadius: AppSpacing.borderRadiusMd,
           ),
           elevation: 0,
-          textStyle: AppTextStyles.button,
+          textStyle: buttonTextStyle,
         ),
       ),
 
@@ -96,7 +104,7 @@ abstract final class AppTheme {
           shape: const RoundedRectangleBorder(
             borderRadius: AppSpacing.borderRadiusMd,
           ),
-          textStyle: AppTextStyles.button,
+          textStyle: buttonTextStyle,
         ),
       ),
 
@@ -104,7 +112,7 @@ abstract final class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
-          textStyle: AppTextStyles.button,
+          textStyle: buttonTextStyle,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.sm,

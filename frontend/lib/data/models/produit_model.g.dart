@@ -16,6 +16,7 @@ _$ProduitModelImpl _$$ProduitModelImplFromJson(Map<String, dynamic> json) =>
       prixVenteSuggere: parseDouble(json['prix_vente_suggere']),
       stockActuel: (json['stock_actuel'] as num).toInt(),
       stockAlerte: (json['stock_alerte'] as num).toInt(),
+      imageUrl: json['image_url'] as String?,
     );
 
 Map<String, dynamic> _$$ProduitModelImplToJson(_$ProduitModelImpl instance) =>
@@ -28,6 +29,7 @@ Map<String, dynamic> _$$ProduitModelImplToJson(_$ProduitModelImpl instance) =>
       'prix_vente_suggere': instance.prixVenteSuggere,
       'stock_actuel': instance.stockActuel,
       'stock_alerte': instance.stockAlerte,
+      'image_url': instance.imageUrl,
     };
 
 _$CategorieModelImpl _$$CategorieModelImplFromJson(Map<String, dynamic> json) =>
@@ -55,6 +57,7 @@ _$ProduitCreateRequestImpl _$$ProduitCreateRequestImplFromJson(
       prixVenteSuggere: (json['prix_vente_suggere'] as num).toDouble(),
       stockActuel: (json['stock_actuel'] as num).toInt(),
       stockAlerte: (json['stock_alerte'] as num).toInt(),
+      imageUrl: json['image_url'] as String?,
     );
 
 Map<String, dynamic> _$$ProduitCreateRequestImplToJson(
@@ -67,6 +70,7 @@ Map<String, dynamic> _$$ProduitCreateRequestImplToJson(
       'prix_vente_suggere': instance.prixVenteSuggere,
       'stock_actuel': instance.stockActuel,
       'stock_alerte': instance.stockAlerte,
+      if (instance.imageUrl case final value?) 'image_url': value,
     };
 
 _$ProduitUpdateRequestImpl _$$ProduitUpdateRequestImplFromJson(
@@ -78,6 +82,7 @@ _$ProduitUpdateRequestImpl _$$ProduitUpdateRequestImplFromJson(
       prixVenteSuggere: (json['prix_vente_suggere'] as num?)?.toDouble(),
       stockActuel: (json['stock_actuel'] as num?)?.toInt(),
       stockAlerte: (json['stock_alerte'] as num?)?.toInt(),
+      imageUrl: json['image_url'] as String?,
     );
 
 Map<String, dynamic> _$$ProduitUpdateRequestImplToJson(
@@ -89,6 +94,7 @@ Map<String, dynamic> _$$ProduitUpdateRequestImplToJson(
       'prix_vente_suggere': instance.prixVenteSuggere,
       'stock_actuel': instance.stockActuel,
       'stock_alerte': instance.stockAlerte,
+      'image_url': instance.imageUrl,
     };
 
 _$CategorieCreateRequestImpl _$$CategorieCreateRequestImplFromJson(
