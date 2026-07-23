@@ -9,8 +9,14 @@ import '../../core/network/api_client.dart';
 /// `/api/v1` — il faut donc les résoudre contre l'origine, pas la base API.
 final apiOriginProvider = Provider<String>((ref) {
   final base = ref.watch(dioProvider).options.baseUrl;
-  final u = Uri.parse(base);
-  return u.replace(path: '', query: '', fragment: '').toString();
+  // `Uri.origin` = `scheme://host[:port]` (sans le préfixe /api/v1, sans
+  // query/fragment). Évite le piège de `replace(query: '', fragment: '')`
+  // qui produirait une origine du type `https://host?#`.
+  try {
+    return Uri.parse(base).origin;
+  } catch (_) {
+    return base;
+  }
 });
 
 /// Convertit une URL d'image éventuellement relative (`/static/...`) renvoyée
