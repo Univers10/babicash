@@ -6,6 +6,7 @@ from app.models.models import (
     LigneVente,
     MouvementStock,
     Produit,
+    RecuConfig,
     SessionCaisse,
     TransactionCaisse,
     User,
@@ -22,5 +23,6 @@ __all__ = [
     "Vente",
     "LigneVente",
     "MouvementStock",
+    "RecuConfig",
     "TransactionCaisse",
 ]

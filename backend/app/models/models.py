@@ -318,6 +318,45 @@ class MouvementStock(Base):
     synced: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
 
+class RecuConfig(Base):
+    """Personnalisation du reçu de caisse, une ligne par boutique (1:1).
+
+    Persistée côté serveur pour survivre à la réinstallation et se synchroniser
+    entre appareils. Côté smartphone, elle est mise en cache dans Drift
+    (`LocalRecuConfigs`) pour rester disponible hors-ligne au moment de la vente.
+    Réconciliation en dernier-écrivain-gagne via `updated_at`.
+    """
+
+    __tablename__ = "recu_configs"
+
+    boutique_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("boutiques.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    # Infos boutique affichées en tête du reçu (surcharges facultatives : vides
+    # => repli sur les infos de la boutique côté client).
+    nom_boutique: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    adresse: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    telephone: Mapped[str] = mapped_column(String(30), nullable=False, default="")
+    # En-tête libre multi-lignes (slogan / RCCM / NCC).
+    entete: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    # Message de pied de reçu.
+    pied_message: Mapped[str] = mapped_column(
+        String(500), nullable=False, default="Merci pour votre achat !"
+    )
+    afficher_logo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    afficher_vendeur: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+
 class TransactionCaisse(Base):
     __tablename__ = "transactions_caisse"
 
