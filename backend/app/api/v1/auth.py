@@ -10,6 +10,7 @@ from app.core.security import create_access_token, hash_password, verify_passwor
 from app.deps import get_current_user
 from app.models import Abonnement, Boutique, User
 from app.services.abonnement_service import PLAN_CATALOG
+from app.services.ambassadeur_service import resoudre_parrain
 from app.schemas.auth import (
     CurrentUser,
     LoginIdRequest,
@@ -49,12 +50,20 @@ async def provision_owner_with_boutique(
     oauth_provider: str | None = None,
     oauth_id: str | None = None,
     avatar_url: str | None = None,
+    code_parrainage: str | None = None,
 ) -> User:
     """Crée un propriétaire + sa boutique par défaut + un abonnement FREE.
 
     Utilisé aussi bien par /register (mot de passe) que par les endpoints
     OAuth (/oauth/google, /oauth/apple) pour l'inscription à la volée.
+
+    Si ``code_parrainage`` correspond à un ambassadeur actif (et hors
+    auto-parrainage), le nouveau propriétaire lui est rattaché définitivement.
     """
+    parraine_par = await resoudre_parrain(
+        db, code_parrainage, email=email, telephone=telephone
+    )
+
     user = User(
         nom=nom,
         email=email,
@@ -64,6 +73,7 @@ async def provision_owner_with_boutique(
         oauth_provider=oauth_provider,
         oauth_id=oauth_id,
         avatar_url=avatar_url,
+        parraine_par_ambassadeur_id=parraine_par,
     )
     db.add(user)
     await db.flush()
@@ -216,6 +226,7 @@ async def register(
         email=payload.email,
         mot_de_passe_hash=hash_password(payload.mot_de_passe),
         telephone=payload.telephone,
+        code_parrainage=payload.code_parrainage,
     )
 
     return _token_for(user)

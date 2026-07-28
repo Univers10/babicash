@@ -40,7 +40,9 @@ class User(Base):
         String(30), unique=True, index=True, nullable=True
     )
     code_pin_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    role: Mapped[str] = mapped_column(String(20), nullable=False)  # OWNER | MANAGER
+    role: Mapped[str] = mapped_column(
+        String(20), nullable=False
+    )  # OWNER | MANAGER | AMBASSADEUR
     boutique_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid(as_uuid=True), ForeignKey("boutiques.id"), nullable=True
     )
@@ -52,6 +54,11 @@ class User(Base):
     avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     date_creation: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    # Parrainage : ambassadeur ayant parrainé ce propriétaire (figé à
+    # l'inscription, jamais modifié). NULL si inscription sans code.
+    parraine_par_ambassadeur_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("ambassadeurs.id"), nullable=True
     )
 
 
@@ -381,3 +388,135 @@ class TransactionCaisse(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     synced: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+
+# ── Parrainage / ambassadeurs ────────────────────────────────────────
+
+
+class Ambassadeur(Base):
+    """Profil ambassadeur (parrainage), lié 1:1 à un ``User``.
+
+    Toute personne peut créer un compte ambassadeur (``role = AMBASSADEUR``,
+    sans boutique) ; un ``OWNER`` existant peut aussi en avoir un. L'ambassadeur
+    choisit lui-même son ``code`` de parrainage. Il perçoit une commission sur
+    les abonnements payés par ses filleuls (voir :class:`CommissionParrainage`),
+    versée chaque semaine par Mobile Money (voir :class:`Payout`).
+    """
+
+    __tablename__ = "ambassadeurs"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        unique=True,
+        nullable=False,
+    )
+    # Code de parrainage choisi par l'ambassadeur (normalisé en majuscules).
+    code: Mapped[str] = mapped_column(String(20), unique=True, index=True, nullable=False)
+    # Coordonnées de versement (Mobile Money).
+    momo_numero: Mapped[str] = mapped_column(String(30), nullable=False, default="")
+    momo_operateur: Mapped[str] = mapped_column(
+        String(20), nullable=False, default=""
+    )  # WAVE | ORANGE | MTN | MOOV
+    actif: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    date_creation: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+class PaiementAbonnement(Base):
+    """Journal des paiements d'abonnement confirmés (par l'admin).
+
+    Source de vérité du chiffre d'affaires réel et déclencheur des commissions
+    de parrainage (le paiement n'étant pas automatisé, un admin le confirme).
+    """
+
+    __tablename__ = "paiements_abonnement"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    proprietaire_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    abonnement_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("abonnements.id"), nullable=True
+    )
+    plan: Mapped[str] = mapped_column(String(20), nullable=False)
+    montant: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    periode_debut: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    periode_fin: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    confirme_par: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    date_paiement: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+class Payout(Base):
+    """Lot de versement hebdomadaire des commissions à un ambassadeur."""
+
+    __tablename__ = "payouts"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    ambassadeur_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("ambassadeurs.id"), index=True, nullable=False
+    )
+    semaine: Mapped[str] = mapped_column(String(10), nullable=False)  # ex. 2026-W31
+    montant_total: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2), nullable=False, default=Decimal("0.00")
+    )
+    momo_numero: Mapped[str] = mapped_column(String(30), nullable=False, default="")
+    statut: Mapped[str] = mapped_column(
+        String(10), nullable=False, default="A_PAYER"
+    )  # A_PAYER | PAYE
+    reference_transfert: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    date_creation: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    date_execution: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+
+class CommissionParrainage(Base):
+    """Commission due à un ambassadeur sur un paiement d'un de ses filleuls."""
+
+    __tablename__ = "commissions_parrainage"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    ambassadeur_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("ambassadeurs.id"), index=True, nullable=False
+    )
+    filleul_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    paiement_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("paiements_abonnement.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    montant_paye: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    taux: Mapped[Decimal] = mapped_column(
+        Numeric(4, 3), nullable=False, default=Decimal("0.200")
+    )
+    montant_commission: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    statut: Mapped[str] = mapped_column(
+        String(15), nullable=False, default="VALIDEE"
+    )  # VALIDEE | PAYEE | ANNULEE
+    payout_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("payouts.id", ondelete="SET NULL"), nullable=True
+    )
+    date_creation: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )

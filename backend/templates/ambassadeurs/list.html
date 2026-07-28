@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Ambassadeurs - BabiCash Admin{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-bold">Ambassadeurs</h2>
+    <input type="text" id="search" placeholder="Rechercher..."
+           class="input input-bordered input-sm w-64" onkeyup="filterTable()">
+</div>
+
+<div class="card bg-base-100 shadow">
+    <div class="overflow-x-auto">
+        <table class="table table-hover" id="amb-table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Code</th>
+                    <th>Mobile Money</th>
+                    <th class="text-center">Filleuls</th>
+                    <th class="text-right">Solde à payer</th>
+                    <th class="text-right">Total gagné</th>
+                    <th class="text-center">Statut</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in ambassadeurs %}
+                <tr>
+                    <td class="font-medium">
+                        {{ item.user.nom if item.user else '—' }}
+                        <div class="text-xs opacity-60">{{ item.user.email if item.user else '' }}</div>
+                    </td>
+                    <td><span class="badge badge-outline font-mono">{{ item.ambassadeur.code }}</span></td>
+                    <td class="text-sm">{{ item.ambassadeur.momo_numero }} <span class="opacity-60">({{ item.ambassadeur.momo_operateur }})</span></td>
+                    <td class="text-center font-mono">{{ item.nb_filleuls_payants }} / {{ item.nb_filleuls }}</td>
+                    <td class="text-right font-mono">{{ item.solde_a_recevoir }} F</td>
+                    <td class="text-right font-mono">{{ item.total_gagne }} F</td>
+                    <td class="text-center">
+                        {% if item.ambassadeur.actif %}
+                        <span class="badge badge-sm badge-success">Actif</span>
+                        {% else %}
+                        <span class="badge badge-sm badge-error">Désactivé</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="POST" action="/admin/ambassadeurs/{{ item.ambassadeur.id }}/toggle">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            {% if item.ambassadeur.actif %}
+                            <button type="submit" class="btn btn-ghost btn-xs text-error"
+                                    onclick="return confirm('Désactiver ce code d\'ambassadeur ?')">Désactiver</button>
+                            {% else %}
+                            <button type="submit" class="btn btn-ghost btn-xs text-success"
+                                    onclick="return confirm('Réactiver ce code ?')">Réactiver</button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" class="text-center opacity-50 py-6">Aucun ambassadeur.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function filterTable() {
+    const query = document.getElementById('search').value.toLowerCase();
+    document.querySelectorAll('#amb-table tbody tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

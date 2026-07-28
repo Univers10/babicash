@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Versements - BabiCash Admin{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div>
+        <h2 class="text-2xl font-bold">Versements</h2>
+        <p class="text-sm opacity-60">Lots de commissions à payer par Mobile Money.</p>
+    </div>
+    <form method="POST" action="/admin/versements/generer">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="btn btn-primary btn-sm"
+                onclick="return confirm('Générer le lot de la semaine {{ semaine }} ?')">
+            Générer le lot ({{ semaine }})
+        </button>
+    </form>
+</div>
+
+<div class="card bg-base-100 shadow">
+    <div class="overflow-x-auto">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Ambassadeur</th>
+                    <th>Semaine</th>
+                    <th class="text-right">Montant</th>
+                    <th>Mobile Money</th>
+                    <th class="text-center">Statut</th>
+                    <th>Référence</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in rows %}
+                <tr>
+                    <td class="font-medium">
+                        {{ r.owner.nom if r.owner else '—' }}
+                        <div class="text-xs opacity-60 font-mono">{{ r.ambassadeur.code if r.ambassadeur else '' }}</div>
+                    </td>
+                    <td class="font-mono text-sm">{{ r.payout.semaine }}</td>
+                    <td class="text-right font-mono">{{ r.payout.montant_total }} F</td>
+                    <td class="text-sm">{{ r.payout.momo_numero or '—' }}</td>
+                    <td class="text-center">
+                        {% if r.payout.statut == 'PAYE' %}
+                        <span class="badge badge-sm badge-success">Payé</span>
+                        {% else %}
+                        <span class="badge badge-sm badge-warning">À payer</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-sm">
+                        {{ r.payout.reference_transfert or '—' }}
+                        {% if r.payout.date_execution %}
+                        <div class="text-xs opacity-60">{{ r.payout.date_execution.strftime('%d/%m/%Y') }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if r.payout.statut != 'PAYE' %}
+                        <form method="POST" action="/admin/versements/{{ r.payout.id }}/payer" class="flex gap-1">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <input type="text" name="reference" placeholder="Réf. transfert"
+                                   class="input input-bordered input-xs w-28">
+                            <button type="submit" class="btn btn-success btn-xs"
+                                    onclick="return confirm('Marquer ce lot comme payé ?')">Payé</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center opacity-50 py-6">Aucun lot de versement.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

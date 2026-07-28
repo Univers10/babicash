@@ -22,6 +22,9 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     mot_de_passe: str = Field(min_length=6, max_length=128)
     telephone: str | None = Field(default=None, max_length=30)
+    # Code de parrainage facultatif. Inconnu/inactif/invalide => inscription
+    # acceptée sans parrain (jamais bloquante).
+    code_parrainage: str | None = Field(default=None, max_length=20)
 
 
 class LoginIdRequest(BaseModel):
