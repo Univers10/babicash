@@ -298,6 +298,6 @@ Le backend CI utilise les variables en dur dans le workflow. Pour la prod, garde
 ```
 DATABASE_URL=postgresql+asyncpg://babicash:<password>@db:5432/babicash
 SECRET_KEY=<64-hex-chars>
-ALLOWED_ORIGINS=https://babicash.ecomotionafricaci.com
+ALLOWED_ORIGINS=https://pos.babicash.ci,https://business.babicash.ci
 WORKERS=2
 ```

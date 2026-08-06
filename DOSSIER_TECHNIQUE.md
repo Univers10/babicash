@@ -2,7 +2,7 @@
 
 > **Version** : 1.0.0 · **Dernière mise à jour** : 10 juillet 2026  
 > **Repo** : https://github.com/Univers10/babicash  
-> **Domaine de test** : https://babicash.ecomotionafricaci.com
+> **Domaine de test** : https://pos.babicash.ci
 
 ---
 
@@ -631,7 +631,7 @@ Fichier : `features/sync/sync_service.dart`
 
 Fichier central : `core/network/api_client.dart`
 
-**URL de base** : `https://babicash.ecomotionafricaci.com/api/v1`  
+**URL de base** : `https://pos.babicash.ci/api/v1`  
 *(configurable via `_baseUrl` dans `api_client.dart`)*
 
 **Configuration Dio** :
@@ -749,16 +749,16 @@ docker compose up -d --build
 docker compose exec api python -m scripts.seed_owner
 
 # 4. Nginx reverse proxy + HTTPS
-certbot --nginx -d babicash.ecomotionafricaci.com
+certbot --nginx -d pos.babicash.ci -d business.babicash.ci
 
 # 5. Vérifier
-curl https://babicash.ecomotionafricaci.com/health
+curl https://pos.babicash.ci/health
 ```
 
 ### Mise à jour du frontend (URL de l'API)
 Fichier : `frontend/lib/core/network/api_client.dart`
 ```dart
-const String _baseUrl = 'https://babicash.ecomotionafricaci.com';
+const String _baseUrl = 'https://pos.babicash.ci';
 ```
 
 ---

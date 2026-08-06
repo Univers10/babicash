@@ -12,6 +12,13 @@ class OAuthConfig {
   static const googleServerClientId =
       '888445557233-ec33fb0s4jgnvbi9f13vfkhp6vq250q3.apps.googleusercontent.com';
 
+  // TODO: remplacer par le Services ID du portail Apple Developer.
+  static const appleServiceId = 'com.babicash.app.signin';
+
+  static final appleRedirectUri = Uri.parse(
+    'https://pos.babicash.ci/api/v1/auth/oauth/apple/callback',
+  );
+
   static bool get googleConfigured =>
       !googleServerClientId.startsWith('REMPLACER-MOI');
 }

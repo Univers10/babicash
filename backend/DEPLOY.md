@@ -1,7 +1,7 @@
 # Déploiement Backend BabiCash
 
 > Déploiement Docker sur VPS Ubuntu/Debian avec Nginx + HTTPS  
-> Domaine : `babicash.ecomotionafricaci.com`
+> Domaines : `pos.babicash.ci` (API/app POS) + `business.babicash.ci` (PWA ambassadeur)
 
 ---
 
@@ -66,7 +66,7 @@ Remplir les valeurs :
 |----------|-------------|---------|
 | `POSTGRES_PASSWORD` | Mot de passe BDD fort | `xK9$mP2vL...` |
 | `SECRET_KEY` | Clé JWT (64 hex) | Générer ci-dessous |
-| `ALLOWED_ORIGINS` | URL frontend autorisées | `https://babicash.ecomotionafricaci.com` |
+| `ALLOWED_ORIGINS` | URL frontend autorisées | `https://pos.babicash.ci,https://business.babicash.ci` |
 | `API_PORT` | Port local de l'API | `8000` |
 | `WORKERS` | Nombre de workers uvicorn | `2` |
 
@@ -105,7 +105,7 @@ nano /etc/nginx/sites-available/babicash
 
 ```nginx
 server {
-    server_name babicash.ecomotionafricaci.com;
+    server_name pos.babicash.ci business.babicash.ci;
 
     location / {
         proxy_pass http://127.0.0.1:8000;
@@ -133,7 +133,7 @@ nginx -t && systemctl restart nginx
 ## 6. HTTPS — Let's Encrypt
 
 ```bash
-certbot --nginx -d babicash.ecomotionafricaci.com
+certbot --nginx -d pos.babicash.ci -d business.babicash.ci
 ```
 
 Le renouvellement est automatique (cron certbot).
@@ -155,10 +155,10 @@ Chez votre registrar ou panel DNS :
 ## 8. Vérification finale
 
 ```bash
-curl https://babicash.ecomotionafricaci.com/health
+curl https://pos.babicash.ci/health
 # → {"status":"ok","service":"BabiCash API"}
 
-curl https://babicash.ecomotionafricaci.com/api/v1/auth/me
+curl https://pos.babicash.ci/api/v1/auth/me
 # → 401 Unauthorized (normal sans token)
 ```
 

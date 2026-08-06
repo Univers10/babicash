@@ -82,7 +82,7 @@ async def update_produit(
     db: AsyncSession = Depends(get_db),
 ) -> Produit:
     produit = await _get_produit_owned(db, current_user, produit_id)
-    data = payload.model_dump(exclude_unset=True)
+    data = payload.model_dump(exclude_unset=True, exclude_none=True)
     for field, value in data.items():
         setattr(produit, field, value)
     await db.commit()
