@@ -32,6 +32,7 @@ class QuotaInfo with _$QuotaInfo {
     @JsonKey(name: 'quota_par_boutique') required int quotaParBoutique,
     @JsonKey(name: 'ventes_ce_mois') @Default(0) int ventesCeMois,
     @JsonKey(name: 'ventes_restantes') int? ventesRestantes,
+    @JsonKey(name: 'jours_essai_restant') int? joursEssaiRestant,
     @Default(false) bool illimite,
   }) = _QuotaInfo;
 

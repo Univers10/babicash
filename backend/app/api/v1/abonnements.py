@@ -64,19 +64,26 @@ async def get_quota_boutique(
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Retourne le quota utilisé ce mois pour une boutique donnée."""
-    await get_authorized_boutique(db, current_user, boutique_id)
-    abo = await abonnement_service.get_or_create_abonnement(db, current_user.id)
+    boutique = await get_authorized_boutique(db, current_user, boutique_id)
+    abo = await abonnement_service.get_or_create_abonnement(db, boutique.proprietaire_id)
     ventes_mois = await abonnement_service.compter_ventes_mois(db, boutique_id)
 
     pro_actif = abonnement_service.est_pro_actif(abo)
+
+    jours_essai_restant = None
+    if abo.plan == "FREE" and abo.date_fin is not None:
+        jours_essai_restant = max(
+            0, (abo.date_fin.replace(tzinfo=None) - abonnement_service._maintenant()).days
+        )
 
     return {
         "boutique_id": str(boutique_id),
         "plan": abo.plan,
         "quota_par_boutique": abo.quota_ventes_par_boutique,
         "ventes_ce_mois": ventes_mois,
-        "ventes_restantes": None if pro_actif else max(0, abo.quota_ventes_par_boutique - ventes_mois),
-        "illimite": pro_actif,
+        "ventes_restantes": None if pro_actif or abo.plan == "FREE" else max(0, abo.quota_ventes_par_boutique - ventes_mois),
+        "illimite": pro_actif or abo.plan == "FREE",
+        "jours_essai_restant": jours_essai_restant,
     }
 
 

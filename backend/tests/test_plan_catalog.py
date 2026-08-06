@@ -53,8 +53,8 @@ async def test_plan_invalide_rejeté(client, seeded, plan):
 @pytest.mark.parametrize(
     "plan, expected_prix, expected_quota, expected_boutiques, expected_gerants",
     [
-        ("FREE", 0.0, 20, 1, 1),
-        ("KIOSQUE", 2000.0, 200, 1, 1),
+        ("FREE", 0.0, 2147483647, 1, 1),
+        ("KIOSQUE", 2000.0, 10000, 1, 1),
         ("BOUTIQUE", 5000.0, 2147483647, 1, 3),
         ("COMMERCE", 10000.0, 2147483647, 3, 6),
         ("ENTREPRISE", 15000.0, 2147483647, 6, 12),
@@ -82,13 +82,13 @@ async def test_propriétés_plan(
 
 @pytest.mark.asyncio
 async def test_upgrade_kiosque_vers_boutique(client, seeded):
-    """Passer de KIOSQUE à BOUTIQUE : quota passe de 200 à illimité."""
+    """Passer de KIOSQUE à BOUTIQUE : quota passe de 10 000 à illimité."""
     token = await login(client, seeded["owner_email"], "boss1234")
     headers = {"Authorization": f"Bearer {token}"}
 
     await _upgrade(client, headers, "KIOSQUE")
     body = await _mon_plan(client, headers)
-    assert body["quota_ventes_par_boutique"] == 200
+    assert body["quota_ventes_par_boutique"] == 10000
 
     await _upgrade(client, headers, "BOUTIQUE")
     body = await _mon_plan(client, headers)
@@ -192,8 +192,8 @@ async def test_downgrade_autorise_sans_surplus(client, seeded):
 # ── 6. Quota libre KIOSQUE (200 ventes) ──────────────────────────────
 
 @pytest.mark.asyncio
-async def test_kiosque_quota_200(client, seeded):
-    """KIOSQUE : le quota est bien de 200 ventes/mois."""
+async def test_kiosque_quota_10000(client, seeded):
+    """KIOSQUE : le quota est bien de 10 000 ventes/mois."""
     token = await login(client, seeded["owner_email"], "boss1234")
     headers = {"Authorization": f"Bearer {token}"}
 
@@ -204,7 +204,7 @@ async def test_kiosque_quota_200(client, seeded):
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["plan"] == "KIOSQUE"
-    assert body["quota_par_boutique"] == 200
+    assert body["quota_par_boutique"] == 10000
     assert body["illimite"] is False
 
 
@@ -346,7 +346,7 @@ async def test_free_prix_zero(client, seeded):
 
 @pytest.mark.asyncio
 async def test_round_trip_free_kiosque_free(client, seeded):
-    """FREE → KIOSQUE → FREE : les valeurs reviennent à zéro."""
+    """FREE → KIOSQUE → FREE : retour à FREE inactif (essai déjà utilisé)."""
     token = await login(client, seeded["owner_email"], "boss1234")
     headers = {"Authorization": f"Bearer {token}"}
 
@@ -359,7 +359,8 @@ async def test_round_trip_free_kiosque_free(client, seeded):
     body = await _mon_plan(client, headers)
     assert body["plan"] == "FREE"
     assert float(body["prix_base"]) == 0.0
-    assert body["quota_ventes_par_boutique"] == 20
+    assert body["quota_ventes_par_boutique"] == 2147483647
+    assert body["actif"] is False
 
 
 # ── 13. Sécurité : upgrade vérifie toujours les boutiques ─────────────

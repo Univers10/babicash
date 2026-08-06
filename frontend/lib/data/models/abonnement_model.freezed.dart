@@ -411,6 +411,8 @@ mixin _$QuotaInfo {
   int get ventesCeMois => throw _privateConstructorUsedError;
   @JsonKey(name: 'ventes_restantes')
   int? get ventesRestantes => throw _privateConstructorUsedError;
+  @JsonKey(name: 'jours_essai_restant')
+  int? get joursEssaiRestant => throw _privateConstructorUsedError;
   bool get illimite => throw _privateConstructorUsedError;
 
   /// Serializes this QuotaInfo to a JSON map.
@@ -434,6 +436,7 @@ abstract class $QuotaInfoCopyWith<$Res> {
       @JsonKey(name: 'quota_par_boutique') int quotaParBoutique,
       @JsonKey(name: 'ventes_ce_mois') int ventesCeMois,
       @JsonKey(name: 'ventes_restantes') int? ventesRestantes,
+      @JsonKey(name: 'jours_essai_restant') int? joursEssaiRestant,
       bool illimite});
 }
 
@@ -457,6 +460,7 @@ class _$QuotaInfoCopyWithImpl<$Res, $Val extends QuotaInfo>
     Object? quotaParBoutique = null,
     Object? ventesCeMois = null,
     Object? ventesRestantes = freezed,
+    Object? joursEssaiRestant = freezed,
     Object? illimite = null,
   }) {
     return _then(_value.copyWith(
@@ -480,6 +484,10 @@ class _$QuotaInfoCopyWithImpl<$Res, $Val extends QuotaInfo>
           ? _value.ventesRestantes
           : ventesRestantes // ignore: cast_nullable_to_non_nullable
               as int?,
+      joursEssaiRestant: freezed == joursEssaiRestant
+          ? _value.joursEssaiRestant
+          : joursEssaiRestant // ignore: cast_nullable_to_non_nullable
+              as int?,
       illimite: null == illimite
           ? _value.illimite
           : illimite // ignore: cast_nullable_to_non_nullable
@@ -502,6 +510,7 @@ abstract class _$$QuotaInfoImplCopyWith<$Res>
       @JsonKey(name: 'quota_par_boutique') int quotaParBoutique,
       @JsonKey(name: 'ventes_ce_mois') int ventesCeMois,
       @JsonKey(name: 'ventes_restantes') int? ventesRestantes,
+      @JsonKey(name: 'jours_essai_restant') int? joursEssaiRestant,
       bool illimite});
 }
 
@@ -523,6 +532,7 @@ class __$$QuotaInfoImplCopyWithImpl<$Res>
     Object? quotaParBoutique = null,
     Object? ventesCeMois = null,
     Object? ventesRestantes = freezed,
+    Object? joursEssaiRestant = freezed,
     Object? illimite = null,
   }) {
     return _then(_$QuotaInfoImpl(
@@ -546,6 +556,10 @@ class __$$QuotaInfoImplCopyWithImpl<$Res>
           ? _value.ventesRestantes
           : ventesRestantes // ignore: cast_nullable_to_non_nullable
               as int?,
+      joursEssaiRestant: freezed == joursEssaiRestant
+          ? _value.joursEssaiRestant
+          : joursEssaiRestant // ignore: cast_nullable_to_non_nullable
+              as int?,
       illimite: null == illimite
           ? _value.illimite
           : illimite // ignore: cast_nullable_to_non_nullable
@@ -563,6 +577,7 @@ class _$QuotaInfoImpl implements _QuotaInfo {
       @JsonKey(name: 'quota_par_boutique') required this.quotaParBoutique,
       @JsonKey(name: 'ventes_ce_mois') this.ventesCeMois = 0,
       @JsonKey(name: 'ventes_restantes') this.ventesRestantes,
+      @JsonKey(name: 'jours_essai_restant') this.joursEssaiRestant,
       this.illimite = false});
 
   factory _$QuotaInfoImpl.fromJson(Map<String, dynamic> json) =>
@@ -583,12 +598,15 @@ class _$QuotaInfoImpl implements _QuotaInfo {
   @JsonKey(name: 'ventes_restantes')
   final int? ventesRestantes;
   @override
+  @JsonKey(name: 'jours_essai_restant')
+  final int? joursEssaiRestant;
+  @override
   @JsonKey()
   final bool illimite;
 
   @override
   String toString() {
-    return 'QuotaInfo(boutiqueId: $boutiqueId, plan: $plan, quotaParBoutique: $quotaParBoutique, ventesCeMois: $ventesCeMois, ventesRestantes: $ventesRestantes, illimite: $illimite)';
+    return 'QuotaInfo(boutiqueId: $boutiqueId, plan: $plan, quotaParBoutique: $quotaParBoutique, ventesCeMois: $ventesCeMois, ventesRestantes: $ventesRestantes, joursEssaiRestant: $joursEssaiRestant, illimite: $illimite)';
   }
 
   @override
@@ -605,14 +623,23 @@ class _$QuotaInfoImpl implements _QuotaInfo {
                 other.ventesCeMois == ventesCeMois) &&
             (identical(other.ventesRestantes, ventesRestantes) ||
                 other.ventesRestantes == ventesRestantes) &&
+            (identical(other.joursEssaiRestant, joursEssaiRestant) ||
+                other.joursEssaiRestant == joursEssaiRestant) &&
             (identical(other.illimite, illimite) ||
                 other.illimite == illimite));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, boutiqueId, plan,
-      quotaParBoutique, ventesCeMois, ventesRestantes, illimite);
+  int get hashCode => Object.hash(
+      runtimeType,
+      boutiqueId,
+      plan,
+      quotaParBoutique,
+      ventesCeMois,
+      ventesRestantes,
+      joursEssaiRestant,
+      illimite);
 
   /// Create a copy of QuotaInfo
   /// with the given fields replaced by the non-null parameter values.
@@ -637,6 +664,7 @@ abstract class _QuotaInfo implements QuotaInfo {
       @JsonKey(name: 'quota_par_boutique') required final int quotaParBoutique,
       @JsonKey(name: 'ventes_ce_mois') final int ventesCeMois,
       @JsonKey(name: 'ventes_restantes') final int? ventesRestantes,
+      @JsonKey(name: 'jours_essai_restant') final int? joursEssaiRestant,
       final bool illimite}) = _$QuotaInfoImpl;
 
   factory _QuotaInfo.fromJson(Map<String, dynamic> json) =
@@ -656,6 +684,9 @@ abstract class _QuotaInfo implements QuotaInfo {
   @override
   @JsonKey(name: 'ventes_restantes')
   int? get ventesRestantes;
+  @override
+  @JsonKey(name: 'jours_essai_restant')
+  int? get joursEssaiRestant;
   @override
   bool get illimite;
 

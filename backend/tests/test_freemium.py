@@ -33,10 +33,11 @@ async def test_abonnement_cree_automatiquement(client, seeded):
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["plan"] == "FREE"
-    assert body["quota_ventes_par_boutique"] == 20
+    assert body["quota_ventes_par_boutique"] == 2147483647
     assert body["actif"] is True
     assert body["nb_boutiques"] == 1
     assert float(body["prix_base"]) == 0.0
+    assert body["date_fin"] is not None
 
 
 @pytest.mark.asyncio
@@ -102,12 +103,26 @@ async def test_manager_peut_modifier_sa_boutique(client, seeded):
 
 
 @pytest.mark.asyncio
-async def test_quota_free_bloque_a_20(client, seeded):
+async def test_quota_kiosque_10000_ventes(client, seeded):
+    """KIOSQUE : quota de 10 000 ventes/mois, décrémenté à chaque vente."""
+    token = await login(client, seeded["owner_email"], "boss1234")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Passer KIOSQUE
+    await client.post("/api/v1/abonnements/upgrade", json={"plan": "KIOSQUE"}, headers=headers)
+
     token = await login(client, seeded["manager_email"], "gerant1234")
     headers = {"Authorization": f"Bearer {token}"}
 
-    # Pousser 20 ventes — toutes doivent passer
-    for i in range(20):
+    r = await client.get(
+        f"/api/v1/abonnements/quota/{seeded['boutique_id']}", headers=headers
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["quota_par_boutique"] == 10000
+    assert r.json()["ventes_restantes"] == 10000
+
+    # Quelques ventes passent
+    for i in range(3):
         resp = await client.post(
             "/api/v1/sync/push",
             json=_vente(seeded["boutique_id"], seeded["produit_id"], f"quota-test-{i}"),
@@ -115,22 +130,17 @@ async def test_quota_free_bloque_a_20(client, seeded):
         )
         assert resp.status_code == 200, f"vente {i} refusée: {resp.text}"
 
-    # La 21ème doit être bloquée (402)
-    resp = await client.post(
-        "/api/v1/sync/push",
-        json=_vente(seeded["boutique_id"], seeded["produit_id"], "quota-test-20"),
-        headers=headers,
+    r = await client.get(
+        f"/api/v1/abonnements/quota/{seeded['boutique_id']}", headers=headers
     )
-    assert resp.status_code == 402, resp.text
-    detail = resp.json()["detail"]
-    assert detail["code"] == "QUOTA_DEPASSE"
-    assert detail["ventes_utilisees"] == 20
-    assert detail["quota"] == 20
+    body = r.json()
+    assert body["ventes_ce_mois"] == 3
+    assert body["ventes_restantes"] == 9997
 
 
 @pytest.mark.asyncio
-async def test_quota_boutique(client, seeded):
-    """GET /abonnements/quota/{boutique_id} retourne le quota de la boutique."""
+async def test_quota_boutique_essai_gratuit(client, seeded):
+    """GET /abonnements/quota/{boutique_id} retourne les jours d'essai restants."""
     token = await login(client, seeded["manager_email"], "gerant1234")
     headers = {"Authorization": f"Bearer {token}"}
 
@@ -140,10 +150,12 @@ async def test_quota_boutique(client, seeded):
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["plan"] == "FREE"
-    assert body["quota_par_boutique"] == 20
+    assert body["quota_par_boutique"] == 2147483647
     assert body["ventes_ce_mois"] == 0
-    assert body["ventes_restantes"] == 20
-    assert body["illimite"] is False
+    assert body["ventes_restantes"] is None
+    assert body["illimite"] is True
+    assert isinstance(body["jours_essai_restant"], int)
+    assert 0 <= body["jours_essai_restant"] <= 14
 
 
 @pytest.mark.asyncio
@@ -243,51 +255,44 @@ async def test_downgrade_protege_trop_boutiques(client, seeded):
 
 
 @pytest.mark.asyncio
-async def test_downgrade_protege_trop_ventes(client, seeded):
-    """Impossible de redescendre en FREE si une boutique a > 20 ventes ce mois."""
+async def test_downgrade_free_inactif_essai_unique(client, seeded):
+    """Après avoir quitté FREE, un retour à FREE désactive l'abonnement."""
     token = await login(client, seeded["owner_email"], "boss1234")
     headers = {"Authorization": f"Bearer {token}"}
 
-    # Passer BOUTIQUE pour pouvoir pousser > 20 ventes
+    # Passer BOUTIQUE puis revenir à FREE
     await client.post("/api/v1/abonnements/upgrade", json={"plan": "BOUTIQUE"}, headers=headers)
-
-    # Pousser 21 ventes
-    for i in range(21):
-        resp = await client.post(
-            "/api/v1/sync/push",
-            json=_vente(seeded["boutique_id"], seeded["produit_id"], f"downgrade-test-{i}"),
-            headers=headers,
-        )
-        assert resp.status_code == 200, f"vente {i} refusée: {resp.text}"
-
-    # Downgrade vers FREE → bloqué (409) car 21 > 20
-    r = await client.post(
-        "/api/v1/abonnements/upgrade",
-        json={"plan": "FREE"},
-        headers=headers,
-    )
-    assert r.status_code == 409, r.text
-    assert r.json()["detail"]["code"] == "DOWNGRADE_VENTES"
-
-
-@pytest.mark.asyncio
-async def test_downgrade_autorise_sans_surplus(client, seeded):
-    """Downgrade FREE autorisé si 1 boutique et ventes ≤ 20."""
-    token = await login(client, seeded["owner_email"], "boss1234")
-    headers = {"Authorization": f"Bearer {token}"}
-
-    # Passer BOUTIQUE (1 seule boutique, 0 ventes)
-    await client.post("/api/v1/abonnements/upgrade", json={"plan": "BOUTIQUE"}, headers=headers)
-
-    # Downgrade → autorisé
     r = await client.post(
         "/api/v1/abonnements/upgrade",
         json={"plan": "FREE"},
         headers=headers,
     )
     assert r.status_code == 200, r.text
-    assert r.json()["plan"] == "FREE"
-    assert r.json()["quota_ventes_par_boutique"] == 20
+    body = r.json()
+    assert body["plan"] == "FREE"
+    assert body["actif"] is False
+
+
+@pytest.mark.asyncio
+async def test_downgrade_autorise_mais_inactif(client, seeded):
+    """Downgrade vers FREE autorisé mais désactivé (essai déjà utilisé)."""
+    token = await login(client, seeded["owner_email"], "boss1234")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Passer BOUTIQUE (1 seule boutique, 0 ventes)
+    await client.post("/api/v1/abonnements/upgrade", json={"plan": "BOUTIQUE"}, headers=headers)
+
+    # Downgrade → autorisé mais inactif
+    r = await client.post(
+        "/api/v1/abonnements/upgrade",
+        json={"plan": "FREE"},
+        headers=headers,
+    )
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["plan"] == "FREE"
+    assert body["quota_ventes_par_boutique"] == 2147483647
+    assert body["actif"] is False
 
 
 @pytest.mark.asyncio

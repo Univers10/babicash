@@ -1,6 +1,6 @@
 """Service de gestion des abonnements et quotas freemium (multi-boutique)."""
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from fastapi import HTTPException, status
@@ -15,13 +15,14 @@ _UNLIMITED = 2_147_483_647  # sentinel pour "illimité"
 PLAN_CATALOG: dict[str, dict] = {
     "FREE": {
         "prix_base": Decimal("0.00"),
-        "quota_ventes": 20,
+        "quota_ventes": _UNLIMITED,
+        "duree_essai_jours": 14,
         "nb_boutiques_max": 1,
         "nb_gerants_max": 1,
     },
     "KIOSQUE": {
         "prix_base": Decimal("2000.00"),
-        "quota_ventes": 200,
+        "quota_ventes": 10_000,
         "nb_boutiques_max": 1,
         "nb_gerants_max": 1,
     },
@@ -62,8 +63,8 @@ def _maintenant() -> datetime:
 
 
 def _est_expire(abo: Abonnement) -> bool:
-    """Vérifie si l'abonnement payant a une date d'expiration dépassée."""
-    if abo.plan == "FREE" or not abo.actif or abo.date_fin is None:
+    """Vérifie si l'abonnement a une date d'expiration dépassée."""
+    if not abo.actif or abo.date_fin is None:
         return False
     now = _maintenant()
     df = abo.date_fin
@@ -120,6 +121,8 @@ async def get_or_create_abonnement(
 
     if abo is None:
         cfg = PLAN_CATALOG["FREE"]
+        now = _maintenant()
+        fin_essai = now + timedelta(days=cfg["duree_essai_jours"])
         abo = Abonnement(
             proprietaire_id=proprietaire_id,
             plan="FREE",
@@ -127,6 +130,8 @@ async def get_or_create_abonnement(
             quota_ventes_par_boutique=cfg["quota_ventes"],
             nb_boutiques_max=cfg["nb_boutiques_max"],
             nb_gerants_max=cfg["nb_gerants_max"],
+            date_fin=fin_essai,
+            actif=True,
         )
         db.add(abo)
         await db.flush()
@@ -209,6 +214,10 @@ async def verifier_quota(
     if not abo.actif:
         return False, abo, ventes_mois
 
+    # Essai gratuit : autorisé pendant la durée de l'essai
+    if abo.plan == "FREE":
+        return True, abo, ventes_mois
+
     autorise = (ventes_mois + nb_nouvelles_ventes) <= abo.quota_ventes_par_boutique
 
     return autorise, abo, ventes_mois
@@ -270,13 +279,22 @@ async def upgrader_plan(
                     },
                 )
 
+    ancien_plan = abo.plan
+
     abo.plan = plan
     abo.prix_base = cfg["prix_base"]
     abo.quota_ventes_par_boutique = cfg["quota_ventes"]
     abo.nb_boutiques_max = cfg["nb_boutiques_max"]
     abo.nb_gerants_max = cfg["nb_gerants_max"]
-    abo.date_fin = date_fin
-    abo.actif = True
+
+    # L'essai gratuit n'est utilisable qu'une fois ; un retour à FREE est inactif.
+    if plan == "FREE" and ancien_plan != "FREE":
+        abo.date_fin = _maintenant()
+        abo.actif = False
+    else:
+        abo.date_fin = date_fin
+        abo.actif = True
+
     await db.commit()
     await db.refresh(abo)
     return abo
