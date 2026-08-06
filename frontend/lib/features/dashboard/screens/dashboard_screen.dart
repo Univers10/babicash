@@ -1,44 +1,23 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../../core/errors/app_exception.dart';
-import '../../../core/network/api_client.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../shared/widgets/amount_text.dart';
 import '../../../shared/widgets/menu_button.dart';
-
-// ── Providers données dashboard ───────────────────────────────────────────────
-
-final _consolideProvider = FutureProvider.family<Map<String, dynamic>?, String>(
-  (ref, granularite) async {
-    final user = ref.watch(authStateProvider).value;
-    if (user == null || !user.isOwner) return null;
-    final dio = ref.watch(dioProvider);
-    try {
-      final resp = await dio.get(
-        '/dashboard/consolide',
-        queryParameters: {'granularite': granularite},
-      );
-      return resp.data as Map<String, dynamic>;
-    } on DioException catch (e) {
-      throw mapDioError(e);
-    }
-  },
-);
-
-final _granulariteProvider = StateProvider<String>((_) => 'mois');
+import '../providers/dashboard_provider.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final granularite = ref.watch(_granulariteProvider);
-    final consolideAsync = ref.watch(_consolideProvider(granularite));
+    final granularite = ref.watch(dashboardGranulariteProvider);
+    final consolideAsync = ref.watch(dashboardConsolideProvider(granularite));
     final user = ref.watch(authStateProvider).value;
 
     return Scaffold(
@@ -60,7 +39,7 @@ class DashboardScreen extends ConsumerWidget {
             child: _PeriodeSelector(
               selected: granularite,
               onChanged: (v) =>
-                  ref.read(_granulariteProvider.notifier).state = v,
+                  ref.read(dashboardGranulariteProvider.notifier).state = v,
             ),
           ),
         ],
@@ -82,7 +61,7 @@ class DashboardScreen extends ConsumerWidget {
                     textAlign: TextAlign.center),
                 const VGap(AppSpacing.lg),
                 TextButton.icon(
-                  onPressed: () => ref.invalidate(_consolideProvider),
+                  onPressed: () => ref.invalidate(dashboardConsolideProvider),
                   icon: const Icon(Symbols.refresh),
                   label: const Text('Réessayer'),
                 ),
@@ -130,6 +109,13 @@ class _DashboardBody extends StatelessWidget {
     final margeTotal = _parseDouble(data['marge_totale']);
     final nbVentes = _parseInt(data['nb_ventes_total']);
 
+    final totalStock = boutiques.fold<double>(
+        0,
+        (s, b) =>
+            s + _parseDouble((b['stock']?['valeur_stock_fcfa'])));
+    final totalDettes = boutiques.fold<double>(
+        0, (s, b) => s + _parseDouble(b['dettes']?['total_dettes']));
+
     return RefreshIndicator(
       onRefresh: () async {},
       child: ListView(
@@ -140,6 +126,8 @@ class _DashboardBody extends StatelessWidget {
             ca: caTotal,
             marge: margeTotal,
             nbVentes: nbVentes,
+            stockValue: totalStock,
+            dettes: totalDettes,
           ),
           const VGap(AppSpacing.xl),
 
@@ -167,10 +155,14 @@ class _HeroBanner extends StatelessWidget {
     required this.ca,
     required this.marge,
     required this.nbVentes,
+    required this.stockValue,
+    required this.dettes,
   });
   final double ca;
   final double marge;
   final int nbVentes;
+  final double stockValue;
+  final double dettes;
 
   @override
   Widget build(BuildContext context) {
@@ -209,6 +201,22 @@ class _HeroBanner extends StatelessWidget {
                 label: 'Ventes',
                 value: '$nbVentes',
                 icon: Symbols.receipt,
+              ),
+            ],
+          ),
+          const VGap(AppSpacing.md),
+          Row(
+            children: [
+              _MiniKpi(
+                label: 'Valeur stock',
+                value: AmountText.format(stockValue),
+                icon: Symbols.inventory_2,
+              ),
+              const HGap(AppSpacing.xl),
+              _MiniKpi(
+                label: 'Dettes',
+                value: AmountText.format(dettes),
+                icon: Symbols.account_balance,
               ),
             ],
           ),
@@ -257,66 +265,127 @@ class _BoutiqueCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final id = boutique['boutique_id'] as String? ?? '';
     final nom = boutique['boutique_nom'] as String? ?? '—';
     final ca = _parseDouble(boutique['chiffre_affaires']);
     final marge = _parseDouble(boutique['marge_nette']);
     final nbVentes = _parseInt(boutique['nb_ventes']);
+    final soldeNet = _parseDouble(boutique['caisse']?['solde_net']);
+    final valeurStock = _parseDouble(boutique['stock']?['valeur_stock_fcfa']);
+    final nbRuptures = _parseInt(boutique['stock']?['nb_ruptures']);
+    final nbAlertes = _parseInt(boutique['stock']?['nb_alertes']);
+    final totalDettes = _parseDouble(boutique['dettes']?['total_dettes']);
 
     return Card(
-      child: Padding(
-        padding: AppSpacing.cardPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primaryContainer,
-                    borderRadius: AppSpacing.borderRadiusMd,
+      clipBehavior: Clip.hardEdge,
+      child: InkWell(
+        onTap: () => context.push('/dashboard/boutique/$id', extra: {'nom': nom}),
+        child: Padding(
+          padding: AppSpacing.cardPadding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: const BoxDecoration(
+                      color: AppColors.primaryContainer,
+                      borderRadius: AppSpacing.borderRadiusMd,
+                    ),
+                    child: const Icon(Symbols.store,
+                        size: 18, color: AppColors.primary),
                   ),
-                  child: const Icon(Symbols.store,
-                      size: 18, color: AppColors.primary),
-                ),
-                const HGap(AppSpacing.md),
-                Expanded(
-                  child: Text(nom,
-                      style: AppTextStyles.headlineSmall,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
-                ),
-                Text(
-                  '$nbVentes vente${nbVentes > 1 ? 's' : ''}',
-                  style: AppTextStyles.caption,
-                ),
-              ],
-            ),
-            const VGap(AppSpacing.md),
-            const Divider(height: 1),
-            const VGap(AppSpacing.md),
-            Row(
-              children: [
-                Expanded(
-                  child: _KpiCell(
-                    label: 'CA',
-                    value: AmountText.format(ca),
-                    color: AppColors.primary,
+                  const HGap(AppSpacing.md),
+                  Expanded(
+                    child: Text(nom,
+                        style: AppTextStyles.headlineSmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
                   ),
-                ),
-                Expanded(
-                  child: _KpiCell(
-                    label: 'Marge nette',
-                    value: AmountText.format(marge),
-                    color: marge >= 0
-                        ? AppColors.success
-                        : AppColors.error,
+                  Text(
+                    '$nbVentes vente${nbVentes > 1 ? 's' : ''}',
+                    style: AppTextStyles.caption,
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+              const VGap(AppSpacing.md),
+              const Divider(height: 1),
+              const VGap(AppSpacing.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: _KpiCell(
+                      label: 'CA',
+                      value: AmountText.format(ca),
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  Expanded(
+                    child: _KpiCell(
+                      label: 'Marge nette',
+                      value: AmountText.format(marge),
+                      color: marge >= 0
+                          ? AppColors.success
+                          : AppColors.error,
+                    ),
+                  ),
+                ],
+              ),
+              const VGap(AppSpacing.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: _KpiCell(
+                      label: 'Solde net',
+                      value: AmountText.format(soldeNet),
+                      color: soldeNet >= 0
+                          ? AppColors.success
+                          : AppColors.error,
+                    ),
+                  ),
+                  Expanded(
+                    child: _KpiCell(
+                      label: 'Valeur stock',
+                      value: AmountText.format(valeurStock),
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+              const VGap(AppSpacing.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: _KpiCell(
+                      label: 'Ruptures',
+                      value: '$nbRuptures',
+                      color: nbRuptures > 0
+                          ? AppColors.error
+                          : AppColors.success,
+                    ),
+                  ),
+                  Expanded(
+                    child: _KpiCell(
+                      label: 'Alertes',
+                      value: '$nbAlertes',
+                      color: nbAlertes > 0
+                          ? AppColors.warning
+                          : AppColors.success,
+                    ),
+                  ),
+                  Expanded(
+                    child: _KpiCell(
+                      label: 'Dettes',
+                      value: AmountText.format(totalDettes),
+                      color: AppColors.brown,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
