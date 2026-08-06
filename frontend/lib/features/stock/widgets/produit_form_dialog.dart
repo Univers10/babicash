@@ -1,8 +1,10 @@
 import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/local/database.dart';
@@ -35,6 +37,7 @@ class _ProduitFormDialogState extends ConsumerState<ProduitFormDialog> {
   // Préchargée depuis le produit en édition (P3) ; `null` = « Sans catégorie ».
   late String? _categorieId = widget.produit?.categorieId;
   bool _isLoading = false;
+  bool _isDeleting = false;
 
   // Image : octets fraîchement choisis (à uploader) et indicateur de retrait.
   Uint8List? _pickedBytes;
@@ -105,6 +108,55 @@ class _ProduitFormDialogState extends ConsumerState<ProduitFormDialog> {
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _delete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Supprimer le produit'),
+        content: const Text(
+          'Cette action est irréversible. Le produit ne peut être supprimé que s\'il n\'a jamais été vendu.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text(
+              'Supprimer',
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _isDeleting = true);
+    try {
+      await ref
+          .read(produitsCrudProvider.notifier)
+          .deleteProduit(widget.produit!.id);
+      ref.invalidate(stockProvider);
+      if (mounted) {
+        Navigator.of(context).pop(true);
+        AppSnackbar.success(context, 'Produit supprimé.');
+      }
+    } on DioException catch (e) {
+      final message = e.response?.statusCode == 409
+          ? 'Impossible de supprimer ce produit car il a déjà été vendu.'
+          : 'Erreur lors de la suppression du produit.';
+      if (mounted) AppSnackbar.error(context, message);
+    } catch (e) {
+      if (mounted) {
+        AppSnackbar.error(context, 'Erreur lors de la suppression du produit.');
+      }
+    } finally {
+      if (mounted) setState(() => _isDeleting = false);
     }
   }
 
@@ -219,11 +271,27 @@ class _ProduitFormDialogState extends ConsumerState<ProduitFormDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+          onPressed: _isLoading || _isDeleting
+              ? null
+              : () => Navigator.of(context).pop(),
           child: const Text('Annuler'),
         ),
+        if (widget.produit != null)
+          TextButton(
+            onPressed: _isLoading || _isDeleting ? null : _delete,
+            child: _isDeleting
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text(
+                    'Supprimer',
+                    style: TextStyle(color: AppColors.error),
+                  ),
+          ),
         FilledButton.icon(
-          onPressed: _isLoading ? null : _submit,
+          onPressed: _isLoading || _isDeleting ? null : _submit,
           icon: _isLoading
               ? const SizedBox(
                   width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))

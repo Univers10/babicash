@@ -7,14 +7,20 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/local/database.dart';
 import '../../../shared/images/media_url.dart';
+import '../../../shared/utils/categorie_utils.dart';
 import '../../../shared/widgets/amount_text.dart';
 import '../utils/categorie_couleur.dart';
 import 'mouvement_stock_dialog.dart';
 import 'produit_form_dialog.dart';
 
 class ProduitCard extends ConsumerWidget {
-  const ProduitCard({super.key, required this.produit});
+  const ProduitCard({
+    super.key,
+    required this.produit,
+    this.categorieNom,
+  });
   final LocalProduit produit;
+  final String? categorieNom;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,9 +32,10 @@ class ProduitCard extends ConsumerWidget {
     if (enRupture) { stockColor = AppColors.error; }
     else if (enAlerte) { stockColor = AppColors.warning; }
 
-    // S5 : la carte reprend la couleur de la catégorie (bordure + pastille).
+    // S5 : pastille de couleur de la catégorie (plus de bande latérale).
     final couleurCategorie = CategorieCouleur.pour(produit.categorieId);
     final imageUrl = absoluteMediaUrl(ref.watch(apiOriginProvider), produit.imageUrl);
+    final labelCategorie = categorieNom ?? sansCategorieLabel;
 
     return Card(
       clipBehavior: Clip.hardEdge,
@@ -37,62 +44,66 @@ class ProduitCard extends ConsumerWidget {
           context: context,
           builder: (_) => ProduitFormDialog(produit: produit),
         ),
-        child: IntrinsicHeight(
+        child: Padding(
+          padding: AppSpacing.cardPadding,
           child: Row(
             children: [
-              // Bordure latérale à la couleur de la catégorie
-              Container(width: 4, color: couleurCategorie),
-              Expanded(
-                child: Padding(
-                  padding: AppSpacing.cardPadding,
-                  child: Row(
-                    children: [
-                      // Image produit (ou pastille catégorie en repli)
-                      ClipRRect(
-                        borderRadius: AppSpacing.borderRadiusMd,
-                        child: Container(
+              // Image produit (ou pastille catégorie en repli)
+              ClipRRect(
+                borderRadius: AppSpacing.borderRadiusMd,
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  color: couleurCategorie.withValues(alpha: 0.14),
+                  child: imageUrl.isEmpty
+                      ? Icon(Symbols.inventory_2,
+                          color: couleurCategorie, size: 22)
+                      : CachedNetworkImage(
+                          imageUrl: imageUrl,
                           width: 44,
                           height: 44,
-                          color: couleurCategorie.withValues(alpha: 0.14),
-                          child: imageUrl.isEmpty
-                              ? Icon(Symbols.inventory_2,
-                                  color: couleurCategorie, size: 22)
-                              : CachedNetworkImage(
-                                  imageUrl: imageUrl,
-                                  width: 44,
-                                  height: 44,
-                                  fit: BoxFit.cover,
-                                  placeholder: (_, __) => Icon(
-                                      Symbols.inventory_2,
-                                      color: couleurCategorie,
-                                      size: 22),
-                                  errorWidget: (_, __, ___) => Icon(
-                                      Symbols.inventory_2,
-                                      color: couleurCategorie,
-                                      size: 22),
-                                ),
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => Icon(
+                              Symbols.inventory_2,
+                              color: couleurCategorie,
+                              size: 22),
+                          errorWidget: (_, __, ___) => Icon(
+                              Symbols.inventory_2,
+                              color: couleurCategorie,
+                              size: 22),
                         ),
-                      ),
-                      const HGap(AppSpacing.md),
+                ),
+              ),
+              const HGap(AppSpacing.md),
 
-                      // Infos
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(produit.nom,
-                                style: AppTextStyles.headlineSmall,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis),
-                            const VGap(2),
-                            AmountText(
-                              amount: produit.prixVenteSuggere,
-                              style: AppTextStyles.bodyMedium
-                                  .copyWith(color: AppColors.textSecondary),
-                            ),
-                          ],
-                        ),
+              // Infos
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(produit.nom,
+                        style: AppTextStyles.headlineSmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                    const VGap(2),
+                    Text(
+                      labelCategorie,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const VGap(2),
+                    AmountText(
+                      amount: produit.prixVenteSuggere,
+                      style: AppTextStyles.bodyMedium
+                          .copyWith(color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
 
                       // Stock badge
                       Container(
@@ -139,10 +150,6 @@ class ProduitCard extends ConsumerWidget {
                   ),
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
+            );
   }
 }
