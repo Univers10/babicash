@@ -46,6 +46,7 @@ _$QuotaInfoImpl _$$QuotaInfoImplFromJson(Map<String, dynamic> json) =>
       quotaParBoutique: (json['quota_par_boutique'] as num).toInt(),
       ventesCeMois: (json['ventes_ce_mois'] as num?)?.toInt() ?? 0,
       ventesRestantes: (json['ventes_restantes'] as num?)?.toInt(),
+      joursEssaiRestant: (json['jours_essai_restant'] as num?)?.toInt(),
       illimite: json['illimite'] as bool? ?? false,
     );
 
@@ -56,6 +57,7 @@ Map<String, dynamic> _$$QuotaInfoImplToJson(_$QuotaInfoImpl instance) =>
       'quota_par_boutique': instance.quotaParBoutique,
       'ventes_ce_mois': instance.ventesCeMois,
       'ventes_restantes': instance.ventesRestantes,
+      'jours_essai_restant': instance.joursEssaiRestant,
       'illimite': instance.illimite,
     };
 

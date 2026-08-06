@@ -255,6 +255,9 @@ async def consolide_owner(
 
     for b in boutiques:
         r = await chiffre_affaires(db, b.id, granularite)
+        caisse = await resume_caisse(db, b.id, granularite)
+        stock = await etat_stock(db, b.id)
+        dettes_b = await dettes(db, b.id)
         ca_total += r["chiffre_affaires"]
         marge_totale += r["marge_nette"]
         nb_ventes_total += r["nb_ventes"]
@@ -265,6 +268,20 @@ async def consolide_owner(
                 "chiffre_affaires": r["chiffre_affaires"],
                 "marge_nette": r["marge_nette"],
                 "nb_ventes": r["nb_ventes"],
+                "caisse": {
+                    "recettes_ventes": caisse["recettes_ventes"],
+                    "depenses": caisse["depenses"],
+                    "solde_net": caisse["solde_net"],
+                },
+                "stock": {
+                    "nb_references": stock["nb_references"],
+                    "valeur_stock_fcfa": stock["valeur_stock_fcfa"],
+                    "nb_ruptures": stock["nb_ruptures"],
+                    "nb_alertes": stock["nb_alertes"],
+                },
+                "dettes": {
+                    "total_dettes": dettes_b["total_dettes"],
+                },
             }
         )
 

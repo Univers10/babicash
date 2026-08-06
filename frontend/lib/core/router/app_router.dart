@@ -14,6 +14,7 @@ import '../../features/sessions/screens/session_detail_screen.dart';
 import '../../features/sessions/screens/session_history_screen.dart';
 import '../../features/sessions/screens/sessions_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
+import '../../features/dashboard/screens/boutique_performance_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/ventes/screens/historique_screen.dart';
 import '../../shared/screens/shell_screen.dart';
@@ -32,6 +33,7 @@ abstract final class AppRoutes {
   static const sessions = '/sessions';
   static const sessionsHistorique = '/sessions/historique';
   static const dashboard = '/dashboard';
+  static const boutiquePerformance = '/dashboard/boutique/:id';
   static const historique = '/historique';
   static const abonnement = '/abonnement';
 }
@@ -121,6 +123,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.dashboard,
             builder: (_, __) => const DashboardScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.boutiquePerformance,
+            builder: (_, state) => BoutiquePerformanceScreen(
+              boutiqueId: state.pathParameters['id']!,
+            ),
           ),
           GoRoute(
             path: AppRoutes.historique,

@@ -42,7 +42,7 @@ const kPlansCatalog = [
     prixMensuel: 0,
     icon: Symbols.storefront,
     features: [
-      '20 ventes par mois',
+      '14 jours d\'essai gratuit',
       '1 boutique',
       '1 gérant',
       'Gestion de stock de base',
@@ -57,7 +57,7 @@ const kPlansCatalog = [
     prixMensuel: 2000,
     icon: Symbols.store,
     features: [
-      '200 ventes par mois',
+      '10 000 ventes par mois',
       '1 boutique',
       '1 gérant',
       'Stock et catégories illimités',

@@ -34,6 +34,14 @@ class _StockScreenState extends ConsumerState<StockScreen> {
   String? _selectedCatId;
   bool _isGridView = false;
 
+  String _nomCategorie(LocalProduit p, List<LocalCategory> cats) {
+    if (p.categorieId == null) return sansCategorieLabel;
+    for (final c in cats) {
+      if (c.id == p.categorieId) return c.nom;
+    }
+    return sansCategorieLabel;
+  }
+
   @override
   Widget build(BuildContext context) {
     final stockAsync = ref.watch(stockProvider);
@@ -327,7 +335,10 @@ class _StockScreenState extends ConsumerState<StockScreen> {
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
               itemCount: produits.length,
               separatorBuilder: (_, __) => const VGap(AppSpacing.sm),
-              itemBuilder: (_, i) => ProduitCard(produit: produits[i]),
+              itemBuilder: (_, i) => ProduitCard(
+                produit: produits[i],
+                categorieNom: _nomCategorie(produits[i], cats),
+              ),
             );
     }
 
@@ -349,7 +360,10 @@ class _StockScreenState extends ConsumerState<StockScreen> {
             for (final p in groupe.produits)
               Padding(
                 padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                child: ProduitCard(produit: p),
+                child: ProduitCard(
+                produit: p,
+                categorieNom: groupe.nom,
+              ),
               ),
         ],
       ],

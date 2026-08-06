@@ -208,8 +208,29 @@ class _PosTopBar extends StatelessWidget {
           quotaAsync.when(
             data: (info) {
               if (info == null) return const SizedBox.shrink();
-              final reste = info.ventesRestantes ?? 0;
+              final joursEssai = info.joursEssaiRestant;
+              if (joursEssai != null) {
+                return Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: joursEssai <= 2
+                        ? AppColors.error
+                        : AppColors.accent,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '$joursEssai j',
+                    style: TextStyle(
+                      color: joursEssai <= 2 ? Colors.white : AppColors.brown,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                );
+              }
               if (info.illimite) return const SizedBox.shrink();
+              final reste = info.ventesRestantes ?? 0;
               return Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

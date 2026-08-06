@@ -612,6 +612,46 @@ class _QuotaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final joursEssai = quota.joursEssaiRestant;
+    if (joursEssai != null) {
+      final color = joursEssai <= 2 ? AppColors.error : AppColors.success;
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: AppSpacing.borderRadiusLg,
+          border: Border.all(color: AppColors.borderLight),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Symbols.timer, size: 18, color: color),
+                const SizedBox(width: 8),
+                const Text('Essai gratuit', style: AppTextStyles.labelMedium),
+                const Spacer(),
+                Text(
+                  '$joursEssai jour${joursEssai > 1 ? 's' : ''}',
+                  style: AppTextStyles.labelLarge.copyWith(color: color),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: (14 - joursEssai).clamp(0, 14) / 14,
+                minHeight: 6,
+                backgroundColor: color.withValues(alpha: 0.12),
+                valueColor: AlwaysStoppedAnimation(color),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     final pct = quota.illimite
         ? 1.0
         : (quota.quotaParBoutique > 0 ? quota.ventesCeMois / quota.quotaParBoutique : 0.0).clamp(0.0, 1.0);

@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.access import get_authorized_boutique
 from app.core.db import get_db
 from app.deps import get_current_user, require_owner
-from app.models import Produit
+from app.models import LigneVente, Produit
 from app.schemas.auth import CurrentUser
 from app.schemas.crud import ProduitCreate, ProduitOut, ProduitUpdate
 
@@ -97,5 +97,17 @@ async def delete_produit(
     db: AsyncSession = Depends(get_db),
 ) -> None:
     produit = await _get_produit_owned(db, current_user, produit_id)
+
+    vente_liee = (
+        await db.execute(
+            select(LigneVente).where(LigneVente.produit_id == produit_id).limit(1)
+        )
+    ).scalar_one_or_none()
+    if vente_liee is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Impossible de supprimer ce produit car il a déjà été vendu.",
+        )
+
     await db.delete(produit)
     await db.commit()

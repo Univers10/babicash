@@ -14,6 +14,7 @@ import '../../../features/settings/models/receipt_config.dart';
 import '../../../features/settings/providers/receipt_config_provider.dart';
 import '../../../shared/images/media_url.dart';
 import '../../../shared/widgets/amount_text.dart';
+import '../../../shared/widgets/menu_button.dart';
 
 // ── Provider ─────────────────────────────────────────────────────────────────
 
@@ -300,10 +301,12 @@ class _HistoriqueScreenState extends ConsumerState<HistoriqueScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: const MenuButton(),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         title: const Text('Historique des ventes',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            style: TextStyle(
+                fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
         centerTitle: false,
         actions: [
           if (hasFiltre)
