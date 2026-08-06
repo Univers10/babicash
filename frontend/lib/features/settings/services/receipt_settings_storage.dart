@@ -3,12 +3,11 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../models/receipt_config.dart';
 
-/// Persistance de la personnalisation du reçu.
+/// Ancien stockage de la personnalisation du reçu (`flutter_secure_storage`).
 ///
-/// Réutilise le mécanisme de stockage déjà présent dans le projet
-/// (`flutter_secure_storage`, cf. [PrinterSettingsStorage]) — aucune
-/// modification du schéma Drift ni du backend. La config est disponible
-/// hors-ligne : le reçu s'imprime sans appel réseau.
+/// Conservé uniquement pour la **migration unique** vers Drift + backend :
+/// [RecuConfigRepository.load] importe cette valeur héritée puis appelle
+/// [clear]. Ne plus utiliser pour de nouvelles écritures.
 class ReceiptSettingsStorage {
   const ReceiptSettingsStorage(this._storage);
 

@@ -4,10 +4,6 @@
 /// Google Cloud Console (pas le client Android). C'est aussi la valeur de
 /// GOOGLE_CLIENT_ID côté backend — le `aud` du token émis correspond au
 /// client Web.
-///
-/// Apple : le [appleServiceId] est un "Services ID" créé dans le portail
-/// Apple Developer avec "Sign in with Apple" activé, configuré avec le
-/// domaine et la [appleRedirectUri] exacte (flux web, pas d'app iOS).
 class OAuthConfig {
   OAuthConfig._();
 

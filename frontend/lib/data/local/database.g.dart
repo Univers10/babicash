@@ -3523,6 +3523,525 @@ class LocalMouvementsStockCompanion
   }
 }
 
+class $LocalRecuConfigsTable extends LocalRecuConfigs
+    with TableInfo<$LocalRecuConfigsTable, LocalRecuConfig> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalRecuConfigsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _boutiqueIdMeta =
+      const VerificationMeta('boutiqueId');
+  @override
+  late final GeneratedColumn<String> boutiqueId = GeneratedColumn<String>(
+      'boutique_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nomBoutiqueMeta =
+      const VerificationMeta('nomBoutique');
+  @override
+  late final GeneratedColumn<String> nomBoutique = GeneratedColumn<String>(
+      'nom_boutique', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _adresseMeta =
+      const VerificationMeta('adresse');
+  @override
+  late final GeneratedColumn<String> adresse = GeneratedColumn<String>(
+      'adresse', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _telephoneMeta =
+      const VerificationMeta('telephone');
+  @override
+  late final GeneratedColumn<String> telephone = GeneratedColumn<String>(
+      'telephone', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _enteteMeta = const VerificationMeta('entete');
+  @override
+  late final GeneratedColumn<String> entete = GeneratedColumn<String>(
+      'entete', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _piedMessageMeta =
+      const VerificationMeta('piedMessage');
+  @override
+  late final GeneratedColumn<String> piedMessage = GeneratedColumn<String>(
+      'pied_message', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('Merci pour votre achat !'));
+  static const VerificationMeta _afficherLogoMeta =
+      const VerificationMeta('afficherLogo');
+  @override
+  late final GeneratedColumn<bool> afficherLogo = GeneratedColumn<bool>(
+      'afficher_logo', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("afficher_logo" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  static const VerificationMeta _afficherVendeurMeta =
+      const VerificationMeta('afficherVendeur');
+  @override
+  late final GeneratedColumn<bool> afficherVendeur = GeneratedColumn<bool>(
+      'afficher_vendeur', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("afficher_vendeur" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _syncedMeta = const VerificationMeta('synced');
+  @override
+  late final GeneratedColumn<bool> synced = GeneratedColumn<bool>(
+      'synced', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("synced" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  @override
+  List<GeneratedColumn> get $columns => [
+        boutiqueId,
+        nomBoutique,
+        adresse,
+        telephone,
+        entete,
+        piedMessage,
+        afficherLogo,
+        afficherVendeur,
+        updatedAt,
+        synced
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_recu_configs';
+  @override
+  VerificationContext validateIntegrity(Insertable<LocalRecuConfig> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('boutique_id')) {
+      context.handle(
+          _boutiqueIdMeta,
+          boutiqueId.isAcceptableOrUnknown(
+              data['boutique_id']!, _boutiqueIdMeta));
+    } else if (isInserting) {
+      context.missing(_boutiqueIdMeta);
+    }
+    if (data.containsKey('nom_boutique')) {
+      context.handle(
+          _nomBoutiqueMeta,
+          nomBoutique.isAcceptableOrUnknown(
+              data['nom_boutique']!, _nomBoutiqueMeta));
+    }
+    if (data.containsKey('adresse')) {
+      context.handle(_adresseMeta,
+          adresse.isAcceptableOrUnknown(data['adresse']!, _adresseMeta));
+    }
+    if (data.containsKey('telephone')) {
+      context.handle(_telephoneMeta,
+          telephone.isAcceptableOrUnknown(data['telephone']!, _telephoneMeta));
+    }
+    if (data.containsKey('entete')) {
+      context.handle(_enteteMeta,
+          entete.isAcceptableOrUnknown(data['entete']!, _enteteMeta));
+    }
+    if (data.containsKey('pied_message')) {
+      context.handle(
+          _piedMessageMeta,
+          piedMessage.isAcceptableOrUnknown(
+              data['pied_message']!, _piedMessageMeta));
+    }
+    if (data.containsKey('afficher_logo')) {
+      context.handle(
+          _afficherLogoMeta,
+          afficherLogo.isAcceptableOrUnknown(
+              data['afficher_logo']!, _afficherLogoMeta));
+    }
+    if (data.containsKey('afficher_vendeur')) {
+      context.handle(
+          _afficherVendeurMeta,
+          afficherVendeur.isAcceptableOrUnknown(
+              data['afficher_vendeur']!, _afficherVendeurMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    if (data.containsKey('synced')) {
+      context.handle(_syncedMeta,
+          synced.isAcceptableOrUnknown(data['synced']!, _syncedMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {boutiqueId};
+  @override
+  LocalRecuConfig map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalRecuConfig(
+      boutiqueId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}boutique_id'])!,
+      nomBoutique: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}nom_boutique'])!,
+      adresse: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}adresse'])!,
+      telephone: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}telephone'])!,
+      entete: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}entete'])!,
+      piedMessage: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}pied_message'])!,
+      afficherLogo: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}afficher_logo'])!,
+      afficherVendeur: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}afficher_vendeur'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      synced: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}synced'])!,
+    );
+  }
+
+  @override
+  $LocalRecuConfigsTable createAlias(String alias) {
+    return $LocalRecuConfigsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalRecuConfig extends DataClass implements Insertable<LocalRecuConfig> {
+  final String boutiqueId;
+  final String nomBoutique;
+  final String adresse;
+  final String telephone;
+  final String entete;
+  final String piedMessage;
+  final bool afficherLogo;
+  final bool afficherVendeur;
+  final DateTime updatedAt;
+  final bool synced;
+  const LocalRecuConfig(
+      {required this.boutiqueId,
+      required this.nomBoutique,
+      required this.adresse,
+      required this.telephone,
+      required this.entete,
+      required this.piedMessage,
+      required this.afficherLogo,
+      required this.afficherVendeur,
+      required this.updatedAt,
+      required this.synced});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['boutique_id'] = Variable<String>(boutiqueId);
+    map['nom_boutique'] = Variable<String>(nomBoutique);
+    map['adresse'] = Variable<String>(adresse);
+    map['telephone'] = Variable<String>(telephone);
+    map['entete'] = Variable<String>(entete);
+    map['pied_message'] = Variable<String>(piedMessage);
+    map['afficher_logo'] = Variable<bool>(afficherLogo);
+    map['afficher_vendeur'] = Variable<bool>(afficherVendeur);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['synced'] = Variable<bool>(synced);
+    return map;
+  }
+
+  LocalRecuConfigsCompanion toCompanion(bool nullToAbsent) {
+    return LocalRecuConfigsCompanion(
+      boutiqueId: Value(boutiqueId),
+      nomBoutique: Value(nomBoutique),
+      adresse: Value(adresse),
+      telephone: Value(telephone),
+      entete: Value(entete),
+      piedMessage: Value(piedMessage),
+      afficherLogo: Value(afficherLogo),
+      afficherVendeur: Value(afficherVendeur),
+      updatedAt: Value(updatedAt),
+      synced: Value(synced),
+    );
+  }
+
+  factory LocalRecuConfig.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalRecuConfig(
+      boutiqueId: serializer.fromJson<String>(json['boutiqueId']),
+      nomBoutique: serializer.fromJson<String>(json['nomBoutique']),
+      adresse: serializer.fromJson<String>(json['adresse']),
+      telephone: serializer.fromJson<String>(json['telephone']),
+      entete: serializer.fromJson<String>(json['entete']),
+      piedMessage: serializer.fromJson<String>(json['piedMessage']),
+      afficherLogo: serializer.fromJson<bool>(json['afficherLogo']),
+      afficherVendeur: serializer.fromJson<bool>(json['afficherVendeur']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      synced: serializer.fromJson<bool>(json['synced']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'boutiqueId': serializer.toJson<String>(boutiqueId),
+      'nomBoutique': serializer.toJson<String>(nomBoutique),
+      'adresse': serializer.toJson<String>(adresse),
+      'telephone': serializer.toJson<String>(telephone),
+      'entete': serializer.toJson<String>(entete),
+      'piedMessage': serializer.toJson<String>(piedMessage),
+      'afficherLogo': serializer.toJson<bool>(afficherLogo),
+      'afficherVendeur': serializer.toJson<bool>(afficherVendeur),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'synced': serializer.toJson<bool>(synced),
+    };
+  }
+
+  LocalRecuConfig copyWith(
+          {String? boutiqueId,
+          String? nomBoutique,
+          String? adresse,
+          String? telephone,
+          String? entete,
+          String? piedMessage,
+          bool? afficherLogo,
+          bool? afficherVendeur,
+          DateTime? updatedAt,
+          bool? synced}) =>
+      LocalRecuConfig(
+        boutiqueId: boutiqueId ?? this.boutiqueId,
+        nomBoutique: nomBoutique ?? this.nomBoutique,
+        adresse: adresse ?? this.adresse,
+        telephone: telephone ?? this.telephone,
+        entete: entete ?? this.entete,
+        piedMessage: piedMessage ?? this.piedMessage,
+        afficherLogo: afficherLogo ?? this.afficherLogo,
+        afficherVendeur: afficherVendeur ?? this.afficherVendeur,
+        updatedAt: updatedAt ?? this.updatedAt,
+        synced: synced ?? this.synced,
+      );
+  LocalRecuConfig copyWithCompanion(LocalRecuConfigsCompanion data) {
+    return LocalRecuConfig(
+      boutiqueId:
+          data.boutiqueId.present ? data.boutiqueId.value : this.boutiqueId,
+      nomBoutique:
+          data.nomBoutique.present ? data.nomBoutique.value : this.nomBoutique,
+      adresse: data.adresse.present ? data.adresse.value : this.adresse,
+      telephone: data.telephone.present ? data.telephone.value : this.telephone,
+      entete: data.entete.present ? data.entete.value : this.entete,
+      piedMessage:
+          data.piedMessage.present ? data.piedMessage.value : this.piedMessage,
+      afficherLogo: data.afficherLogo.present
+          ? data.afficherLogo.value
+          : this.afficherLogo,
+      afficherVendeur: data.afficherVendeur.present
+          ? data.afficherVendeur.value
+          : this.afficherVendeur,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      synced: data.synced.present ? data.synced.value : this.synced,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalRecuConfig(')
+          ..write('boutiqueId: $boutiqueId, ')
+          ..write('nomBoutique: $nomBoutique, ')
+          ..write('adresse: $adresse, ')
+          ..write('telephone: $telephone, ')
+          ..write('entete: $entete, ')
+          ..write('piedMessage: $piedMessage, ')
+          ..write('afficherLogo: $afficherLogo, ')
+          ..write('afficherVendeur: $afficherVendeur, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('synced: $synced')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(boutiqueId, nomBoutique, adresse, telephone,
+      entete, piedMessage, afficherLogo, afficherVendeur, updatedAt, synced);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalRecuConfig &&
+          other.boutiqueId == this.boutiqueId &&
+          other.nomBoutique == this.nomBoutique &&
+          other.adresse == this.adresse &&
+          other.telephone == this.telephone &&
+          other.entete == this.entete &&
+          other.piedMessage == this.piedMessage &&
+          other.afficherLogo == this.afficherLogo &&
+          other.afficherVendeur == this.afficherVendeur &&
+          other.updatedAt == this.updatedAt &&
+          other.synced == this.synced);
+}
+
+class LocalRecuConfigsCompanion extends UpdateCompanion<LocalRecuConfig> {
+  final Value<String> boutiqueId;
+  final Value<String> nomBoutique;
+  final Value<String> adresse;
+  final Value<String> telephone;
+  final Value<String> entete;
+  final Value<String> piedMessage;
+  final Value<bool> afficherLogo;
+  final Value<bool> afficherVendeur;
+  final Value<DateTime> updatedAt;
+  final Value<bool> synced;
+  final Value<int> rowid;
+  const LocalRecuConfigsCompanion({
+    this.boutiqueId = const Value.absent(),
+    this.nomBoutique = const Value.absent(),
+    this.adresse = const Value.absent(),
+    this.telephone = const Value.absent(),
+    this.entete = const Value.absent(),
+    this.piedMessage = const Value.absent(),
+    this.afficherLogo = const Value.absent(),
+    this.afficherVendeur = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.synced = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalRecuConfigsCompanion.insert({
+    required String boutiqueId,
+    this.nomBoutique = const Value.absent(),
+    this.adresse = const Value.absent(),
+    this.telephone = const Value.absent(),
+    this.entete = const Value.absent(),
+    this.piedMessage = const Value.absent(),
+    this.afficherLogo = const Value.absent(),
+    this.afficherVendeur = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.synced = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : boutiqueId = Value(boutiqueId);
+  static Insertable<LocalRecuConfig> custom({
+    Expression<String>? boutiqueId,
+    Expression<String>? nomBoutique,
+    Expression<String>? adresse,
+    Expression<String>? telephone,
+    Expression<String>? entete,
+    Expression<String>? piedMessage,
+    Expression<bool>? afficherLogo,
+    Expression<bool>? afficherVendeur,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? synced,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (boutiqueId != null) 'boutique_id': boutiqueId,
+      if (nomBoutique != null) 'nom_boutique': nomBoutique,
+      if (adresse != null) 'adresse': adresse,
+      if (telephone != null) 'telephone': telephone,
+      if (entete != null) 'entete': entete,
+      if (piedMessage != null) 'pied_message': piedMessage,
+      if (afficherLogo != null) 'afficher_logo': afficherLogo,
+      if (afficherVendeur != null) 'afficher_vendeur': afficherVendeur,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (synced != null) 'synced': synced,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalRecuConfigsCompanion copyWith(
+      {Value<String>? boutiqueId,
+      Value<String>? nomBoutique,
+      Value<String>? adresse,
+      Value<String>? telephone,
+      Value<String>? entete,
+      Value<String>? piedMessage,
+      Value<bool>? afficherLogo,
+      Value<bool>? afficherVendeur,
+      Value<DateTime>? updatedAt,
+      Value<bool>? synced,
+      Value<int>? rowid}) {
+    return LocalRecuConfigsCompanion(
+      boutiqueId: boutiqueId ?? this.boutiqueId,
+      nomBoutique: nomBoutique ?? this.nomBoutique,
+      adresse: adresse ?? this.adresse,
+      telephone: telephone ?? this.telephone,
+      entete: entete ?? this.entete,
+      piedMessage: piedMessage ?? this.piedMessage,
+      afficherLogo: afficherLogo ?? this.afficherLogo,
+      afficherVendeur: afficherVendeur ?? this.afficherVendeur,
+      updatedAt: updatedAt ?? this.updatedAt,
+      synced: synced ?? this.synced,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (boutiqueId.present) {
+      map['boutique_id'] = Variable<String>(boutiqueId.value);
+    }
+    if (nomBoutique.present) {
+      map['nom_boutique'] = Variable<String>(nomBoutique.value);
+    }
+    if (adresse.present) {
+      map['adresse'] = Variable<String>(adresse.value);
+    }
+    if (telephone.present) {
+      map['telephone'] = Variable<String>(telephone.value);
+    }
+    if (entete.present) {
+      map['entete'] = Variable<String>(entete.value);
+    }
+    if (piedMessage.present) {
+      map['pied_message'] = Variable<String>(piedMessage.value);
+    }
+    if (afficherLogo.present) {
+      map['afficher_logo'] = Variable<bool>(afficherLogo.value);
+    }
+    if (afficherVendeur.present) {
+      map['afficher_vendeur'] = Variable<bool>(afficherVendeur.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (synced.present) {
+      map['synced'] = Variable<bool>(synced.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalRecuConfigsCompanion(')
+          ..write('boutiqueId: $boutiqueId, ')
+          ..write('nomBoutique: $nomBoutique, ')
+          ..write('adresse: $adresse, ')
+          ..write('telephone: $telephone, ')
+          ..write('entete: $entete, ')
+          ..write('piedMessage: $piedMessage, ')
+          ..write('afficherLogo: $afficherLogo, ')
+          ..write('afficherVendeur: $afficherVendeur, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('synced: $synced, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3537,6 +4056,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LocalTiersTable localTiers = $LocalTiersTable(this);
   late final $LocalMouvementsStockTable localMouvementsStock =
       $LocalMouvementsStockTable(this);
+  late final $LocalRecuConfigsTable localRecuConfigs =
+      $LocalRecuConfigsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3549,7 +4070,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         localDepenses,
         localSessions,
         localTiers,
-        localMouvementsStock
+        localMouvementsStock,
+        localRecuConfigs
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -5518,6 +6040,258 @@ typedef $$LocalMouvementsStockTableProcessedTableManager
         ),
         LocalMouvementsStockData,
         PrefetchHooks Function()>;
+typedef $$LocalRecuConfigsTableCreateCompanionBuilder
+    = LocalRecuConfigsCompanion Function({
+  required String boutiqueId,
+  Value<String> nomBoutique,
+  Value<String> adresse,
+  Value<String> telephone,
+  Value<String> entete,
+  Value<String> piedMessage,
+  Value<bool> afficherLogo,
+  Value<bool> afficherVendeur,
+  Value<DateTime> updatedAt,
+  Value<bool> synced,
+  Value<int> rowid,
+});
+typedef $$LocalRecuConfigsTableUpdateCompanionBuilder
+    = LocalRecuConfigsCompanion Function({
+  Value<String> boutiqueId,
+  Value<String> nomBoutique,
+  Value<String> adresse,
+  Value<String> telephone,
+  Value<String> entete,
+  Value<String> piedMessage,
+  Value<bool> afficherLogo,
+  Value<bool> afficherVendeur,
+  Value<DateTime> updatedAt,
+  Value<bool> synced,
+  Value<int> rowid,
+});
+
+class $$LocalRecuConfigsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalRecuConfigsTable> {
+  $$LocalRecuConfigsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get boutiqueId => $composableBuilder(
+      column: $table.boutiqueId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get nomBoutique => $composableBuilder(
+      column: $table.nomBoutique, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get adresse => $composableBuilder(
+      column: $table.adresse, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get telephone => $composableBuilder(
+      column: $table.telephone, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get entete => $composableBuilder(
+      column: $table.entete, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get piedMessage => $composableBuilder(
+      column: $table.piedMessage, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get afficherLogo => $composableBuilder(
+      column: $table.afficherLogo, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get afficherVendeur => $composableBuilder(
+      column: $table.afficherVendeur,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get synced => $composableBuilder(
+      column: $table.synced, builder: (column) => ColumnFilters(column));
+}
+
+class $$LocalRecuConfigsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalRecuConfigsTable> {
+  $$LocalRecuConfigsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get boutiqueId => $composableBuilder(
+      column: $table.boutiqueId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get nomBoutique => $composableBuilder(
+      column: $table.nomBoutique, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get adresse => $composableBuilder(
+      column: $table.adresse, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get telephone => $composableBuilder(
+      column: $table.telephone, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get entete => $composableBuilder(
+      column: $table.entete, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get piedMessage => $composableBuilder(
+      column: $table.piedMessage, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get afficherLogo => $composableBuilder(
+      column: $table.afficherLogo,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get afficherVendeur => $composableBuilder(
+      column: $table.afficherVendeur,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get synced => $composableBuilder(
+      column: $table.synced, builder: (column) => ColumnOrderings(column));
+}
+
+class $$LocalRecuConfigsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalRecuConfigsTable> {
+  $$LocalRecuConfigsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get boutiqueId => $composableBuilder(
+      column: $table.boutiqueId, builder: (column) => column);
+
+  GeneratedColumn<String> get nomBoutique => $composableBuilder(
+      column: $table.nomBoutique, builder: (column) => column);
+
+  GeneratedColumn<String> get adresse =>
+      $composableBuilder(column: $table.adresse, builder: (column) => column);
+
+  GeneratedColumn<String> get telephone =>
+      $composableBuilder(column: $table.telephone, builder: (column) => column);
+
+  GeneratedColumn<String> get entete =>
+      $composableBuilder(column: $table.entete, builder: (column) => column);
+
+  GeneratedColumn<String> get piedMessage => $composableBuilder(
+      column: $table.piedMessage, builder: (column) => column);
+
+  GeneratedColumn<bool> get afficherLogo => $composableBuilder(
+      column: $table.afficherLogo, builder: (column) => column);
+
+  GeneratedColumn<bool> get afficherVendeur => $composableBuilder(
+      column: $table.afficherVendeur, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get synced =>
+      $composableBuilder(column: $table.synced, builder: (column) => column);
+}
+
+class $$LocalRecuConfigsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $LocalRecuConfigsTable,
+    LocalRecuConfig,
+    $$LocalRecuConfigsTableFilterComposer,
+    $$LocalRecuConfigsTableOrderingComposer,
+    $$LocalRecuConfigsTableAnnotationComposer,
+    $$LocalRecuConfigsTableCreateCompanionBuilder,
+    $$LocalRecuConfigsTableUpdateCompanionBuilder,
+    (
+      LocalRecuConfig,
+      BaseReferences<_$AppDatabase, $LocalRecuConfigsTable, LocalRecuConfig>
+    ),
+    LocalRecuConfig,
+    PrefetchHooks Function()> {
+  $$LocalRecuConfigsTableTableManager(
+      _$AppDatabase db, $LocalRecuConfigsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalRecuConfigsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalRecuConfigsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalRecuConfigsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> boutiqueId = const Value.absent(),
+            Value<String> nomBoutique = const Value.absent(),
+            Value<String> adresse = const Value.absent(),
+            Value<String> telephone = const Value.absent(),
+            Value<String> entete = const Value.absent(),
+            Value<String> piedMessage = const Value.absent(),
+            Value<bool> afficherLogo = const Value.absent(),
+            Value<bool> afficherVendeur = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<bool> synced = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalRecuConfigsCompanion(
+            boutiqueId: boutiqueId,
+            nomBoutique: nomBoutique,
+            adresse: adresse,
+            telephone: telephone,
+            entete: entete,
+            piedMessage: piedMessage,
+            afficherLogo: afficherLogo,
+            afficherVendeur: afficherVendeur,
+            updatedAt: updatedAt,
+            synced: synced,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String boutiqueId,
+            Value<String> nomBoutique = const Value.absent(),
+            Value<String> adresse = const Value.absent(),
+            Value<String> telephone = const Value.absent(),
+            Value<String> entete = const Value.absent(),
+            Value<String> piedMessage = const Value.absent(),
+            Value<bool> afficherLogo = const Value.absent(),
+            Value<bool> afficherVendeur = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<bool> synced = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalRecuConfigsCompanion.insert(
+            boutiqueId: boutiqueId,
+            nomBoutique: nomBoutique,
+            adresse: adresse,
+            telephone: telephone,
+            entete: entete,
+            piedMessage: piedMessage,
+            afficherLogo: afficherLogo,
+            afficherVendeur: afficherVendeur,
+            updatedAt: updatedAt,
+            synced: synced,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$LocalRecuConfigsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $LocalRecuConfigsTable,
+    LocalRecuConfig,
+    $$LocalRecuConfigsTableFilterComposer,
+    $$LocalRecuConfigsTableOrderingComposer,
+    $$LocalRecuConfigsTableAnnotationComposer,
+    $$LocalRecuConfigsTableCreateCompanionBuilder,
+    $$LocalRecuConfigsTableUpdateCompanionBuilder,
+    (
+      LocalRecuConfig,
+      BaseReferences<_$AppDatabase, $LocalRecuConfigsTable, LocalRecuConfig>
+    ),
+    LocalRecuConfig,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5538,4 +6312,6 @@ class $AppDatabaseManager {
       $$LocalTiersTableTableManager(_db, _db.localTiers);
   $$LocalMouvementsStockTableTableManager get localMouvementsStock =>
       $$LocalMouvementsStockTableTableManager(_db, _db.localMouvementsStock);
+  $$LocalRecuConfigsTableTableManager get localRecuConfigs =>
+      $$LocalRecuConfigsTableTableManager(_db, _db.localRecuConfigs);
 }

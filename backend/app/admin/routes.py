@@ -13,9 +13,9 @@ from app.admin.deps import require_admin
 from app.core.csrf import verify_csrf_token
 from app.core.db import get_db
 from app.core.security import hash_password
-from app.models import Abonnement, Boutique, User
+from app.models import Abonnement, Ambassadeur, Boutique, Payout, User
 from app.schemas.auth import CurrentUser
-from app.services import abonnement_service
+from app.services import abonnement_service, parrainage_service
 from app.services.abonnement_service import compter_ventes_mois
 
 router = APIRouter()
@@ -226,7 +226,27 @@ async def owner_change_plan(
     if not verify_csrf_token(csrf_token, session_id):
         return RedirectResponse(url=f"/admin/owners/{owner_id}", status_code=303)
 
-    await abonnement_service.upgrader_plan(db, owner_id, plan)
+    # Plan avant modification : ne compter un paiement que sur une vraie
+    # transition vers un plan payant (évite les doublons si on re-soumet le
+    # même plan). Les renouvellements auront un déclencheur dédié plus tard.
+    abo_avant = await abonnement_service.get_or_create_abonnement(db, owner_id)
+    plan_avant = abo_avant.plan
+
+    abo = await abonnement_service.upgrader_plan(db, owner_id, plan)
+
+    if plan != "FREE" and plan_avant != plan:
+        nb_boutiques = await abonnement_service.compter_boutiques_owner(db, owner_id)
+        montant = abonnement_service.calculer_prix_total(abo.prix_base, nb_boutiques)
+        await parrainage_service.confirmer_paiement(
+            db,
+            owner_id,
+            plan,
+            montant,
+            confirme_par=current_user.id,
+            abonnement_id=abo.id,
+            periode_fin=abo.date_fin,
+        )
+
     return RedirectResponse(url=f"/admin/owners/{owner_id}", status_code=303)
 
 
@@ -311,3 +331,146 @@ async def boutiques_list(
         "user": current_user,
         "boutiques_data": boutiques_data,
     })
+
+
+# ── Ambassadeurs (parrainage) ────────────────────────────────────────
+
+@router.get("/ambassadeurs", response_class=HTMLResponse)
+async def ambassadeurs_list(
+    request: Request,
+    current_user: CurrentUser = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.core.csrf import generate_csrf_token
+
+    ambassadeurs = await parrainage_service.lister_ambassadeurs_admin(db)
+    session_id = request.cookies.get("admin_session_id", "")
+    csrf_token = generate_csrf_token(session_id)
+
+    return templates.TemplateResponse(request, "ambassadeurs/list.html", {
+        "user": current_user,
+        "ambassadeurs": ambassadeurs,
+        "csrf_token": csrf_token,
+    })
+
+
+@router.post("/ambassadeurs/{amb_id}/toggle")
+async def ambassadeur_toggle(
+    amb_id: str,
+    request: Request,
+    csrf_token: str = Form(""),
+    current_user: CurrentUser = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    session_id = request.cookies.get("admin_session_id", "")
+    if not verify_csrf_token(csrf_token, session_id):
+        return RedirectResponse(url="/admin/ambassadeurs", status_code=303)
+
+    try:
+        aid = uuid.UUID(amb_id)
+    except ValueError:
+        return RedirectResponse(url="/admin/ambassadeurs", status_code=303)
+
+    amb = await db.get(Ambassadeur, aid)
+    if amb is not None:
+        amb.actif = not amb.actif
+        await db.commit()
+    return RedirectResponse(url="/admin/ambassadeurs", status_code=303)
+
+
+@router.post("/owners/{owner_id}/confirmer-paiement")
+async def owner_confirmer_paiement(
+    owner_id: str,
+    request: Request,
+    csrf_token: str = Form(""),
+    current_user: CurrentUser = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Confirme un paiement/renouvellement du plan courant (déclenche la
+    commission de parrainage), utile hors changement de plan."""
+    session_id = request.cookies.get("admin_session_id", "")
+    if not verify_csrf_token(csrf_token, session_id):
+        return RedirectResponse(url=f"/admin/owners/{owner_id}", status_code=303)
+
+    abo = await abonnement_service.get_or_create_abonnement(db, owner_id)
+    if abo.plan != "FREE":
+        nb_boutiques = await abonnement_service.compter_boutiques_owner(db, owner_id)
+        montant = abonnement_service.calculer_prix_total(abo.prix_base, nb_boutiques)
+        await parrainage_service.confirmer_paiement(
+            db,
+            owner_id,
+            abo.plan,
+            montant,
+            confirme_par=current_user.id,
+            abonnement_id=abo.id,
+            periode_fin=abo.date_fin,
+        )
+    return RedirectResponse(url=f"/admin/owners/{owner_id}", status_code=303)
+
+
+# ── Versements hebdomadaires ─────────────────────────────────────────
+
+@router.get("/versements", response_class=HTMLResponse)
+async def versements_list(
+    request: Request,
+    current_user: CurrentUser = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.core.csrf import generate_csrf_token
+
+    payouts = (
+        await db.execute(select(Payout).order_by(Payout.date_creation.desc()))
+    ).scalars().all()
+
+    rows = []
+    for p in payouts:
+        amb = await db.get(Ambassadeur, p.ambassadeur_id)
+        owner = await db.get(User, amb.user_id) if amb else None
+        rows.append({"payout": p, "ambassadeur": amb, "owner": owner})
+
+    session_id = request.cookies.get("admin_session_id", "")
+    csrf_token = generate_csrf_token(session_id)
+
+    return templates.TemplateResponse(request, "versements/list.html", {
+        "user": current_user,
+        "rows": rows,
+        "semaine": parrainage_service.semaine_courante(),
+        "csrf_token": csrf_token,
+    })
+
+
+@router.post("/versements/generer")
+async def versements_generer(
+    request: Request,
+    csrf_token: str = Form(""),
+    current_user: CurrentUser = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    session_id = request.cookies.get("admin_session_id", "")
+    if not verify_csrf_token(csrf_token, session_id):
+        return RedirectResponse(url="/admin/versements", status_code=303)
+
+    await parrainage_service.generer_payouts_semaine(db)
+    return RedirectResponse(url="/admin/versements", status_code=303)
+
+
+@router.post("/versements/{payout_id}/payer")
+async def versement_payer(
+    payout_id: str,
+    request: Request,
+    reference: str = Form(""),
+    csrf_token: str = Form(""),
+    current_user: CurrentUser = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    session_id = request.cookies.get("admin_session_id", "")
+    if not verify_csrf_token(csrf_token, session_id):
+        return RedirectResponse(url="/admin/versements", status_code=303)
+
+    try:
+        pid = uuid.UUID(payout_id)
+    except ValueError:
+        return RedirectResponse(url="/admin/versements", status_code=303)
+
+    await parrainage_service.marquer_payout_paye(db, pid, reference or None)
+    return RedirectResponse(url="/admin/versements", status_code=303)

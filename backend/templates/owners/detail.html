@@ -77,6 +77,15 @@
                 </select>
                 <button type="submit" class="btn btn-primary btn-sm w-full">Appliquer</button>
             </form>
+            {% if abo.plan != 'FREE' %}
+            <form method="POST" action="/admin/owners/{{ owner.id }}/confirmer-paiement" class="mt-2">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button type="submit" class="btn btn-outline btn-sm w-full"
+                        onclick="return confirm('Confirmer un paiement/renouvellement du plan {{ abo.plan }} ? (génère la commission de parrainage)')">
+                    Confirmer paiement / renouvellement
+                </button>
+            </form>
+            {% endif %}
             {% else %}
             <p class="text-sm opacity-50">Aucun abonnement trouvé.</p>
             {% endif %}

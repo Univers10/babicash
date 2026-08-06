@@ -50,11 +50,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           state.matchedLocation == AppRoutes.register;
 
       if (!isLoggedIn && !isOnAuth) {
-        // Session expirée d'un compte PIN (gérant) → reconnexion par PIN,
-        // téléphone prérempli. Sinon, écran de connexion classique.
-        return expiredMethod == LoginMethod.pin
-            ? AppRoutes.loginPin
-            : AppRoutes.login;
+        // Par défaut, connexion par PIN. On ne revient à l'écran email que si
+        // la dernière méthode connue était email (propriétaire).
+        return expiredMethod == LoginMethod.email
+            ? AppRoutes.login
+            : AppRoutes.loginPin;
       }
       if (isLoggedIn && isOnAuth) {
         final user = authState.value!;

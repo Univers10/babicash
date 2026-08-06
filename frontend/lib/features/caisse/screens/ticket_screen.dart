@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:pdf/pdf.dart';
@@ -453,19 +452,18 @@ class _TicketDialogState extends State<TicketDialog> {
     final doc = pw.Document();
     final fmt = DateFormat('dd/MM/yyyy HH:mm');
 
-    // Logo boutique (réseau) si disponible, sinon logo de l'application.
-    Future<pw.ImageProvider> loadAsset() async {
-      final logoBytes = await rootBundle.load('assets/images/logo.png');
-      return pw.MemoryImage(logoBytes.buffer.asUint8List());
-    }
-
-    pw.ImageProvider logoImage;
+    // Logo de la boutique (réseau) uniquement : rien si la boutique n'a pas de
+    // logo ou si le chargement échoue — pas de logo d'application par défaut.
     final logoUrl = vente.logoUrl?.trim() ?? '';
-    try {
-      logoImage = logoUrl.isNotEmpty ? await networkImage(logoUrl) : await loadAsset();
-    } catch (_) {
-      logoImage = await loadAsset();
+    pw.ImageProvider? loaded;
+    if (vente.afficherLogo && logoUrl.isNotEmpty) {
+      try {
+        loaded = await networkImage(logoUrl);
+      } catch (_) {
+        loaded = null;
+      }
     }
+    final logoImage = loaded; // capture final pour la closure de la page
 
     doc.addPage(
       pw.Page(
@@ -479,7 +477,7 @@ class _TicketDialogState extends State<TicketDialog> {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               // En-tête
-              if (vente.afficherLogo) ...[
+              if (logoImage != null) ...[
                 pw.Center(child: pw.Image(logoImage, width: 60, height: 60)),
                 pw.SizedBox(height: 4),
               ],
@@ -635,23 +633,22 @@ class _TicketHeader extends StatelessWidget {
   final String? logoUrl;
   final String? caissierNom;
 
+  /// Logo à afficher uniquement si l'option est active ET que la boutique a un
+  /// logo — pas de logo d'application par défaut.
+  bool get _hasLogo =>
+      afficherLogo && (logoUrl?.trim().isNotEmpty ?? false);
+
   Widget _logo() {
-    const asset = Image(
-      image: AssetImage('assets/images/logo.png'),
-      width: 72,
-      height: 72,
-    );
-    final url = logoUrl?.trim() ?? '';
-    if (url.isEmpty) return asset;
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: CachedNetworkImage(
-        imageUrl: url,
+        imageUrl: logoUrl!.trim(),
         width: 72,
         height: 72,
         fit: BoxFit.cover,
-        placeholder: (_, __) => asset,
-        errorWidget: (_, __, ___) => asset,
+        // Rien si le logo de la boutique est indisponible (pas de repli).
+        placeholder: (_, __) => const SizedBox(width: 72, height: 72),
+        errorWidget: (_, __, ___) => const SizedBox.shrink(),
       ),
     );
   }
@@ -662,7 +659,7 @@ class _TicketHeader extends StatelessWidget {
     final tel = telephone?.trim() ?? '';
     return Column(
       children: [
-        if (afficherLogo) ...[
+        if (_hasLogo) ...[
           _logo(),
           const SizedBox(height: 4),
         ],

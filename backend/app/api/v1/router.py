@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.api.v1 import (
     abonnements,
+    ambassadeurs,
     analytics,
     auth,
     boutiques,
@@ -41,6 +42,9 @@ api_router.include_router(
 )
 api_router.include_router(
     abonnements.router, prefix="/abonnements", tags=["abonnements"]
+)
+api_router.include_router(
+    ambassadeurs.router, prefix="/ambassadeurs", tags=["ambassadeurs"]
 )
 api_router.include_router(ventes.router, prefix="/ventes", tags=["ventes"])
 api_router.include_router(

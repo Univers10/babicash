@@ -7,10 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.access import get_authorized_boutique
 from app.core.db import get_db
 from app.deps import get_current_user, require_owner
-from app.models import Boutique
+from app.models import Boutique, RecuConfig
 from app.schemas.auth import CurrentUser
 from app.schemas.boutique import BoutiqueOut
 from app.schemas.crud import BoutiqueCreate, BoutiqueUpdate
+from app.schemas.recu_config import RecuConfigOut, RecuConfigUpdate
 from app.services import abonnement_service
 
 router = APIRouter()
@@ -104,3 +105,43 @@ async def update_boutique(
     await db.commit()
     await db.refresh(boutique)
     return boutique
+
+
+# ----- Personnalisation du reçu (1:1 par boutique) -----
+@router.get("/{boutique_id}/recu-config", response_model=RecuConfigOut | None)
+async def get_recu_config(
+    boutique_id: uuid.UUID,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> RecuConfig | None:
+    """Retourne la personnalisation du reçu de la boutique, ou `null` si aucune
+    n'a encore été enregistrée (le client applique alors ses valeurs par défaut
+    sans écraser une éventuelle config locale)."""
+    await get_authorized_boutique(db, current_user, boutique_id)
+    return await db.get(RecuConfig, boutique_id)
+
+
+@router.put("/{boutique_id}/recu-config", response_model=RecuConfigOut)
+async def put_recu_config(
+    boutique_id: uuid.UUID,
+    payload: RecuConfigUpdate,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> RecuConfig:
+    """Enregistre (upsert) la personnalisation du reçu. OWNER comme MANAGER
+    peuvent la modifier pour leur boutique."""
+    await get_authorized_boutique(db, current_user, boutique_id)
+    config = await db.get(RecuConfig, boutique_id)
+    if config is None:
+        config = RecuConfig(boutique_id=boutique_id)
+        db.add(config)
+    config.nom_boutique = payload.nom_boutique
+    config.adresse = payload.adresse
+    config.telephone = payload.telephone
+    config.entete = payload.entete
+    config.pied_message = payload.pied_message
+    config.afficher_logo = payload.afficher_logo
+    config.afficher_vendeur = payload.afficher_vendeur
+    await db.commit()
+    await db.refresh(config)
+    return config
