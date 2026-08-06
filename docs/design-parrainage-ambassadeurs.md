@@ -198,7 +198,7 @@ Base : `/api/v1`. Réutilise l'auth JWT existante (le `sub` du token = `User.id`
 Nouveau dossier à la racine, ex. `ambassadeur-pwa/` (séparé de `frontend/` Flutter) :
 - **React + Vite + TypeScript**, `vite-plugin-pwa` (manifest + service worker Workbox).
 - State/serveur : React Query (cache + revalidation), Zustand pour l'auth token.
-- Client HTTP : `fetch`/axios vers `https://babicash.ecomotionafricaci.com/api/v1`.
+- Client HTTP : `fetch`/axios vers `https://business.babicash.ci/api/v1`.
 - Léger, mobile-first, une seule colonne. Objectif : bundle initial de l'ordre de ~150 Ko gzip.
 
 ### 7.2 Écrans (look « genre Wave »)

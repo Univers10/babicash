@@ -13,7 +13,7 @@ npm run dev            # http://localhost:5173
 ```
 
 Par défaut (sans `.env`), l'app tape l'API de prod
-`https://babicash.ecomotionafricaci.com/api/v1`. Pour développer contre le backend
+`https://business.babicash.ci/api/v1`. Pour développer contre le backend
 local : `VITE_API_BASE=http://localhost:8000/api/v1` (lancer aussi
 `uvicorn app.main:app --reload` côté `backend/`, CORS déjà ouvert).
 
