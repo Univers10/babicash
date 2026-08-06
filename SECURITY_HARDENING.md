@@ -170,7 +170,7 @@ POSTGRES_USER=babicash
 POSTGRES_PASSWORD=<mot-de-passe-fort>
 POSTGRES_DB=babicash
 SECURE_COOKIES=true
-ALLOWED_ORIGINS=https://babicash.ecomotionafricaci.com
+ALLOWED_ORIGINS=https://pos.babicash.ci,https://business.babicash.ci
 WORKERS=2
 ```
 

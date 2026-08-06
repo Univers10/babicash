@@ -103,7 +103,7 @@ Tables: `LocalProduits`, `LocalCategories`, `LocalVentes`, `LocalLignesVente`, `
 
 ### API client (Dio)
 
-Base URL: `https://babicash.ecomotionafricaci.com/api/v1`
+Base URL: `https://pos.babicash.ci/api/v1`
 Dev overrides: `http://192.168.1.29:8000` (LAN) / `http://10.0.2.2:8000` (emulator)
 
 JWT is injected automatically by an interceptor. 401 responses clear the session.

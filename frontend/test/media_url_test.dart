@@ -7,8 +7,8 @@ void main() {
     String originOf(String base) => Uri.parse(base).origin;
 
     test('prod : /api/v1 retiré, pas de query/fragment parasite', () {
-      expect(originOf('https://babicash.ecomotionafricaci.com/api/v1'),
-          'https://babicash.ecomotionafricaci.com');
+      expect(originOf('https://pos.babicash.ci/api/v1'),
+          'https://pos.babicash.ci');
     });
 
     test('dev LAN : port conservé', () {
@@ -22,18 +22,18 @@ void main() {
   });
 
   group('absoluteMediaUrl', () {
-    const origin = 'https://babicash.ecomotionafricaci.com';
+    const origin = 'https://pos.babicash.ci';
 
     test('URL relative /static → absolue', () {
       expect(
         absoluteMediaUrl(origin, '/static/uploads/produits/abc.jpg'),
-        'https://babicash.ecomotionafricaci.com/static/uploads/produits/abc.jpg',
+        'https://pos.babicash.ci/static/uploads/produits/abc.jpg',
       );
     });
 
     test('chemin sans slash initial → slash ajouté', () {
       expect(absoluteMediaUrl(origin, 'static/x.jpg'),
-          'https://babicash.ecomotionafricaci.com/static/x.jpg');
+          'https://pos.babicash.ci/static/x.jpg');
     });
 
     test('URL déjà absolue → inchangée', () {

@@ -20,7 +20,7 @@ class OAuthConfig {
   static const appleServiceId = 'com.babicash.app.signin';
 
   static final appleRedirectUri = Uri.parse(
-    'https://babicash.ecomotionafricaci.com/api/v1/auth/oauth/apple/callback',
+    'https://pos.babicash.ci/api/v1/auth/oauth/apple/callback',
   );
 
   static bool get googleConfigured =>
