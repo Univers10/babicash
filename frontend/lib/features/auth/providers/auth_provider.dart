@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../../core/config/oauth_config.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/storage/secure_storage.dart';
@@ -99,35 +98,6 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
       await storage.saveTelephone(telephone);
       await storage.savePinHash(PinHasher.hash(codePin));
       await storage.saveLastLoginMethod(LoginMethod.pin);
-      _clearSessionExpired();
-      state = AsyncData(SessionUser(
-        token: resp.accessToken,
-        role: resp.role,
-        nom: resp.nom,
-        boutiqueId: resp.boutiqueId,
-      ));
-    } on DioException catch (e) {
-      state = AsyncError(mapDioError(e), StackTrace.current);
-    } catch (e) {
-      state = AsyncError(const UnknownException(), StackTrace.current);
-    }
-  }
-
-  Future<void> loginId(String idProprietaire, String motDePasse) async {
-    state = const AsyncLoading();
-    final api = ref.read(authApiProvider);
-    final storage = ref.read(secureStorageProvider);
-    try {
-      final resp = await api.loginId(
-        LoginIdRequest(idProprietaire: idProprietaire, motDePasse: motDePasse),
-      );
-      await storage.saveSession(
-        token: resp.accessToken,
-        role: resp.role,
-        nom: resp.nom,
-        boutiqueId: resp.boutiqueId,
-      );
-      await storage.saveLastLoginMethod(LoginMethod.email);
       _clearSessionExpired();
       state = AsyncData(SessionUser(
         token: resp.accessToken,
@@ -259,58 +229,6 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
     } catch (e) {
       state = AsyncError(
         const UnknownException('Connexion Google impossible.'),
-        StackTrace.current,
-      );
-    }
-  }
-
-  Future<void> loginWithApple() async {
-    final previous = state.valueOrNull;
-    state = const AsyncLoading();
-    final api = ref.read(authApiProvider);
-    try {
-      final credential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-        webAuthenticationOptions: WebAuthenticationOptions(
-          clientId: OAuthConfig.appleServiceId,
-          redirectUri: OAuthConfig.appleRedirectUri,
-        ),
-      );
-      final identityToken = credential.identityToken;
-      if (identityToken == null) {
-        state = AsyncError(
-          const UnknownException('Apple n\'a pas fourni de token.'),
-          StackTrace.current,
-        );
-        return;
-      }
-      // Apple ne fournit le nom qu'à la toute première autorisation.
-      final nom = [credential.givenName, credential.familyName]
-          .whereType<String>()
-          .join(' ')
-          .trim();
-      final resp = await api.loginApple(AppleTokenRequest(
-        identityToken: identityToken,
-        nom: nom.isEmpty ? null : nom,
-      ));
-      await _onLoginSuccess(resp);
-    } on SignInWithAppleAuthorizationException catch (e) {
-      if (e.code == AuthorizationErrorCode.canceled) {
-        state = AsyncData(previous);
-        return;
-      }
-      state = AsyncError(
-        const UnknownException('Connexion Apple impossible.'),
-        StackTrace.current,
-      );
-    } on DioException catch (e) {
-      state = AsyncError(mapDioError(e), StackTrace.current);
-    } catch (e) {
-      state = AsyncError(
-        const UnknownException('Connexion Apple impossible.'),
         StackTrace.current,
       );
     }

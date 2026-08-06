@@ -50,19 +50,6 @@ Map<String, dynamic> _$$RegisterRequestImplToJson(
       'telephone': instance.telephone,
     };
 
-_$LoginIdRequestImpl _$$LoginIdRequestImplFromJson(Map<String, dynamic> json) =>
-    _$LoginIdRequestImpl(
-      idProprietaire: json['id_proprietaire'] as String,
-      motDePasse: json['mot_de_passe'] as String,
-    );
-
-Map<String, dynamic> _$$LoginIdRequestImplToJson(
-        _$LoginIdRequestImpl instance) =>
-    <String, dynamic>{
-      'id_proprietaire': instance.idProprietaire,
-      'mot_de_passe': instance.motDePasse,
-    };
-
 _$GoogleTokenRequestImpl _$$GoogleTokenRequestImplFromJson(
         Map<String, dynamic> json) =>
     _$GoogleTokenRequestImpl(
@@ -73,20 +60,6 @@ Map<String, dynamic> _$$GoogleTokenRequestImplToJson(
         _$GoogleTokenRequestImpl instance) =>
     <String, dynamic>{
       'id_token': instance.idToken,
-    };
-
-_$AppleTokenRequestImpl _$$AppleTokenRequestImplFromJson(
-        Map<String, dynamic> json) =>
-    _$AppleTokenRequestImpl(
-      identityToken: json['identity_token'] as String,
-      nom: json['nom'] as String?,
-    );
-
-Map<String, dynamic> _$$AppleTokenRequestImplToJson(
-        _$AppleTokenRequestImpl instance) =>
-    <String, dynamic>{
-      'identity_token': instance.identityToken,
-      'nom': instance.nom,
     };
 
 _$TokenResponseImpl _$$TokenResponseImplFromJson(Map<String, dynamic> json) =>

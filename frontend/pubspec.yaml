@@ -33,9 +33,8 @@ dependencies:
   # Hachage local du PIN (verrouillage hors ligne)
   crypto: ^3.0.3
 
-  # Connexion sociale (Google / Apple)
+  # Connexion sociale (Google)
   google_sign_in: ^6.2.1
-  sign_in_with_apple: ^6.1.1
 
   # Data classes
   freezed_annotation: ^2.4.1

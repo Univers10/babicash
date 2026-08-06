@@ -36,33 +36,12 @@ class RegisterRequest with _$RegisterRequest {
 }
 
 @freezed
-class LoginIdRequest with _$LoginIdRequest {
-  const factory LoginIdRequest({
-    @JsonKey(name: 'id_proprietaire') required String idProprietaire,
-    @JsonKey(name: 'mot_de_passe') required String motDePasse,
-  }) = _LoginIdRequest;
-  factory LoginIdRequest.fromJson(Map<String, dynamic> json) =>
-      _$LoginIdRequestFromJson(json);
-}
-
-@freezed
 class GoogleTokenRequest with _$GoogleTokenRequest {
   const factory GoogleTokenRequest({
     @JsonKey(name: 'id_token') required String idToken,
   }) = _GoogleTokenRequest;
   factory GoogleTokenRequest.fromJson(Map<String, dynamic> json) =>
       _$GoogleTokenRequestFromJson(json);
-}
-
-@freezed
-class AppleTokenRequest with _$AppleTokenRequest {
-  const factory AppleTokenRequest({
-    @JsonKey(name: 'identity_token') required String identityToken,
-    // Apple ne fournit le nom qu'à la première autorisation, hors du token.
-    String? nom,
-  }) = _AppleTokenRequest;
-  factory AppleTokenRequest.fromJson(Map<String, dynamic> json) =>
-      _$AppleTokenRequestFromJson(json);
 }
 
 @freezed

@@ -1,11 +1,13 @@
 import 'dart:convert';
 
-/// Personnalisation du reçu de caisse (ticket de vente).
+/// Personnalisation du reçu de caisse (ticket de vente) : infos boutique
+/// affichées en en-tête, en-tête libre (slogan / RCCM / NCC), message de pied
+/// de page et options d'affichage.
 ///
-/// Persistée en JSON dans le secure storage (voir [ReceiptSettingsStorage]) :
-/// infos boutique affichées en en-tête, en-tête libre (slogan / RCCM / NCC),
-/// message de pied de page et options d'affichage. Aucune modification du
-/// schéma Drift ni du backend — le reçu reste imprimable hors-ligne.
+/// Objet de valeur pur. La persistance est offline-first (cache Drift
+/// `LocalRecuConfigs`) et synchronisée avec le backend — voir
+/// [RecuConfigRepository]. Les helpers [encode]/[tryDecode] ne servent plus
+/// qu'à la migration unique depuis l'ancien secure storage.
 class ReceiptConfig {
   const ReceiptConfig({
     this.nomBoutique = '',

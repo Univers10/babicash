@@ -122,6 +122,30 @@ class LocalMouvementsStock extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// Personnalisation du reçu de caisse — une ligne par boutique (1:1).
+///
+/// Cache local (offline-first) de la config serveur `recu_configs` : le reçu
+/// s'imprime sans réseau. `synced = false` marque une modification locale en
+/// attente d'envoi ; `updatedAt` sert d'arbitrage dernier-écrivain-gagne.
+class LocalRecuConfigs extends Table {
+  TextColumn get boutiqueId => text()();
+  TextColumn get nomBoutique => text().withDefault(const Constant(''))();
+  TextColumn get adresse => text().withDefault(const Constant(''))();
+  TextColumn get telephone => text().withDefault(const Constant(''))();
+  TextColumn get entete => text().withDefault(const Constant(''))();
+  TextColumn get piedMessage =>
+      text().withDefault(const Constant('Merci pour votre achat !'))();
+  BoolColumn get afficherLogo => boolean().withDefault(const Constant(true))();
+  BoolColumn get afficherVendeur =>
+      boolean().withDefault(const Constant(true))();
+  DateTimeColumn get updatedAt =>
+      dateTime().withDefault(currentDateAndTime)();
+  BoolColumn get synced => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {boutiqueId};
+}
+
 // ── Database ──────────────────────────────────────────────────────────────────
 
 @DriftDatabase(tables: [
@@ -133,12 +157,17 @@ class LocalMouvementsStock extends Table {
   LocalSessions,
   LocalTiers,
   LocalMouvementsStock,
+  LocalRecuConfigs,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
+  /// Ouvre la base sur un [QueryExecutor] fourni (ex. `NativeDatabase.memory()`
+  /// dans les tests) — évite path_provider et le stockage sur disque.
+  AppDatabase.forTesting(super.executor);
+
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -157,6 +186,10 @@ class AppDatabase extends _$AppDatabase {
           if (from < 4) {
             // v4 : image produit — colonne additive nullable.
             await m.addColumn(localProduits, localProduits.imageUrl);
+          }
+          if (from < 5) {
+            // v5 : cache local de la personnalisation du reçu (offline-first).
+            await m.createTable(localRecuConfigs);
           }
         },
       );
@@ -292,6 +325,33 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> upsertTier(LocalTiersCompanion tier) =>
       into(localTiers).insertOnConflictUpdate(tier);
+
+  // ── Personnalisation du reçu ──────────────────────────────────────────────
+
+  Future<LocalRecuConfig?> getRecuConfig(String boutiqueId) =>
+      (select(localRecuConfigs)
+            ..where((r) => r.boutiqueId.equals(boutiqueId)))
+          .getSingleOrNull();
+
+  /// Stream réactif : l'aperçu et le ticket reflètent toujours l'état local.
+  Stream<LocalRecuConfig?> watchRecuConfig(String boutiqueId) =>
+      (select(localRecuConfigs)
+            ..where((r) => r.boutiqueId.equals(boutiqueId)))
+          .watchSingleOrNull();
+
+  Future<void> upsertRecuConfig(LocalRecuConfigsCompanion config) =>
+      into(localRecuConfigs).insertOnConflictUpdate(config);
+
+  /// Config locale modifiée hors-ligne, en attente d'envoi (ou `null`).
+  Future<LocalRecuConfig?> getRecuConfigNonSync(String boutiqueId) =>
+      (select(localRecuConfigs)
+            ..where((r) =>
+                r.boutiqueId.equals(boutiqueId) & r.synced.equals(false)))
+          .getSingleOrNull();
+
+  Future<void> marquerRecuConfigSync(String boutiqueId) =>
+      (update(localRecuConfigs)..where((r) => r.boutiqueId.equals(boutiqueId)))
+          .write(const LocalRecuConfigsCompanion(synced: Value(true)));
 }
 
 LazyDatabase _openConnection() {

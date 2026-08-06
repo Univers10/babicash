@@ -7,6 +7,7 @@ import '../../data/models/sync_model.dart';
 import '../../data/remote/sync_api.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/boutiques/providers/boutique_provider.dart';
+import '../../features/settings/services/recu_config_repository.dart';
 
 class SyncService {
   const SyncService(this._ref);
@@ -115,6 +116,9 @@ class SyncService {
           synced++;
         }
       }
+
+      // ── Personnalisation du reçu non sync ─────────────────────────────────
+      synced += await _ref.read(recuConfigRepositoryProvider).push(boutiqueId);
     } on AppException {
       // Silencieux — sera retenté au prochain appel
     }
@@ -158,6 +162,9 @@ class SyncService {
                 nom: drift.Value(c.nom),
               ))
           .toList());
+
+      // Personnalisation du reçu : rafraîchit le cache local depuis le serveur.
+      await _ref.read(recuConfigRepositoryProvider).pull(boutiqueId);
     } on AppException {
       // Silencieux
     }

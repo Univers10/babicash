@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +7,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/images/media_url.dart';
 import '../../../shared/widgets/app_snackbar.dart';
 import '../../boutiques/providers/boutique_provider.dart';
 import '../models/receipt_config.dart';
@@ -147,6 +149,11 @@ class _ReceiptConfigScreenState extends ConsumerState<ReceiptConfigScreen> {
       if (changed) setState(() {});
     });
 
+    // Logo réel de la boutique (URL absolue) pour l'aperçu — vide si absent.
+    final boutique = ref.watch(boutiqueInfoProvider).valueOrNull;
+    final logoUrl =
+        absoluteMediaUrl(ref.read(apiOriginProvider), boutique?.logoUrl);
+
     final configAsync = ref.watch(receiptConfigProvider);
 
     return Scaffold(
@@ -176,7 +183,7 @@ class _ReceiptConfigScreenState extends ConsumerState<ReceiptConfigScreen> {
             children: [
               // ── Aperçu ──────────────────────────────────────────────────
               const _SectionTitle('APERÇU'),
-              _ReceiptPreview(config: _currentConfig()),
+              _ReceiptPreview(config: _currentConfig(), logoUrl: logoUrl),
               const VGap(AppSpacing.xl),
 
               // ── Infos boutique ──────────────────────────────────────────
@@ -284,8 +291,15 @@ class _ReceiptConfigScreenState extends ConsumerState<ReceiptConfigScreen> {
 // ── Aperçu du reçu ─────────────────────────────────────────────────────────────
 
 class _ReceiptPreview extends StatelessWidget {
-  const _ReceiptPreview({required this.config});
+  const _ReceiptPreview({required this.config, this.logoUrl});
   final ReceiptConfig config;
+
+  /// URL absolue du logo de la boutique (vide = pas de logo).
+  final String? logoUrl;
+
+  /// Logo affiché uniquement si l'option est active ET que la boutique en a un.
+  bool get _hasLogo =>
+      config.afficherLogo && (logoUrl?.trim().isNotEmpty ?? false);
 
   @override
   Widget build(BuildContext context) {
@@ -314,8 +328,18 @@ class _ReceiptPreview extends StatelessWidget {
       ),
       child: Column(
         children: [
-          if (config.afficherLogo) ...[
-            Image.asset('assets/images/logo.png', width: 56, height: 56),
+          if (_hasLogo) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: CachedNetworkImage(
+                imageUrl: logoUrl!.trim(),
+                width: 56,
+                height: 56,
+                fit: BoxFit.cover,
+                placeholder: (_, __) => const SizedBox(width: 56, height: 56),
+                errorWidget: (_, __, ___) => const SizedBox.shrink(),
+              ),
+            ),
             const SizedBox(height: 4),
           ],
           Text(nom,
