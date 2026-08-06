@@ -131,9 +131,10 @@ const kPlansCatalog = [
 
 /// Retrouve la carte du catalogue correspondant à l'abonnement backend.
 ///
-/// Le backend ne connaît aujourd'hui que 'FREE' et 'PRO' ; un plan 'PRO'
-/// est rattaché à la carte payante dont le prix correspond à [AbonnementOut.prixBase]
-/// (Boutique par défaut). Les codes futurs ('KIOSQUE', 'EMPIRE', …) matchent par id.
+/// Le backend expose désormais 'FREE', 'KIOSQUE', 'BOUTIQUE', 'COMMERCE',
+/// 'ENTREPRISE' et 'EMPIRE'. Les codes matchent par id. Pour rétrocompatibilité,
+/// un ancien plan 'PRO' est rattaché à la carte payante dont le prix correspond
+/// à [AbonnementOut.prixBase] (Boutique par défaut).
 PlanDef? planFromAbonnement(AbonnementOut abonnement) {
   final code = abonnement.plan.trim().toUpperCase();
   if (code == 'PRO') {

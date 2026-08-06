@@ -206,6 +206,9 @@ class _CurrentPlanBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final planDef = planFromAbonnement(abonnement);
+    final label = planDef?.nom ?? abonnement.plan;
+    final status = abonnement.actif ? '' : ' (inactif)';
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: const BoxDecoration(
@@ -218,7 +221,7 @@ class _CurrentPlanBanner extends StatelessWidget {
           const HGap(AppSpacing.sm),
           Expanded(
             child: Text(
-              'Votre plan actuel : ${abonnement.plan} — '
+              'Votre plan actuel : $label$status — '
               '${AmountText.format(abonnement.prixTotalMensuel)} / mois',
               style: AppTextStyles.bodySmall
                   .copyWith(color: AppColors.onPrimaryContainer),
