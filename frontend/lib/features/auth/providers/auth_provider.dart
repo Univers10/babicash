@@ -116,8 +116,9 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
     String nom,
     String email,
     String motDePasse,
-    String? telephone,
-  ) async {
+    String? telephone, {
+    String? codeParrainage,
+  }) async {
     state = const AsyncLoading();
     final api = ref.read(authApiProvider);
     final storage = ref.read(secureStorageProvider);
@@ -128,6 +129,9 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
           email: email,
           motDePasse: motDePasse,
           telephone: telephone,
+          codeParrainage: codeParrainage?.trim().isEmpty ?? true
+              ? null
+              : codeParrainage!.trim().toUpperCase(),
         ),
       );
       await storage.saveSession(
@@ -199,7 +203,7 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
     state = const AsyncData(null);
   }
 
-  Future<void> loginWithGoogle() async {
+  Future<void> loginWithGoogle({String? codeParrainage}) async {
     final previous = state.valueOrNull;
     state = const AsyncLoading();
     final api = ref.read(authApiProvider);
@@ -222,7 +226,12 @@ class AuthNotifier extends AsyncNotifier<SessionUser?> {
         );
         return;
       }
-      final resp = await api.loginGoogle(GoogleTokenRequest(idToken: idToken));
+      final resp = await api.loginGoogle(
+        idToken,
+        codeParrainage: codeParrainage?.trim().isEmpty ?? true
+            ? null
+            : codeParrainage!.trim().toUpperCase(),
+      );
       await _onLoginSuccess(resp);
     } on DioException catch (e) {
       state = AsyncError(mapDioError(e), StackTrace.current);

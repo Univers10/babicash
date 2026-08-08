@@ -5,6 +5,9 @@
     <div>
         <h2 class="text-2xl font-bold">Versements</h2>
         <p class="text-sm opacity-60">Lots de commissions à payer par Mobile Money.</p>
+        {% if seuil_min and seuil_min > 0 %}
+        <p class="text-xs opacity-50">Seuil minimum de versement : {{ seuil_min }} F (solde inférieur = reporté à la semaine suivante).</p>
+        {% endif %}
     </div>
     <form method="POST" action="/admin/versements/generer">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">

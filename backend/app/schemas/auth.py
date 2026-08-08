@@ -38,6 +38,8 @@ class GoogleTokenRequest(BaseModel):
     """Connexion / inscription via Google Sign-In."""
 
     id_token: str
+    # Code ambassadeur facultatif, utile uniquement lors de la création de compte.
+    code_parrainage: str | None = Field(default=None, max_length=20)
 
 
 class AppleTokenRequest(BaseModel):
@@ -46,6 +48,8 @@ class AppleTokenRequest(BaseModel):
     identity_token: str
     # Apple ne renvoie le nom qu'à la toute première autorisation, hors du token.
     nom: str | None = Field(default=None, max_length=255)
+    # Code ambassadeur facultatif, utile uniquement lors de la création de compte.
+    code_parrainage: str | None = Field(default=None, max_length=20)
 
 
 class Token(BaseModel):

@@ -559,6 +559,9 @@ class _AbonnementCard extends StatelessWidget {
     Color iconFg;
     Color borderColor;
 
+    // Icône spécifique au plan quand il est connu du catalogue.
+    final planIcon = planDef?.icon;
+
     if (isFree) {
       if (isActive) {
         badgeColor = AppColors.success;
@@ -578,7 +581,7 @@ class _AbonnementCard extends StatelessWidget {
     } else if (isActive) {
       badgeColor = AppColors.accent;
       badgeText = 'Actif';
-      icon = Symbols.workspace_premium;
+      icon = planIcon ?? Symbols.workspace_premium;
       iconBg = AppColors.accentContainer;
       iconFg = AppColors.accentDark;
       borderColor = AppColors.accent.withValues(alpha: 0.4);

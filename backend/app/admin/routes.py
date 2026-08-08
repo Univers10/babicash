@@ -10,6 +10,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.admin.deps import require_admin
+from app.core.config import settings
 from app.core.csrf import verify_csrf_token
 from app.core.db import get_db
 from app.core.security import hash_password
@@ -435,6 +436,7 @@ async def versements_list(
         "user": current_user,
         "rows": rows,
         "semaine": parrainage_service.semaine_courante(),
+        "seuil_min": settings.AMBASSADEUR_SEUIL_MIN_PAYOUT,
         "csrf_token": csrf_token,
     })
 
@@ -450,7 +452,9 @@ async def versements_generer(
     if not verify_csrf_token(csrf_token, session_id):
         return RedirectResponse(url="/admin/versements", status_code=303)
 
-    await parrainage_service.generer_payouts_semaine(db)
+    await parrainage_service.generer_payouts_semaine(
+        db, seuil_min=settings.AMBASSADEUR_SEUIL_MIN_PAYOUT
+    )
     return RedirectResponse(url="/admin/versements", status_code=303)
 
 

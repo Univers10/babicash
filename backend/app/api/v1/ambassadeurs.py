@@ -1,7 +1,7 @@
 """Endpoints ambassadeurs : inscription, connexion, disponibilité du code, profil."""
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -183,16 +183,25 @@ async def moi(
 
 @router.get("/filleuls", response_model=list[FilleulOut])
 async def filleuls(
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
     current_user: CurrentUser = Depends(require_ambassadeur),
     db: AsyncSession = Depends(get_db),
 ) -> list[FilleulOut]:
     """Liste des filleuls de l'ambassadeur avec l'état de leur abonnement."""
     amb = await _get_profil(db, current_user.id)
-    return [FilleulOut(**d) for d in await parrainage_service.lister_filleuls(db, amb.id)]
+    return [
+        FilleulOut(**d)
+        for d in await parrainage_service.lister_filleuls(
+            db, amb.id, limit=limit, offset=offset
+        )
+    ]
 
 
 @router.get("/commissions", response_model=list[CommissionOut])
 async def commissions(
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
     current_user: CurrentUser = Depends(require_ambassadeur),
     db: AsyncSession = Depends(get_db),
 ) -> list[CommissionOut]:
@@ -200,12 +209,16 @@ async def commissions(
     amb = await _get_profil(db, current_user.id)
     return [
         CommissionOut(**d)
-        for d in await parrainage_service.lister_commissions(db, amb.id)
+        for d in await parrainage_service.lister_commissions(
+            db, amb.id, limit=limit, offset=offset
+        )
     ]
 
 
 @router.get("/versements", response_model=list[VersementOut])
 async def versements(
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
     current_user: CurrentUser = Depends(require_ambassadeur),
     db: AsyncSession = Depends(get_db),
 ) -> list[VersementOut]:
@@ -213,7 +226,9 @@ async def versements(
     amb = await _get_profil(db, current_user.id)
     return [
         VersementOut(**d)
-        for d in await parrainage_service.lister_versements(db, amb.id)
+        for d in await parrainage_service.lister_versements(
+            db, amb.id, limit=limit, offset=offset
+        )
     ]
 
 

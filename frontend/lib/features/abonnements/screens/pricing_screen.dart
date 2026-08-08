@@ -581,9 +581,9 @@ class _PriceBlock extends StatelessWidget {
                           '${AmountText.format(plan.prixAnnuel)} / an',
                           style: AppTextStyles.amountLarge,
                         ),
-                        const _Chip(
-                          label: '2 mois offerts',
-                          icon: Symbols.redeem,
+                        _Chip(
+                          label: 'Économisez ${AmountText.format(plan.economieAnnuelle)}',
+                          icon: Symbols.savings,
                           background: AppColors.accentContainer,
                           foreground: AppColors.onAccentContainer,
                         ),

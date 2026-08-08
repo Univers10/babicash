@@ -177,13 +177,21 @@ async def synthese(db: AsyncSession, ambassadeur_id: uuid.UUID) -> dict:
     }
 
 
-async def lister_filleuls(db: AsyncSession, ambassadeur_id: uuid.UUID) -> list[dict]:
+async def lister_filleuls(
+    db: AsyncSession,
+    ambassadeur_id: uuid.UUID,
+    *,
+    limit: int = 50,
+    offset: int = 0,
+) -> list[dict]:
     """Filleuls de l'ambassadeur avec l'état de leur abonnement + commission cumulée."""
     filleuls = (
         await db.execute(
             select(User)
             .where(User.parraine_par_ambassadeur_id == ambassadeur_id)
             .order_by(User.date_creation.desc())
+            .limit(limit)
+            .offset(offset)
         )
     ).scalars().all()
 
@@ -218,7 +226,11 @@ async def lister_filleuls(db: AsyncSession, ambassadeur_id: uuid.UUID) -> list[d
 
 
 async def lister_commissions(
-    db: AsyncSession, ambassadeur_id: uuid.UUID
+    db: AsyncSession,
+    ambassadeur_id: uuid.UUID,
+    *,
+    limit: int = 50,
+    offset: int = 0,
 ) -> list[dict]:
     """Historique des commissions (activité, style « transactions »)."""
     rows = (
@@ -227,6 +239,8 @@ async def lister_commissions(
             .join(User, User.id == CommissionParrainage.filleul_id)
             .where(CommissionParrainage.ambassadeur_id == ambassadeur_id)
             .order_by(CommissionParrainage.date_creation.desc())
+            .limit(limit)
+            .offset(offset)
         )
     ).all()
 
@@ -243,13 +257,21 @@ async def lister_commissions(
     ]
 
 
-async def lister_versements(db: AsyncSession, ambassadeur_id: uuid.UUID) -> list[dict]:
+async def lister_versements(
+    db: AsyncSession,
+    ambassadeur_id: uuid.UUID,
+    *,
+    limit: int = 50,
+    offset: int = 0,
+) -> list[dict]:
     """Historique des lots de versement d'un ambassadeur (récent d'abord)."""
     payouts = (
         await db.execute(
             select(Payout)
             .where(Payout.ambassadeur_id == ambassadeur_id)
             .order_by(Payout.date_creation.desc())
+            .limit(limit)
+            .offset(offset)
         )
     ).scalars().all()
     return [

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from functools import lru_cache
 
 from pydantic import field_validator
@@ -30,6 +31,10 @@ class Settings(BaseSettings):
     # OAuth (Google / Apple sign-in) : vide = fonctionnalité désactivée pour ce provider
     GOOGLE_CLIENT_ID: str = ""
     APPLE_CLIENT_ID: str = ""
+
+    # Ambassadeurs : solde minimum (FCFA) pour déclencher un versement hebdo.
+    # En dessous, le solde est reporté à la semaine suivante (cf. generer_payouts_semaine).
+    AMBASSADEUR_SEUIL_MIN_PAYOUT: Decimal = Decimal("0")
 
     @field_validator("SECRET_KEY")
     @classmethod

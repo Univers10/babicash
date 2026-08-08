@@ -32,6 +32,9 @@ class PlanDef {
 
   /// Prix annuel sans remise (affiché barré).
   double get prixAnnuelBarre => prixMensuel * 12;
+
+  /// Économie réalisée en payant annuellement (2 mois offerts).
+  double get economieAnnuelle => prixAnnuelBarre - prixAnnuel;
 }
 
 const kPlansCatalog = [

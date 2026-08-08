@@ -24,6 +24,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _mdpCtrl = TextEditingController();
+  final _codeParrainageCtrl = TextEditingController();
   bool _obscure = true;
 
   @override
@@ -45,6 +46,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void dispose() {
     _emailCtrl.dispose();
     _mdpCtrl.dispose();
+    _codeParrainageCtrl.dispose();
     super.dispose();
   }
 
@@ -168,6 +170,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const VGap(AppSpacing.xl),
 
+                  // Code de parrainage (optionnel) — utilisé lors de la création
+                  // de compte via Google.
+                  AppTextField(
+                    controller: _codeParrainageCtrl,
+                    label: 'Code de parrainage (optionnel)',
+                    hint: 'Ex. ABC123',
+                    prefixIcon: Symbols.card_giftcard,
+                    textInputAction: TextInputAction.done,
+                    textCapitalization: TextCapitalization.characters,
+                  ),
+                  const VGap(AppSpacing.lg),
+
                   // Connexion sociale
                   _SocialButton(
                     label: 'Continuer avec Google',
@@ -184,7 +198,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ? null
                         : () => ref
                             .read(authStateProvider.notifier)
-                            .loginWithGoogle(),
+                            .loginWithGoogle(
+                              codeParrainage: _codeParrainageCtrl.text,
+                            ),
                   ),
                   const VGap(AppSpacing.xl),
 

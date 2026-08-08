@@ -21,7 +21,11 @@ router = APIRouter()
 
 
 async def _resolve_oauth_user(
-    db: AsyncSession, claims: OAuthClaims, *, nom_hint: str | None = None
+    db: AsyncSession,
+    claims: OAuthClaims,
+    *,
+    nom_hint: str | None = None,
+    code_parrainage: str | None = None,
 ) -> User:
     rate_key = f"login:oauth:{claims.provider}:{claims.email or claims.sub}"
     if login_rate_limiter.is_locked(rate_key):
@@ -87,6 +91,7 @@ async def _resolve_oauth_user(
         oauth_provider=claims.provider,
         oauth_id=claims.sub,
         avatar_url=claims.picture,
+        code_parrainage=code_parrainage,
     )
     login_rate_limiter.record_success(rate_key)
     return user
@@ -103,7 +108,7 @@ async def login_google(
             status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)
         ) from exc
 
-    user = await _resolve_oauth_user(db, claims)
+    user = await _resolve_oauth_user(db, claims, code_parrainage=payload.code_parrainage)
     return _token_for(user)
 
 
@@ -118,7 +123,12 @@ async def login_apple(
             status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)
         ) from exc
 
-    user = await _resolve_oauth_user(db, claims, nom_hint=payload.nom)
+    user = await _resolve_oauth_user(
+        db,
+        claims,
+        nom_hint=payload.nom,
+        code_parrainage=payload.code_parrainage,
+    )
     return _token_for(user)
 
 
