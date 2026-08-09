@@ -139,7 +139,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   AppTextField(
                     controller: _codeParrainageCtrl,
                     label: 'Code de parrainage (optionnel)',
-                    hint: 'Ex. ABC123',
+                    hint: 'Ex. ABC123 — débloque 14 jours d\'essai',
                     prefixIcon: Symbols.card_giftcard,
                     textInputAction: TextInputAction.next,
                     textCapitalization: TextCapitalization.characters,

@@ -108,9 +108,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ],
 
           // ════════════════════════════════════════════════════════════════════
-          // ── 2. BOUTIQUE ────────────────────────────────────────────────────
+          // ── 2. ÉTABLISSEMENT ─────────────────────────────────────────────────
           // ════════════════════════════════════════════════════════════════════
-          const _SectionTitle('BOUTIQUE'),
+          const _SectionTitle('ÉTABLISSEMENT'),
           boutiqueAsync.when(
             loading: () => const _LoadingTile(),
             error: (_, __) => const _ErrorTile(message: 'Impossible de charger la boutique'),
@@ -121,7 +121,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const VGap(AppSpacing.sm),
           _SettingsTile(
             icon: Symbols.storefront,
-            title: user?.isOwner == true ? 'Gérer mes boutiques' : 'Modifier ma boutique',
+            title: user?.isOwner == true
+                ? 'Gérer mes établissements'
+                : 'Modifier mon établissement',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => const BoutiquesScreen(),

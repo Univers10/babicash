@@ -45,7 +45,7 @@ const kPlansCatalog = [
     prixMensuel: 0,
     icon: Symbols.storefront,
     features: [
-      '14 jours d\'essai gratuit',
+      '14 jours d\'essai avec un code de parrainage (sinon 20 ventes offertes)',
       '1 boutique',
       '1 gérant',
       'Gestion de stock de base',

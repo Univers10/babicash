@@ -18,6 +18,13 @@ class UnauthorizedException extends AppException {
   const UnauthorizedException([super.message = 'Session expirée. Reconnectez-vous.']);
 }
 
+class AccountDisabledException extends AppException {
+  const AccountDisabledException([
+    super.message =
+        'Votre compte a été désactivé. Contactez le service client BabiCash pour le réactiver.',
+  ]);
+}
+
 class ForbiddenException extends AppException {
   const ForbiddenException([super.message = 'Accès non autorisé.']);
 }
@@ -64,6 +71,10 @@ AppException mapDioError(DioException e) {
       final data = e.response?.data;
       switch (status) {
         case 401:
+          final detail401 = data is Map ? data['detail']?.toString() : null;
+          if (detail401 != null && detail401.contains('désactivé')) {
+            return const AccountDisabledException();
+          }
           return const UnauthorizedException();
         case 402:
           // Quota freemium dépassé — FastAPI wrape dans {"detail": {...}}

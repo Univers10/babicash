@@ -26,6 +26,7 @@ def _vente(boutique_id, produit_id, id_local):
 
 @pytest.mark.asyncio
 async def test_abonnement_cree_automatiquement(client, seeded):
+    """Sans code de parrainage : essai FREE limité à 20 ventes, sans date de fin."""
     token = await login(client, seeded["owner_email"], "boss1234")
     headers = {"Authorization": f"Bearer {token}"}
 
@@ -33,11 +34,11 @@ async def test_abonnement_cree_automatiquement(client, seeded):
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["plan"] == "FREE"
-    assert body["quota_ventes_par_boutique"] == 2147483647
+    assert body["quota_ventes_par_boutique"] == 20
     assert body["actif"] is True
     assert body["nb_boutiques"] == 1
     assert float(body["prix_base"]) == 0.0
-    assert body["date_fin"] is not None
+    assert body["date_fin"] is None
 
 
 @pytest.mark.asyncio
@@ -139,8 +140,8 @@ async def test_quota_kiosque_10000_ventes(client, seeded):
 
 
 @pytest.mark.asyncio
-async def test_quota_boutique_essai_gratuit(client, seeded):
-    """GET /abonnements/quota/{boutique_id} retourne les jours d'essai restants."""
+async def test_quota_boutique_essai_gratuit_sans_parrainage(client, seeded):
+    """Sans parrainage : GET /abonnements/quota retourne un essai de 20 ventes (pas de durée)."""
     token = await login(client, seeded["manager_email"], "gerant1234")
     headers = {"Authorization": f"Bearer {token}"}
 
@@ -150,12 +151,49 @@ async def test_quota_boutique_essai_gratuit(client, seeded):
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["plan"] == "FREE"
-    assert body["quota_par_boutique"] == 2147483647
+    assert body["quota_par_boutique"] == 20
     assert body["ventes_ce_mois"] == 0
-    assert body["ventes_restantes"] is None
-    assert body["illimite"] is True
-    assert isinstance(body["jours_essai_restant"], int)
-    assert 0 <= body["jours_essai_restant"] <= 14
+    assert body["ventes_restantes"] == 20
+    assert body["illimite"] is False
+    assert body["jours_essai_restant"] is None
+
+
+@pytest.mark.asyncio
+async def test_essai_avec_parrainage_14_jours_illimite(client, session_factory):
+    """Avec un code de parrainage valide : essai de 14 jours, ventes illimitées."""
+    r = await client.post(
+        "/api/v1/ambassadeurs/register",
+        json={
+            "nom": "Amb",
+            "email": "amb@promo.ci",
+            "mot_de_passe": "promo1234",
+            "telephone": None,
+            "code": "PROMO2026",
+            "momo_numero": "0700888999",
+            "momo_operateur": "wave",
+        },
+    )
+    assert r.status_code == 201, r.text
+
+    r = await client.post(
+        "/api/v1/auth/register",
+        json={
+            "nom": "Proprio",
+            "email": "filleul@boutique.ci",
+            "mot_de_passe": "boss1234",
+            "code_parrainage": "PROMO2026",
+        },
+    )
+    assert r.status_code == 200, r.text
+    token = r.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    body = (
+        await client.get("/api/v1/abonnements/mon-plan", headers=headers)
+    ).json()
+    assert body["plan"] == "FREE"
+    assert body["quota_ventes_par_boutique"] == 2147483647
+    assert body["date_fin"] is not None
 
 
 @pytest.mark.asyncio
