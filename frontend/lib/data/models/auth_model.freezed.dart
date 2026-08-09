@@ -374,6 +374,8 @@ mixin _$RegisterRequest {
   @JsonKey(name: 'mot_de_passe')
   String get motDePasse => throw _privateConstructorUsedError;
   String? get telephone => throw _privateConstructorUsedError;
+  @JsonKey(name: 'code_parrainage')
+  String? get codeParrainage => throw _privateConstructorUsedError;
 
   /// Serializes this RegisterRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -395,7 +397,8 @@ abstract class $RegisterRequestCopyWith<$Res> {
       {String nom,
       String email,
       @JsonKey(name: 'mot_de_passe') String motDePasse,
-      String? telephone});
+      String? telephone,
+      @JsonKey(name: 'code_parrainage') String? codeParrainage});
 }
 
 /// @nodoc
@@ -417,6 +420,7 @@ class _$RegisterRequestCopyWithImpl<$Res, $Val extends RegisterRequest>
     Object? email = null,
     Object? motDePasse = null,
     Object? telephone = freezed,
+    Object? codeParrainage = freezed,
   }) {
     return _then(_value.copyWith(
       nom: null == nom
@@ -435,6 +439,10 @@ class _$RegisterRequestCopyWithImpl<$Res, $Val extends RegisterRequest>
           ? _value.telephone
           : telephone // ignore: cast_nullable_to_non_nullable
               as String?,
+      codeParrainage: freezed == codeParrainage
+          ? _value.codeParrainage
+          : codeParrainage // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -451,7 +459,8 @@ abstract class _$$RegisterRequestImplCopyWith<$Res>
       {String nom,
       String email,
       @JsonKey(name: 'mot_de_passe') String motDePasse,
-      String? telephone});
+      String? telephone,
+      @JsonKey(name: 'code_parrainage') String? codeParrainage});
 }
 
 /// @nodoc
@@ -471,6 +480,7 @@ class __$$RegisterRequestImplCopyWithImpl<$Res>
     Object? email = null,
     Object? motDePasse = null,
     Object? telephone = freezed,
+    Object? codeParrainage = freezed,
   }) {
     return _then(_$RegisterRequestImpl(
       nom: null == nom
@@ -489,6 +499,10 @@ class __$$RegisterRequestImplCopyWithImpl<$Res>
           ? _value.telephone
           : telephone // ignore: cast_nullable_to_non_nullable
               as String?,
+      codeParrainage: freezed == codeParrainage
+          ? _value.codeParrainage
+          : codeParrainage // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -500,7 +514,8 @@ class _$RegisterRequestImpl implements _RegisterRequest {
       {required this.nom,
       required this.email,
       @JsonKey(name: 'mot_de_passe') required this.motDePasse,
-      this.telephone});
+      this.telephone,
+      @JsonKey(name: 'code_parrainage') this.codeParrainage});
 
   factory _$RegisterRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$RegisterRequestImplFromJson(json);
@@ -514,10 +529,13 @@ class _$RegisterRequestImpl implements _RegisterRequest {
   final String motDePasse;
   @override
   final String? telephone;
+  @override
+  @JsonKey(name: 'code_parrainage')
+  final String? codeParrainage;
 
   @override
   String toString() {
-    return 'RegisterRequest(nom: $nom, email: $email, motDePasse: $motDePasse, telephone: $telephone)';
+    return 'RegisterRequest(nom: $nom, email: $email, motDePasse: $motDePasse, telephone: $telephone, codeParrainage: $codeParrainage)';
   }
 
   @override
@@ -530,13 +548,15 @@ class _$RegisterRequestImpl implements _RegisterRequest {
             (identical(other.motDePasse, motDePasse) ||
                 other.motDePasse == motDePasse) &&
             (identical(other.telephone, telephone) ||
-                other.telephone == telephone));
+                other.telephone == telephone) &&
+            (identical(other.codeParrainage, codeParrainage) ||
+                other.codeParrainage == codeParrainage));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, nom, email, motDePasse, telephone);
+  int get hashCode => Object.hash(
+      runtimeType, nom, email, motDePasse, telephone, codeParrainage);
 
   /// Create a copy of RegisterRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -557,10 +577,12 @@ class _$RegisterRequestImpl implements _RegisterRequest {
 
 abstract class _RegisterRequest implements RegisterRequest {
   const factory _RegisterRequest(
-      {required final String nom,
-      required final String email,
-      @JsonKey(name: 'mot_de_passe') required final String motDePasse,
-      final String? telephone}) = _$RegisterRequestImpl;
+          {required final String nom,
+          required final String email,
+          @JsonKey(name: 'mot_de_passe') required final String motDePasse,
+          final String? telephone,
+          @JsonKey(name: 'code_parrainage') final String? codeParrainage}) =
+      _$RegisterRequestImpl;
 
   factory _RegisterRequest.fromJson(Map<String, dynamic> json) =
       _$RegisterRequestImpl.fromJson;
@@ -574,6 +596,9 @@ abstract class _RegisterRequest implements RegisterRequest {
   String get motDePasse;
   @override
   String? get telephone;
+  @override
+  @JsonKey(name: 'code_parrainage')
+  String? get codeParrainage;
 
   /// Create a copy of RegisterRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -591,6 +616,8 @@ GoogleTokenRequest _$GoogleTokenRequestFromJson(Map<String, dynamic> json) {
 mixin _$GoogleTokenRequest {
   @JsonKey(name: 'id_token')
   String get idToken => throw _privateConstructorUsedError;
+  @JsonKey(name: 'code_parrainage')
+  String? get codeParrainage => throw _privateConstructorUsedError;
 
   /// Serializes this GoogleTokenRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -608,7 +635,9 @@ abstract class $GoogleTokenRequestCopyWith<$Res> {
           GoogleTokenRequest value, $Res Function(GoogleTokenRequest) then) =
       _$GoogleTokenRequestCopyWithImpl<$Res, GoogleTokenRequest>;
   @useResult
-  $Res call({@JsonKey(name: 'id_token') String idToken});
+  $Res call(
+      {@JsonKey(name: 'id_token') String idToken,
+      @JsonKey(name: 'code_parrainage') String? codeParrainage});
 }
 
 /// @nodoc
@@ -627,12 +656,17 @@ class _$GoogleTokenRequestCopyWithImpl<$Res, $Val extends GoogleTokenRequest>
   @override
   $Res call({
     Object? idToken = null,
+    Object? codeParrainage = freezed,
   }) {
     return _then(_value.copyWith(
       idToken: null == idToken
           ? _value.idToken
           : idToken // ignore: cast_nullable_to_non_nullable
               as String,
+      codeParrainage: freezed == codeParrainage
+          ? _value.codeParrainage
+          : codeParrainage // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -645,7 +679,9 @@ abstract class _$$GoogleTokenRequestImplCopyWith<$Res>
       __$$GoogleTokenRequestImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({@JsonKey(name: 'id_token') String idToken});
+  $Res call(
+      {@JsonKey(name: 'id_token') String idToken,
+      @JsonKey(name: 'code_parrainage') String? codeParrainage});
 }
 
 /// @nodoc
@@ -662,12 +698,17 @@ class __$$GoogleTokenRequestImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? idToken = null,
+    Object? codeParrainage = freezed,
   }) {
     return _then(_$GoogleTokenRequestImpl(
       idToken: null == idToken
           ? _value.idToken
           : idToken // ignore: cast_nullable_to_non_nullable
               as String,
+      codeParrainage: freezed == codeParrainage
+          ? _value.codeParrainage
+          : codeParrainage // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -676,7 +717,8 @@ class __$$GoogleTokenRequestImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$GoogleTokenRequestImpl implements _GoogleTokenRequest {
   const _$GoogleTokenRequestImpl(
-      {@JsonKey(name: 'id_token') required this.idToken});
+      {@JsonKey(name: 'id_token') required this.idToken,
+      @JsonKey(name: 'code_parrainage') this.codeParrainage});
 
   factory _$GoogleTokenRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$GoogleTokenRequestImplFromJson(json);
@@ -684,10 +726,13 @@ class _$GoogleTokenRequestImpl implements _GoogleTokenRequest {
   @override
   @JsonKey(name: 'id_token')
   final String idToken;
+  @override
+  @JsonKey(name: 'code_parrainage')
+  final String? codeParrainage;
 
   @override
   String toString() {
-    return 'GoogleTokenRequest(idToken: $idToken)';
+    return 'GoogleTokenRequest(idToken: $idToken, codeParrainage: $codeParrainage)';
   }
 
   @override
@@ -695,12 +740,14 @@ class _$GoogleTokenRequestImpl implements _GoogleTokenRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$GoogleTokenRequestImpl &&
-            (identical(other.idToken, idToken) || other.idToken == idToken));
+            (identical(other.idToken, idToken) || other.idToken == idToken) &&
+            (identical(other.codeParrainage, codeParrainage) ||
+                other.codeParrainage == codeParrainage));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, idToken);
+  int get hashCode => Object.hash(runtimeType, idToken, codeParrainage);
 
   /// Create a copy of GoogleTokenRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -721,7 +768,8 @@ class _$GoogleTokenRequestImpl implements _GoogleTokenRequest {
 
 abstract class _GoogleTokenRequest implements GoogleTokenRequest {
   const factory _GoogleTokenRequest(
-          {@JsonKey(name: 'id_token') required final String idToken}) =
+          {@JsonKey(name: 'id_token') required final String idToken,
+          @JsonKey(name: 'code_parrainage') final String? codeParrainage}) =
       _$GoogleTokenRequestImpl;
 
   factory _GoogleTokenRequest.fromJson(Map<String, dynamic> json) =
@@ -730,6 +778,9 @@ abstract class _GoogleTokenRequest implements GoogleTokenRequest {
   @override
   @JsonKey(name: 'id_token')
   String get idToken;
+  @override
+  @JsonKey(name: 'code_parrainage')
+  String? get codeParrainage;
 
   /// Create a copy of GoogleTokenRequest
   /// with the given fields replaced by the non-null parameter values.

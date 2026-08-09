@@ -32,6 +32,9 @@ class PlanDef {
 
   /// Prix annuel sans remise (affiché barré).
   double get prixAnnuelBarre => prixMensuel * 12;
+
+  /// Économie réalisée en payant annuellement (2 mois offerts).
+  double get economieAnnuelle => prixAnnuelBarre - prixAnnuel;
 }
 
 const kPlansCatalog = [
@@ -42,7 +45,7 @@ const kPlansCatalog = [
     prixMensuel: 0,
     icon: Symbols.storefront,
     features: [
-      '14 jours d\'essai gratuit',
+      '14 jours d\'essai avec un code de parrainage (sinon 20 ventes offertes)',
       '1 boutique',
       '1 gérant',
       'Gestion de stock de base',
@@ -131,9 +134,10 @@ const kPlansCatalog = [
 
 /// Retrouve la carte du catalogue correspondant à l'abonnement backend.
 ///
-/// Le backend ne connaît aujourd'hui que 'FREE' et 'PRO' ; un plan 'PRO'
-/// est rattaché à la carte payante dont le prix correspond à [AbonnementOut.prixBase]
-/// (Boutique par défaut). Les codes futurs ('KIOSQUE', 'EMPIRE', …) matchent par id.
+/// Le backend expose désormais 'FREE', 'KIOSQUE', 'BOUTIQUE', 'COMMERCE',
+/// 'ENTREPRISE' et 'EMPIRE'. Les codes matchent par id. Pour rétrocompatibilité,
+/// un ancien plan 'PRO' est rattaché à la carte payante dont le prix correspond
+/// à [AbonnementOut.prixBase] (Boutique par défaut).
 PlanDef? planFromAbonnement(AbonnementOut abonnement) {
   final code = abonnement.plan.trim().toUpperCase();
   if (code == 'PRO') {

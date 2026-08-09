@@ -9,6 +9,11 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
+      workbox: {
+        // Précache aussi les polices Inter (self-hosted) pour un rendu
+        // fidèle à la charte même hors-ligne.
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+      },
       manifest: {
         name: 'BabiCash Ambassadeur',
         short_name: 'Ambassadeur',

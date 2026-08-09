@@ -23,16 +23,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nomCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
-  final _mdpCtrl = TextEditingController();
   final _telephoneCtrl = TextEditingController();
+  final _codeParrainageCtrl = TextEditingController();
+  final _mdpCtrl = TextEditingController();
   bool _obscure = true;
 
   @override
   void dispose() {
     _nomCtrl.dispose();
     _emailCtrl.dispose();
-    _mdpCtrl.dispose();
     _telephoneCtrl.dispose();
+    _codeParrainageCtrl.dispose();
+    _mdpCtrl.dispose();
     super.dispose();
   }
 
@@ -43,6 +45,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           _emailCtrl.text.trim(),
           _mdpCtrl.text,
           _telephoneCtrl.text.trim().isEmpty ? null : _telephoneCtrl.text.trim(),
+          codeParrainage:
+              _codeParrainageCtrl.text.trim().isEmpty ? null : _codeParrainageCtrl.text.trim(),
         );
   }
 
@@ -128,6 +132,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     keyboardType: TextInputType.phone,
                     prefixIcon: Symbols.phone,
                     textInputAction: TextInputAction.next,
+                  ),
+                  const VGap(AppSpacing.lg),
+
+                  // Code de parrainage (optionnel)
+                  AppTextField(
+                    controller: _codeParrainageCtrl,
+                    label: 'Code de parrainage (optionnel)',
+                    hint: 'Ex. ABC123 — débloque 14 jours d\'essai',
+                    prefixIcon: Symbols.card_giftcard,
+                    textInputAction: TextInputAction.next,
+                    textCapitalization: TextCapitalization.characters,
                   ),
                   const VGap(AppSpacing.lg),
 

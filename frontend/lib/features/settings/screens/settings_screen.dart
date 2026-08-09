@@ -11,6 +11,7 @@ import '../../../data/models/boutique_model.dart';
 import '../../../data/remote/users_api.dart';
 import '../../../data/models/auth_model.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/abonnements/models/plan_catalog.dart';
 import '../../../features/abonnements/providers/quota_provider.dart';
 import '../../../features/boutiques/providers/boutique_provider.dart';
 import '../../../features/boutiques/screens/boutiques_screen.dart';
@@ -107,9 +108,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ],
 
           // ════════════════════════════════════════════════════════════════════
-          // ── 2. BOUTIQUE ────────────────────────────────────────────────────
+          // ── 2. ÉTABLISSEMENT ─────────────────────────────────────────────────
           // ════════════════════════════════════════════════════════════════════
-          const _SectionTitle('BOUTIQUE'),
+          const _SectionTitle('ÉTABLISSEMENT'),
           boutiqueAsync.when(
             loading: () => const _LoadingTile(),
             error: (_, __) => const _ErrorTile(message: 'Impossible de charger la boutique'),
@@ -120,7 +121,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const VGap(AppSpacing.sm),
           _SettingsTile(
             icon: Symbols.storefront,
-            title: user?.isOwner == true ? 'Gérer mes boutiques' : 'Modifier ma boutique',
+            title: user?.isOwner == true
+                ? 'Gérer mes établissements'
+                : 'Modifier mon établissement',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => const BoutiquesScreen(),
@@ -547,13 +550,58 @@ class _AbonnementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isPro = abonnement.plan.toUpperCase() != 'FREE';
+    final planDef = planFromAbonnement(abonnement);
+    final isFree = abonnement.plan.toUpperCase() == 'FREE';
+    final isActive = abonnement.actif;
+
+    Color badgeColor;
+    String badgeText;
+    IconData icon;
+    Color iconBg;
+    Color iconFg;
+    Color borderColor;
+
+    // Icône spécifique au plan quand il est connu du catalogue.
+    final planIcon = planDef?.icon;
+
+    if (isFree) {
+      if (isActive) {
+        badgeColor = AppColors.success;
+        badgeText = 'Essai gratuit';
+        icon = Symbols.timer;
+        iconBg = AppColors.success.withValues(alpha: 0.12);
+        iconFg = AppColors.success;
+        borderColor = AppColors.success.withValues(alpha: 0.4);
+      } else {
+        badgeColor = AppColors.error;
+        badgeText = 'Essai terminé';
+        icon = Symbols.lock;
+        iconBg = AppColors.error.withValues(alpha: 0.12);
+        iconFg = AppColors.error;
+        borderColor = AppColors.error.withValues(alpha: 0.4);
+      }
+    } else if (isActive) {
+      badgeColor = AppColors.accent;
+      badgeText = 'Actif';
+      icon = planIcon ?? Symbols.workspace_premium;
+      iconBg = AppColors.accentContainer;
+      iconFg = AppColors.accentDark;
+      borderColor = AppColors.accent.withValues(alpha: 0.4);
+    } else {
+      badgeColor = AppColors.error;
+      badgeText = 'Inactif';
+      icon = Symbols.lock;
+      iconBg = AppColors.error.withValues(alpha: 0.12);
+      iconFg = AppColors.error;
+      borderColor = AppColors.error.withValues(alpha: 0.4);
+    }
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: AppSpacing.borderRadiusLg,
-        border: Border.all(color: isPro ? AppColors.accent.withValues(alpha: 0.4) : AppColors.borderLight),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         children: [
@@ -561,14 +609,10 @@ class _AbonnementCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: isPro ? AppColors.accentContainer : AppColors.surfaceVariant,
+              color: iconBg,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              isPro ? Symbols.workspace_premium : Symbols.card_membership,
-              color: isPro ? AppColors.accentDark : AppColors.textSecondary,
-              size: 22,
-            ),
+            child: Icon(icon, color: iconFg, size: 22),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -577,19 +621,23 @@ class _AbonnementCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text('Plan ${abonnement.plan}', style: AppTextStyles.headlineSmall),
-                    if (isPro) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                        decoration: BoxDecoration(
-                          color: AppColors.accent,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text('PRO', style: AppTextStyles.caption.copyWith(
-                          color: Colors.white, fontWeight: FontWeight.w700, fontSize: 9)),
+                    Text(planDef?.nom ?? 'Plan ${abonnement.plan}', style: AppTextStyles.headlineSmall),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: badgeColor,
+                        borderRadius: BorderRadius.circular(4),
                       ),
-                    ],
+                      child: Text(
+                        badgeText,
+                        style: AppTextStyles.caption.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 9,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),

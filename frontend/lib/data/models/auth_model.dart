@@ -30,6 +30,7 @@ class RegisterRequest with _$RegisterRequest {
     required String email,
     @JsonKey(name: 'mot_de_passe') required String motDePasse,
     String? telephone,
+    @JsonKey(name: 'code_parrainage') String? codeParrainage,
   }) = _RegisterRequest;
   factory RegisterRequest.fromJson(Map<String, dynamic> json) =>
       _$RegisterRequestFromJson(json);
@@ -39,6 +40,7 @@ class RegisterRequest with _$RegisterRequest {
 class GoogleTokenRequest with _$GoogleTokenRequest {
   const factory GoogleTokenRequest({
     @JsonKey(name: 'id_token') required String idToken,
+    @JsonKey(name: 'code_parrainage') String? codeParrainage,
   }) = _GoogleTokenRequest;
   factory GoogleTokenRequest.fromJson(Map<String, dynamic> json) =>
       _$GoogleTokenRequestFromJson(json);

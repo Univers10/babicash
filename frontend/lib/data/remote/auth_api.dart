@@ -40,10 +40,16 @@ class AuthApi {
     return TokenResponse.fromJson(resp.data!);
   }
 
-  Future<TokenResponse> loginGoogle(GoogleTokenRequest request) async {
+  Future<TokenResponse> loginGoogle(
+    String idToken, {
+    String? codeParrainage,
+  }) async {
     final resp = await _dio.post<Map<String, dynamic>>(
       '$_baseUrl/auth/oauth/google',
-      data: request.toJson(),
+      data: GoogleTokenRequest(
+        idToken: idToken,
+        codeParrainage: codeParrainage,
+      ).toJson(),
     );
     return TokenResponse.fromJson(resp.data!);
   }

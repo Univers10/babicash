@@ -3,7 +3,7 @@ from sqlalchemy import select
 
 import app.api.v1.oauth as oauth_module
 from app.core.oauth import OAuthClaims
-from app.models import Boutique, User
+from app.models import Ambassadeur, Boutique, User
 
 
 def _claims(**overrides) -> OAuthClaims:
@@ -45,6 +45,52 @@ async def test_google_nouveau_compte_cree(client, session_factory, monkeypatch):
             )
         ).scalars().all()
         assert len(boutiques) == 1
+
+
+@pytest.mark.asyncio
+async def test_google_nouveau_compte_rattache_au_parrain(
+    client, session_factory, monkeypatch
+):
+    """Nouveau compte via Google + code_parrainage → rattaché à l'ambassadeur."""
+    r = await client.post(
+        "/api/v1/ambassadeurs/register",
+        json={
+            "nom": "Amb",
+            "email": "amb@promo.ci",
+            "mot_de_passe": "promo1234",
+            "telephone": None,
+            "code": "KOSSIVI",
+            "momo_numero": "0700888999",
+            "momo_operateur": "wave",
+        },
+    )
+    assert r.status_code == 201, r.text
+    amb_token = r.json()["access_token"]
+    amb_id = (
+        await client.get(
+            "/api/v1/ambassadeurs/moi",
+            headers={"Authorization": f"Bearer {amb_token}"},
+        )
+    ).json()["id"]
+
+    async def fake_verify(id_token: str):
+        return _claims(sub="google-sub-parrain", email="filleul-google@gmail.com")
+
+    monkeypatch.setattr(oauth_module, "verify_google_id_token", fake_verify)
+
+    resp = await client.post(
+        "/api/v1/auth/oauth/google",
+        json={"id_token": "fake", "code_parrainage": "kossivi"},
+    )
+    assert resp.status_code == 200, resp.text
+
+    async with session_factory() as db:
+        user = (
+            await db.execute(
+                select(User).where(User.email == "filleul-google@gmail.com")
+            )
+        ).scalar_one()
+        assert str(user.parraine_par_ambassadeur_id) == amb_id
 
 
 @pytest.mark.asyncio

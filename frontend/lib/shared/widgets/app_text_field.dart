@@ -15,6 +15,7 @@ class AppTextField extends StatelessWidget {
     this.validator,
     this.onChanged,
     this.onFieldSubmitted,
+    this.textCapitalization = TextCapitalization.none,
     this.inputFormatters,
     this.maxLines = 1,
     this.readOnly = false,
@@ -33,6 +34,7 @@ class AppTextField extends StatelessWidget {
   final FormFieldValidator<String>? validator;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onFieldSubmitted;
+  final TextCapitalization textCapitalization;
   final List<TextInputFormatter>? inputFormatters;
   final int? maxLines;
   final bool readOnly;
@@ -49,6 +51,7 @@ class AppTextField extends StatelessWidget {
       validator: validator,
       onChanged: onChanged,
       onFieldSubmitted: onFieldSubmitted,
+      textCapitalization: textCapitalization,
       inputFormatters: inputFormatters,
       maxLines: maxLines,
       readOnly: readOnly,

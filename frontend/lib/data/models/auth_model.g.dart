@@ -39,6 +39,7 @@ _$RegisterRequestImpl _$$RegisterRequestImplFromJson(
       email: json['email'] as String,
       motDePasse: json['mot_de_passe'] as String,
       telephone: json['telephone'] as String?,
+      codeParrainage: json['code_parrainage'] as String?,
     );
 
 Map<String, dynamic> _$$RegisterRequestImplToJson(
@@ -48,18 +49,21 @@ Map<String, dynamic> _$$RegisterRequestImplToJson(
       'email': instance.email,
       'mot_de_passe': instance.motDePasse,
       'telephone': instance.telephone,
+      'code_parrainage': instance.codeParrainage,
     };
 
 _$GoogleTokenRequestImpl _$$GoogleTokenRequestImplFromJson(
         Map<String, dynamic> json) =>
     _$GoogleTokenRequestImpl(
       idToken: json['id_token'] as String,
+      codeParrainage: json['code_parrainage'] as String?,
     );
 
 Map<String, dynamic> _$$GoogleTokenRequestImplToJson(
         _$GoogleTokenRequestImpl instance) =>
     <String, dynamic>{
       'id_token': instance.idToken,
+      'code_parrainage': instance.codeParrainage,
     };
 
 _$TokenResponseImpl _$$TokenResponseImplFromJson(Map<String, dynamic> json) =>

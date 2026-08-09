@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
@@ -9,7 +10,7 @@ from app.core.rate_limit import login_rate_limiter, pin_rate_limiter
 from app.core.security import create_access_token, hash_password, verify_password, verify_pin
 from app.deps import get_current_user
 from app.models import Abonnement, Boutique, User
-from app.services.abonnement_service import PLAN_CATALOG
+from app.services.abonnement_service import PLAN_CATALOG, QUOTA_ESSAI_SANS_PARRAINAGE
 from app.services.ambassadeur_service import resoudre_parrain
 from app.schemas.auth import (
     CurrentUser,
@@ -85,14 +86,27 @@ async def provision_owner_with_boutique(
     db.add(boutique)
     await db.flush()
 
+    # Essai gratuit : 14 jours illimités si rattaché à un ambassadeur (code de
+    # parrainage valide), sinon un nombre limité de ventes sans limite de temps.
     cfg = PLAN_CATALOG["FREE"]
+    if parraine_par is not None:
+        quota = cfg["quota_ventes"]
+        date_fin_essai = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(
+            days=cfg["duree_essai_jours"]
+        )
+    else:
+        quota = QUOTA_ESSAI_SANS_PARRAINAGE
+        date_fin_essai = None
+
     abonnement = Abonnement(
         proprietaire_id=str(user.id),
         plan="FREE",
         prix_base=cfg["prix_base"],
-        quota_ventes_par_boutique=cfg["quota_ventes"],
+        quota_ventes_par_boutique=quota,
         nb_boutiques_max=cfg["nb_boutiques_max"],
         nb_gerants_max=cfg["nb_gerants_max"],
+        date_fin=date_fin_essai,
+        actif=True,
     )
     db.add(abonnement)
 

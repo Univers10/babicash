@@ -3,6 +3,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { checkCode } from '../api/ambassadeur'
 import type { Operateur } from '../api/types'
+import {
+  IconCheckCircle,
+  IconEye,
+  IconEyeOff,
+  IconMail,
+  IconPhone,
+} from '../components/icons'
 
 const OPERATEURS: Operateur[] = ['WAVE', 'ORANGE', 'MTN', 'MOOV']
 const RAISONS: Record<string, string> = {
@@ -24,6 +31,7 @@ export default function RegisterScreen() {
   const [nom, setNom] = useState('')
   const [email, setEmail] = useState('')
   const [mdp, setMdp] = useState('')
+  const [showMdp, setShowMdp] = useState(false)
   const [tel, setTel] = useState('')
   const [code, setCode] = useState('')
   const [momo, setMomo] = useState('')
@@ -76,7 +84,7 @@ export default function RegisterScreen() {
 
   return (
     <div className="app-shell">
-      <div className="screen--auth">
+      <div className="screen--auth screen--scroll">
         <div className="brand">
           <img className="logo" src="/icon.svg" alt="" />
           <h1>Devenir ambassadeur</h1>
@@ -86,99 +94,156 @@ export default function RegisterScreen() {
         <form onSubmit={submit}>
           {error && <div className="form-error">{error}</div>}
 
+          <div className="form-section-title">Informations personnelles</div>
           <div className="field">
             <label>Nom complet</label>
             <input className="input" value={nom} onChange={(e) => setNom(e.target.value)} required />
           </div>
           <div className="field">
             <label>Email</label>
-            <input
-              className="input"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            <div className="input-wrap">
+              <input
+                className="input"
+                style={{ paddingLeft: 40 }}
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <span
+                style={{
+                  position: 'absolute',
+                  left: 14,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--text-tertiary)',
+                }}
+              >
+                <IconMail width={17} height={17} />
+              </span>
+            </div>
           </div>
           <div className="field">
             <label>Mot de passe</label>
-            <input
-              className="input"
-              type="password"
-              autoComplete="new-password"
-              minLength={6}
-              value={mdp}
-              onChange={(e) => setMdp(e.target.value)}
-              required
-            />
+            <div className="input-wrap">
+              <input
+                className="input"
+                type={showMdp ? 'text' : 'password'}
+                autoComplete="new-password"
+                minLength={6}
+                value={mdp}
+                onChange={(e) => setMdp(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="input-suffix-btn"
+                onClick={() => setShowMdp((v) => !v)}
+                aria-label={showMdp ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+              >
+                {showMdp ? <IconEyeOff width={18} height={18} /> : <IconEye width={18} height={18} />}
+              </button>
+            </div>
           </div>
           <div className="field">
             <label>Téléphone (facultatif)</label>
-            <input
-              className="input"
-              inputMode="tel"
-              value={tel}
-              onChange={(e) => setTel(e.target.value)}
-            />
+            <div className="input-wrap">
+              <input
+                className="input"
+                style={{ paddingLeft: 40 }}
+                inputMode="tel"
+                value={tel}
+                onChange={(e) => setTel(e.target.value)}
+              />
+              <span
+                style={{
+                  position: 'absolute',
+                  left: 14,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--text-tertiary)',
+                }}
+              >
+                <IconPhone width={17} height={17} />
+              </span>
+            </div>
           </div>
 
+          <div className="form-section-title">Ton code de parrainage</div>
           <div className="field">
-            <label>Ton code de parrainage</label>
+            <label>Choisis un code unique</label>
             <input
-              className="input"
+              className={'input' + (codeState.ok === false ? ' invalid' : '')}
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="ex. KOUASSI7"
               autoCapitalize="characters"
               maxLength={20}
               required
-              style={{ textTransform: 'uppercase', letterSpacing: 1 }}
+              style={{ textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700 }}
             />
             {codeNorm.length >= 4 && (
-              <div
-                className={
-                  'hint ' +
-                  (codeState.loading ? '' : codeState.ok ? 'hint--ok' : 'hint--ko')
-                }
-              >
-                {codeState.loading
-                  ? 'Vérification…'
-                  : codeState.ok
-                    ? '✅ Ce code est disponible'
-                    : '❌ ' + (RAISONS[codeState.raison ?? ''] ?? 'Indisponible')}
+              <div className={'hint ' + (codeState.loading ? 'hint--loading' : codeState.ok ? 'hint--ok' : 'hint--ko')}>
+                {codeState.loading ? (
+                  'Vérification…'
+                ) : codeState.ok ? (
+                  <>
+                    <IconCheckCircle width={14} height={14} /> Ce code est disponible
+                  </>
+                ) : (
+                  RAISONS[codeState.raison ?? ''] ?? 'Indisponible'
+                )}
               </div>
             )}
+            <div className="field-hint">4 à 20 caractères, lettres et chiffres uniquement.</div>
           </div>
 
+          <div className="form-section-title">Versement Mobile Money</div>
           <div className="field">
-            <label>Numéro Mobile Money (versements)</label>
-            <input
-              className="input"
-              inputMode="tel"
-              value={momo}
-              onChange={(e) => setMomo(e.target.value)}
-              required
-            />
+            <label>Numéro Mobile Money</label>
+            <div className="input-wrap">
+              <input
+                className="input"
+                style={{ paddingLeft: 40 }}
+                inputMode="tel"
+                value={momo}
+                onChange={(e) => setMomo(e.target.value)}
+                required
+              />
+              <span
+                style={{
+                  position: 'absolute',
+                  left: 14,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--text-tertiary)',
+                }}
+              >
+                <IconPhone width={17} height={17} />
+              </span>
+            </div>
           </div>
-          <div className="field">
+          <div className="field" style={{ marginBottom: 6 }}>
             <label>Opérateur</label>
-            <select
-              className="select"
-              value={op}
-              onChange={(e) => setOp(e.target.value as Operateur)}
-            >
+            <div className="chip-group">
               {OPERATEURS.map((o) => (
-                <option key={o} value={o}>
+                <button
+                  key={o}
+                  type="button"
+                  className={'chip-option' + (op === o ? ' active' : '')}
+                  onClick={() => setOp(o)}
+                >
                   {o}
-                </option>
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
           <button
             className="btn btn--primary btn--block"
+            style={{ marginTop: 20 }}
             disabled={loading || (codeNorm.length >= 4 && codeState.ok === false)}
           >
             {loading ? 'Création…' : 'Créer mon compte'}

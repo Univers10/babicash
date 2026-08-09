@@ -7,9 +7,14 @@ from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Abonnement, Boutique, Vente
+from app.models import Abonnement, Boutique, User, Vente
 
 _UNLIMITED = 2_147_483_647  # sentinel pour "illimité"
+
+# Essai gratuit sans code de parrainage : limité en nombre de ventes (pas de
+# limite de temps). Avec un code de parrainage valide, l'essai est celui du
+# catalogue FREE (14 jours, ventes illimitées pendant l'essai).
+QUOTA_ESSAI_SANS_PARRAINAGE = 20
 
 # Catalogue des plans — doit correspondre au frontend plan_catalog.dart
 PLAN_CATALOG: dict[str, dict] = {
@@ -109,10 +114,29 @@ def calculer_prix_total(prix_base: Decimal, nb_boutiques: int) -> Decimal:
     return prix_base * (1 + _REMISE_MULTI * (nb_boutiques - 1))
 
 
+async def _a_un_parrain(db: AsyncSession, proprietaire_id: str) -> bool:
+    """Vrai si le propriétaire s'est inscrit avec un code de parrainage valide."""
+    try:
+        user_id = uuid.UUID(str(proprietaire_id))
+    except ValueError:
+        return False
+    parrain_id = (
+        await db.execute(
+            select(User.parraine_par_ambassadeur_id).where(User.id == user_id)
+        )
+    ).scalar_one_or_none()
+    return parrain_id is not None
+
+
 async def get_or_create_abonnement(
     db: AsyncSession, proprietaire_id: str
 ) -> Abonnement:
-    """Retourne l'abonnement du propriétaire, en crée un FREE si absent."""
+    """Retourne l'abonnement du propriétaire, en crée un FREE si absent.
+
+    Essai gratuit : 14 jours illimités si le propriétaire a été parrainé par
+    un ambassadeur (code de parrainage valide à l'inscription), sinon
+    :data:`QUOTA_ESSAI_SANS_PARRAINAGE` ventes sans limite de temps.
+    """
     abo = (
         await db.execute(
             select(Abonnement).where(Abonnement.proprietaire_id == proprietaire_id)
@@ -121,16 +145,20 @@ async def get_or_create_abonnement(
 
     if abo is None:
         cfg = PLAN_CATALOG["FREE"]
-        now = _maintenant()
-        fin_essai = now + timedelta(days=cfg["duree_essai_jours"])
+        if await _a_un_parrain(db, proprietaire_id):
+            quota = cfg["quota_ventes"]
+            date_fin = _maintenant() + timedelta(days=cfg["duree_essai_jours"])
+        else:
+            quota = QUOTA_ESSAI_SANS_PARRAINAGE
+            date_fin = None
         abo = Abonnement(
             proprietaire_id=proprietaire_id,
             plan="FREE",
             prix_base=cfg["prix_base"],
-            quota_ventes_par_boutique=cfg["quota_ventes"],
+            quota_ventes_par_boutique=quota,
             nb_boutiques_max=cfg["nb_boutiques_max"],
             nb_gerants_max=cfg["nb_gerants_max"],
-            date_fin=fin_essai,
+            date_fin=date_fin,
             actif=True,
         )
         db.add(abo)
@@ -174,6 +202,22 @@ async def compter_ventes_mois(
     return int(count)
 
 
+async def compter_ventes_totales(db: AsyncSession, proprietaire_id: str) -> int:
+    """Compte le total de ventes (toutes boutiques, tous mois) d'un propriétaire.
+
+    Utilisé pour l'essai sans parrainage, limité en nombre de ventes plutôt
+    qu'en durée.
+    """
+    count = (
+        await db.execute(
+            select(func.count(Vente.id))
+            .join(Boutique, Boutique.id == Vente.boutique_id)
+            .where(Boutique.proprietaire_id == proprietaire_id)
+        )
+    ).scalar_one()
+    return int(count)
+
+
 async def peut_creer_boutique(
     db: AsyncSession, proprietaire_id: str
 ) -> tuple[bool, Abonnement, int]:
@@ -214,9 +258,14 @@ async def verifier_quota(
     if not abo.actif:
         return False, abo, ventes_mois
 
-    # Essai gratuit : autorisé pendant la durée de l'essai
     if abo.plan == "FREE":
-        return True, abo, ventes_mois
+        # Essai chronométré (parrainage) : ventes illimitées pendant l'essai.
+        if abo.date_fin is not None:
+            return True, abo, ventes_mois
+        # Essai sans parrainage : limité en nombre total de ventes (pas par mois).
+        ventes_totales = await compter_ventes_totales(db, proprietaire_id)
+        autorise = (ventes_totales + nb_nouvelles_ventes) <= abo.quota_ventes_par_boutique
+        return autorise, abo, ventes_totales
 
     autorise = (ventes_mois + nb_nouvelles_ventes) <= abo.quota_ventes_par_boutique
 

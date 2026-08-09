@@ -63,26 +63,44 @@ async def get_quota_boutique(
     current_user: CurrentUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Retourne le quota utilisé ce mois pour une boutique donnée."""
+    """Retourne le quota utilisé pour une boutique donnée.
+
+    Pour l'essai FREE sans parrainage, les ventes sont comptées sur
+    l'ensemble de la vie du compte (pas seulement le mois), car l'essai est
+    limité en nombre total de ventes plutôt qu'en durée.
+    """
     boutique = await get_authorized_boutique(db, current_user, boutique_id)
     abo = await abonnement_service.get_or_create_abonnement(db, boutique.proprietaire_id)
     ventes_mois = await abonnement_service.compter_ventes_mois(db, boutique_id)
 
     pro_actif = abonnement_service.est_pro_actif(abo)
+    essai_chronometre = abo.plan == "FREE" and abo.date_fin is not None
+    essai_par_ventes = abo.plan == "FREE" and abo.date_fin is None
 
     jours_essai_restant = None
-    if abo.plan == "FREE" and abo.date_fin is not None:
+    if essai_chronometre:
         jours_essai_restant = max(
             0, (abo.date_fin.replace(tzinfo=None) - abonnement_service._maintenant()).days
         )
+
+    ventes_comptees = (
+        await abonnement_service.compter_ventes_totales(db, boutique.proprietaire_id)
+        if essai_par_ventes
+        else ventes_mois
+    )
+
+    illimite = pro_actif or essai_chronometre
+    ventes_restantes = (
+        None if illimite else max(0, abo.quota_ventes_par_boutique - ventes_comptees)
+    )
 
     return {
         "boutique_id": str(boutique_id),
         "plan": abo.plan,
         "quota_par_boutique": abo.quota_ventes_par_boutique,
-        "ventes_ce_mois": ventes_mois,
-        "ventes_restantes": None if pro_actif or abo.plan == "FREE" else max(0, abo.quota_ventes_par_boutique - ventes_mois),
-        "illimite": pro_actif or abo.plan == "FREE",
+        "ventes_ce_mois": ventes_comptees,
+        "ventes_restantes": ventes_restantes,
+        "illimite": illimite,
         "jours_essai_restant": jours_essai_restant,
     }
 

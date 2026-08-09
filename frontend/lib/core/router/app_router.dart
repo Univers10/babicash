@@ -16,6 +16,7 @@ import '../../features/sessions/screens/sessions_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import '../../features/dashboard/screens/boutique_performance_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
+import '../../features/shop/screens/shop_screen.dart';
 import '../../features/ventes/screens/historique_screen.dart';
 import '../../shared/screens/shell_screen.dart';
 
@@ -36,6 +37,7 @@ abstract final class AppRoutes {
   static const boutiquePerformance = '/dashboard/boutique/:id';
   static const historique = '/historique';
   static const abonnement = '/abonnement';
+  static const boutiqueShop = '/boutique/shop';
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -137,6 +139,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.abonnement,
             builder: (_, __) => const PricingScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.boutiqueShop,
+            builder: (_, __) => const ShopScreen(),
           ),
         ],
       ),
