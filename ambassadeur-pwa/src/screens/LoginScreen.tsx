@@ -95,6 +95,9 @@ export default function LoginScreen() {
         <div className="auth-footer">
           Pas encore ambassadeur ? <Link to="/register">Créer un compte</Link>
         </div>
+        <div className="legal-links">
+          <Link to="/conditions-utilisation">Conditions d'utilisation</Link>
+        </div>
       </div>
     </div>
   )

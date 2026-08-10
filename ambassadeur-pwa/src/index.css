@@ -1137,3 +1137,227 @@ a.list-item,
 .text-secondary {
   color: var(--text-secondary);
 }
+
+/* ---- Lien légal (login / register) ---- */
+.legal-links {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.legal-links a {
+  color: var(--text-tertiary);
+  text-decoration: underline;
+}
+
+/* ---- Acceptation CGU (inscription) ---- */
+.cgu-accept {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 18px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.cgu-accept input {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.cgu-accept a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* ---- Page Conditions d'utilisation ---- */
+.screen--legal {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.cgu-meta {
+  margin-bottom: var(--sp-2);
+}
+
+.cgu-intro {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin: 0 0 10px;
+}
+
+.cgu-date {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.cgu-section {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-3);
+}
+
+.cgu-section h2 {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 10px;
+}
+
+.cgu-num {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: var(--primary-container);
+  color: var(--primary);
+  border-radius: var(--radius-full);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.cgu-body {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+.cgu-body p {
+  margin: 0 0 10px;
+}
+
+.cgu-body p:last-child {
+  margin-bottom: 0;
+}
+
+.cgu-body ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.cgu-body li {
+  margin-bottom: 8px;
+}
+
+.cgu-body li:last-child {
+  margin-bottom: 0;
+}
+
+.cgu-body strong {
+  color: var(--text);
+}
+
+.cgu-body a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.cgu-end {
+  text-align: center;
+  padding: var(--sp-3) 0 var(--sp-8);
+}
+
+.back-btn {
+  height: auto;
+  font-size: 13.5px;
+}
+
+/* ---- Bannière « Télécharger l'application » (PWA installable) ---- */
+.install-banner {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: var(--sp-3) var(--sp-4) 0;
+  padding: 12px 14px;
+  background: var(--primary-dark);
+  color: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  animation: banner-in 0.28s var(--ease);
+}
+
+@keyframes banner-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.install-banner-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-full);
+}
+
+.install-banner-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.install-banner-title {
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+.install-banner-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.78);
+  margin-top: 2px;
+  line-height: 1.35;
+}
+
+.install-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.install-banner .btn--sm {
+  height: 38px;
+  padding: 0 16px;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.install-banner-close {
+  color: rgba(255, 255, 255, 0.85) !important;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-full);
+}
+
+.install-banner-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+}

@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { useAuth } from './auth/AuthContext'
 import BottomNav from './components/BottomNav'
+import InstallBanner from './components/InstallBanner'
 import LoginScreen from './screens/LoginScreen'
 import RegisterScreen from './screens/RegisterScreen'
 import HomeScreen from './screens/HomeScreen'
@@ -9,12 +10,14 @@ import FilleulsScreen from './screens/FilleulsScreen'
 import GainsScreen from './screens/GainsScreen'
 import NotificationsScreen from './screens/NotificationsScreen'
 import ProfilScreen from './screens/ProfilScreen'
+import TermsScreen from './screens/TermsScreen'
 
 function Shell({ children }: { children: ReactNode }) {
   const { session } = useAuth()
   if (!session) return <Navigate to="/login" replace />
   return (
     <div className="app-shell">
+      <InstallBanner />
       {children}
       <BottomNav />
     </div>
@@ -33,6 +36,7 @@ export default function App() {
         path="/register"
         element={session ? <Navigate to="/" replace /> : <RegisterScreen />}
       />
+      <Route path="/conditions-utilisation" element={<TermsScreen />} />
       <Route
         path="/"
         element={

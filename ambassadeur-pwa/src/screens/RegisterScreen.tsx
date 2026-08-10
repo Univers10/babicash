@@ -36,6 +36,7 @@ export default function RegisterScreen() {
   const [code, setCode] = useState('')
   const [momo, setMomo] = useState('')
   const [op, setOp] = useState<Operateur>('WAVE')
+  const [acceptCgu, setAcceptCgu] = useState(false)
 
   const [codeState, setCodeState] = useState<CodeState>({ loading: false })
   const [error, setError] = useState<string>()
@@ -62,6 +63,10 @@ export default function RegisterScreen() {
 
   async function submit(e: FormEvent) {
     e.preventDefault()
+    if (!acceptCgu) {
+      setError("Tu dois accepter les conditions d'utilisation pour créer ton compte.")
+      return
+    }
     setError(undefined)
     setLoading(true)
     try {
@@ -241,6 +246,19 @@ export default function RegisterScreen() {
             </div>
           </div>
 
+          <label className="cgu-accept">
+            <input
+              type="checkbox"
+              checked={acceptCgu}
+              onChange={(e) => setAcceptCgu(e.target.checked)}
+            />
+            <span>
+              J'ai lu et j'accepte les{' '}
+              <Link to="/conditions-utilisation">conditions d'utilisation</Link> du programme
+              BabiCash.
+            </span>
+          </label>
+
           <button
             className="btn btn--primary btn--block"
             style={{ marginTop: 20 }}
@@ -252,6 +270,9 @@ export default function RegisterScreen() {
 
         <div className="auth-footer">
           Déjà un compte ? <Link to="/login">Se connecter</Link>
+        </div>
+        <div className="legal-links">
+          <Link to="/conditions-utilisation">Conditions d'utilisation</Link>
         </div>
       </div>
     </div>
