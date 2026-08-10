@@ -7,6 +7,7 @@ import RegisterScreen from './screens/RegisterScreen'
 import HomeScreen from './screens/HomeScreen'
 import FilleulsScreen from './screens/FilleulsScreen'
 import GainsScreen from './screens/GainsScreen'
+import NotificationsScreen from './screens/NotificationsScreen'
 import ProfilScreen from './screens/ProfilScreen'
 
 function Shell({ children }: { children: ReactNode }) {
@@ -61,6 +62,14 @@ export default function App() {
         element={
           <Shell>
             <ProfilScreen />
+          </Shell>
+        }
+      />
+      <Route
+        path="/notifications"
+        element={
+          <Shell>
+            <NotificationsScreen />
           </Shell>
         }
       />

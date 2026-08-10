@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { useAsync } from '../hooks/useAsync'
 import { getCommissions, getMonEspace } from '../api/ambassadeur'
+import NotifBell from '../components/NotifBell'
 import {
   Avatar,
   Card,
@@ -65,6 +66,7 @@ export default function HomeScreen() {
             <p className="greeting">{heureDuJour()}</p>
             <h1>{prenom}</h1>
           </div>
+          <NotifBell />
         </div>
         <SkeletonHero />
         <div style={{ marginTop: 22 }}>
@@ -89,7 +91,10 @@ export default function HomeScreen() {
           <p className="greeting">{heureDuJour()}</p>
           <h1>{prenom}</h1>
         </div>
-        <Avatar nom={session?.nom || e.nom} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <NotifBell />
+          <Avatar nom={session?.nom || e.nom} />
+        </div>
       </div>
 
       <div className="hero">

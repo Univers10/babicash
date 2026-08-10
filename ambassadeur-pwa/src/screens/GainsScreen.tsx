@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { usePaginatedList } from '../hooks/usePaginatedList'
 import { useAsync } from '../hooks/useAsync'
 import { getCommissions, getMonEspace, getVersements } from '../api/ambassadeur'
+import NotifBell from '../components/NotifBell'
 import {
   Avatar,
   Card,
@@ -26,6 +27,7 @@ export default function GainsScreen() {
     <div className="screen">
       <div className="topbar">
         <h1>Mes gains</h1>
+        <NotifBell />
       </div>
 
       {espace.data && (

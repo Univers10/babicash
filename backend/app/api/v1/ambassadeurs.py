@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.db import get_db
 from app.core.rate_limit import login_rate_limiter
 from app.core.security import create_access_token, hash_password, verify_password
@@ -19,10 +20,15 @@ from app.schemas.ambassadeur import (
     FilleulOut,
     MomoUpdateRequest,
     MonEspaceOut,
+    NonLuesOut,
+    NotificationOut,
+    PushSubscriptionRequest,
+    PushUnsubscribeRequest,
+    VapidPublicKeyOut,
     VersementOut,
 )
 from app.schemas.auth import CurrentUser, Token
-from app.services import ambassadeur_service, parrainage_service
+from app.services import ambassadeur_service, notification_service, parrainage_service
 
 router = APIRouter()
 
@@ -253,3 +259,105 @@ async def maj_momo(
         momo_operateur=amb.momo_operateur,
         actif=amb.actif,
     )
+
+
+# ── Notifications ─────────────────────────────────────────────────────
+
+
+@router.get("/notifications", response_model=list[NotificationOut])
+async def notifications(
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    current_user: CurrentUser = Depends(require_ambassadeur),
+    db: AsyncSession = Depends(get_db),
+) -> list[NotificationOut]:
+    """Centre de notifications de l'ambassadeur (nouveau filleul, commission, versement)."""
+    amb = await _get_profil(db, current_user.id)
+    rows = await notification_service.lister_notifications(
+        db, amb.id, limit=limit, offset=offset
+    )
+    return [
+        NotificationOut(
+            id=str(n.id),
+            type=n.type,
+            titre=n.titre,
+            message=n.message,
+            lu=n.lu,
+            date_creation=n.date_creation,
+        )
+        for n in rows
+    ]
+
+
+@router.get("/notifications/non-lues", response_model=NonLuesOut)
+async def notifications_non_lues(
+    current_user: CurrentUser = Depends(require_ambassadeur),
+    db: AsyncSession = Depends(get_db),
+) -> NonLuesOut:
+    """Nombre de notifications non lues (badge)."""
+    amb = await _get_profil(db, current_user.id)
+    count = await notification_service.compter_non_lues(db, amb.id)
+    return NonLuesOut(count=count)
+
+
+@router.post("/notifications/{notif_id}/lu", status_code=status.HTTP_204_NO_CONTENT)
+async def marquer_notification_lue(
+    notif_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_ambassadeur),
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    amb = await _get_profil(db, current_user.id)
+    ok = await notification_service.marquer_lue(db, amb.id, notif_id)
+    if not ok:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Notification introuvable"
+        )
+
+
+@router.post("/notifications/lu-tout", status_code=status.HTTP_204_NO_CONTENT)
+async def marquer_toutes_notifications_lues(
+    current_user: CurrentUser = Depends(require_ambassadeur),
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    amb = await _get_profil(db, current_user.id)
+    await notification_service.marquer_toutes_lues(db, amb.id)
+
+
+# ── Notifications push (Web Push) ────────────────────────────────────
+
+
+@router.get("/push/cle-publique", response_model=VapidPublicKeyOut)
+async def push_cle_publique() -> VapidPublicKeyOut:
+    """Clé publique VAPID à utiliser côté navigateur pour s'abonner au push.
+
+    Chaîne vide si le push n'est pas configuré côté serveur (les
+    notifications restent disponibles dans le centre in-app).
+    """
+    return VapidPublicKeyOut(public_key=settings.VAPID_PUBLIC_KEY)
+
+
+@router.post("/push/abonner", status_code=status.HTTP_204_NO_CONTENT)
+async def push_abonner(
+    payload: PushSubscriptionRequest,
+    current_user: CurrentUser = Depends(require_ambassadeur),
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    """Enregistre l'abonnement Web Push du navigateur de l'ambassadeur."""
+    amb = await _get_profil(db, current_user.id)
+    await notification_service.enregistrer_subscription(
+        db,
+        amb.id,
+        endpoint=payload.endpoint,
+        p256dh=payload.keys.p256dh,
+        auth=payload.keys.auth,
+    )
+
+
+@router.post("/push/desabonner", status_code=status.HTTP_204_NO_CONTENT)
+async def push_desabonner(
+    payload: PushUnsubscribeRequest,
+    current_user: CurrentUser = Depends(require_ambassadeur),
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    amb = await _get_profil(db, current_user.id)
+    await notification_service.supprimer_subscription(db, amb.id, payload.endpoint)

@@ -67,3 +67,20 @@ export interface CodeDisponible {
   disponible: boolean
   raison: string | null
 }
+
+export type NotificationType = 'NOUVEAU_FILLEUL' | 'COMMISSION' | 'VERSEMENT'
+
+// Nommé "AmbassadeurNotification" pour éviter le conflit avec l'API Notification du navigateur.
+export interface AmbassadeurNotification {
+  id: string
+  type: NotificationType
+  titre: string
+  message: string
+  lu: boolean
+  date_creation: string
+}
+
+export interface PushSubscriptionPayload {
+  endpoint: string
+  keys: { p256dh: string; auth: string }
+}

@@ -10,6 +10,7 @@ from app.core.rate_limit import login_rate_limiter, pin_rate_limiter
 from app.core.security import create_access_token, hash_password, verify_password, verify_pin
 from app.deps import get_current_user
 from app.models import Abonnement, Boutique, User
+from app.services import notification_service
 from app.services.abonnement_service import PLAN_CATALOG, QUOTA_ESSAI_SANS_PARRAINAGE
 from app.services.ambassadeur_service import resoudre_parrain
 from app.schemas.auth import (
@@ -109,6 +110,15 @@ async def provision_owner_with_boutique(
         actif=True,
     )
     db.add(abonnement)
+
+    if parraine_par is not None:
+        await notification_service.creer_notification(
+            db,
+            parraine_par,
+            notification_service.TYPE_NOUVEAU_FILLEUL,
+            "Nouveau filleul 🎉",
+            f"{nom} vient de s'inscrire avec votre code de parrainage.",
+        )
 
     await db.commit()
     await db.refresh(user)

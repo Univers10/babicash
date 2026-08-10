@@ -7,9 +7,11 @@ from app.models.models import (
     CompteTiers,
     LigneVente,
     MouvementStock,
+    Notification,
     PaiementAbonnement,
     Payout,
     Produit,
+    PushSubscription,
     RecuConfig,
     SessionCaisse,
     TransactionCaisse,
@@ -34,4 +36,6 @@ __all__ = [
     "PaiementAbonnement",
     "Payout",
     "CommissionParrainage",
+    "Notification",
+    "PushSubscription",
 ]

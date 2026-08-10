@@ -626,6 +626,43 @@ a.list-item,
   flex-shrink: 0;
 }
 
+.badge-dot--accent {
+  width: 9px;
+  height: 9px;
+  background: var(--accent);
+  margin-left: auto;
+}
+
+.list-item--unread {
+  background: var(--primary-container);
+  border-radius: var(--radius-sm);
+  margin: 0 -8px;
+  padding: var(--sp-3) 8px;
+}
+
+/* ---- Clochette de notifications (dans le topbar) ---- */
+.notif-bell {
+  position: relative;
+}
+
+.notif-bell-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: var(--radius-full);
+  background: var(--danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  border: 2px solid var(--surface);
+}
+
 .badge--muted {
   background: var(--surface-variant);
   color: var(--text-secondary);
