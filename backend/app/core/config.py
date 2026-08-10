@@ -36,6 +36,13 @@ class Settings(BaseSettings):
     # En dessous, le solde est reporté à la semaine suivante (cf. generer_payouts_semaine).
     AMBASSADEUR_SEUIL_MIN_PAYOUT: Decimal = Decimal("0")
 
+    # Ambassadeurs : plafond de versement mensuel (FCFA) d'un compte NON validé.
+    # La validation du compte (vérification d'identité) n'est obligatoire que
+    # lorsque l'ambassadeur cumule au moins ce montant sur un mois ; tant que le
+    # compte n'est pas validé, ses versements sont plafonnés à ce montant par
+    # mois et l'excédent est reporté (cf. generer_payouts_semaine).
+    AMBASSADEUR_PLAFOND_MENSUEL: Decimal = Decimal("200000")
+
     # Notifications push (Web Push / VAPID) pour l'espace ambassadeur.
     # Vides = push désactivé (les notifications restent visibles in-app uniquement).
     # Générer une paire de clés : `vapid --gen` (CLI fournie par py-vapid, dépendance

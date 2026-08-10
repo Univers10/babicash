@@ -1,11 +1,11 @@
 from decimal import Decimal
+from uuid import UUID
 
 import pytest
 from sqlalchemy import select
 
-from app.models import CommissionParrainage, Payout, User
+from app.models import Ambassadeur, CommissionParrainage, Payout, User
 from app.services import parrainage_service
-
 
 def _auth(token: str) -> dict:
     return {"Authorization": f"Bearer {token}"}
@@ -122,3 +122,52 @@ async def test_generer_idempotent_et_fusion(client, session_factory):
     async with session_factory() as db:
         payouts = (await db.execute(select(Payout))).scalars().all()
         assert len(payouts) == 1  # fusionné, pas de doublon
+
+
+@pytest.mark.asyncio
+async def test_plafond_mensuel_compte_non_valide(client, session_factory):
+    amb_id, _, filleul_id = await _setup(client, session_factory)
+
+    # 2 paiements de 1 000 000 F => commissions de 200 000 F chacune (20 %).
+    # Le compte n'est pas validé : le lot est plafonné à 200 000 FCFA/mois.
+    async with session_factory() as db:
+        await parrainage_service.confirmer_paiement(
+            db, filleul_id, "BOUTIQUE", Decimal("1000000.00")
+        )
+        await parrainage_service.confirmer_paiement(
+            db, filleul_id, "BOUTIQUE", Decimal("1000000.00")
+        )
+        lots = await parrainage_service.generer_payouts_semaine(db)
+    assert len(lots) == 1
+    assert lots[0].montant_total == Decimal("200000")
+
+    # L'excédent reste en attente (non rattaché à un lot).
+    async with session_factory() as db:
+        en_attente = (
+            await db.execute(
+                select(CommissionParrainage).where(
+                    CommissionParrainage.ambassadeur_id == UUID(amb_id),
+                    CommissionParrainage.payout_id.is_(None),
+                )
+            )
+        ).scalars().all()
+        assert sum(c.montant_commission for c in en_attente) == Decimal("200000")
+
+        # Une fois le compte validé, tout le solde est versé.
+        amb = await db.get(Ambassadeur, UUID(amb_id))
+        amb.valide = True
+        await db.commit()
+
+        lots2 = await parrainage_service.generer_payouts_semaine(db)
+    assert len(lots2) == 1
+    assert lots2[0].montant_total == Decimal("400000")
+    async with session_factory() as db:
+        en_attente = (
+            await db.execute(
+                select(CommissionParrainage).where(
+                    CommissionParrainage.ambassadeur_id == UUID(amb_id),
+                    CommissionParrainage.payout_id.is_(None),
+                )
+            )
+        ).scalars().all()
+        assert en_attente == []

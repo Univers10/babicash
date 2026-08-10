@@ -379,6 +379,32 @@ async def ambassadeur_toggle(
     return RedirectResponse(url="/admin/ambassadeurs", status_code=303)
 
 
+@router.post("/ambassadeurs/{amb_id}/valider")
+async def ambassadeur_valider(
+    amb_id: str,
+    request: Request,
+    csrf_token: str = Form(""),
+    current_user: CurrentUser = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Marque le compte d'un ambassadeur comme validé (vérification d'identité
+    effectuée) : lève le plafond mensuel de versement."""
+    session_id = request.cookies.get("admin_session_id", "")
+    if not verify_csrf_token(csrf_token, session_id):
+        return RedirectResponse(url="/admin/ambassadeurs", status_code=303)
+
+    try:
+        aid = uuid.UUID(amb_id)
+    except ValueError:
+        return RedirectResponse(url="/admin/ambassadeurs", status_code=303)
+
+    amb = await db.get(Ambassadeur, aid)
+    if amb is not None and not amb.valide:
+        amb.valide = True
+        await db.commit()
+    return RedirectResponse(url="/admin/ambassadeurs", status_code=303)
+
+
 @router.post("/owners/{owner_id}/confirmer-paiement")
 async def owner_confirmer_paiement(
     owner_id: str,

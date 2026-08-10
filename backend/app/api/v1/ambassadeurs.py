@@ -183,6 +183,7 @@ async def moi(
         momo_numero=amb.momo_numero,
         momo_operateur=amb.momo_operateur,
         actif=amb.actif,
+        valide=amb.valide,
         **synthese,
     )
 
@@ -258,6 +259,7 @@ async def maj_momo(
         momo_numero=amb.momo_numero,
         momo_operateur=amb.momo_operateur,
         actif=amb.actif,
+        valide=amb.valide,
     )
 
 

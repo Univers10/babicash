@@ -19,6 +19,7 @@
                     <th class="text-right">Solde à payer</th>
                     <th class="text-right">Total gagné</th>
                     <th class="text-center">Statut</th>
+                    <th class="text-center">Validation</th>
                     <th></th>
                 </tr>
             </thead>
@@ -41,6 +42,13 @@
                         <span class="badge badge-sm badge-error">Désactivé</span>
                         {% endif %}
                     </td>
+                    <td class="text-center">
+                        {% if item.ambassadeur.valide %}
+                        <span class="badge badge-sm badge-success">Validé</span>
+                        {% else %}
+                        <span class="badge badge-sm badge-warning">Non validé</span>
+                        {% endif %}
+                    </td>
                     <td>
                         <form method="POST" action="/admin/ambassadeurs/{{ item.ambassadeur.id }}/toggle">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -52,10 +60,17 @@
                                     onclick="return confirm('Réactiver ce code ?')">Réactiver</button>
                             {% endif %}
                         </form>
+                        {% if not item.ambassadeur.valide %}
+                        <form method="POST" action="/admin/ambassadeurs/{{ item.ambassadeur.id }}/valider">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="btn btn-ghost btn-xs text-primary"
+                                    onclick="return confirm('Confirmer la validation du compte (vérification d\'identité) ?')">Valider</button>
+                        </form>
+                        {% endif %}
                     </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="8" class="text-center opacity-50 py-6">Aucun ambassadeur.</td></tr>
+                <tr><td colspan="9" class="text-center opacity-50 py-6">Aucun ambassadeur.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

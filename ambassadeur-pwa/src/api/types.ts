@@ -28,6 +28,7 @@ export interface MonEspace {
   momo_numero: string
   momo_operateur: string
   actif: boolean
+  valide: boolean
   nb_filleuls: number
   nb_filleuls_payants: number
   solde_a_recevoir: number | string

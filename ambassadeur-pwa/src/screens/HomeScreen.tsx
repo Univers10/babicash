@@ -117,6 +117,17 @@ export default function HomeScreen() {
         </div>
       </div>
 
+      {!e.valide && (
+        <div className="alert cgu-alert">
+          <strong>Compte non validé</strong>
+          <span>
+            Tes versements sont plafonnés à 200 000 FCFA par mois. Fournis ton
+            justificatif d'identité dès que tu cumules 200 000 FCFA pour débloquer
+            tes commissions.
+          </span>
+        </div>
+      )}
+
       <div className="code-card">
         <div>
           <div className="li-sub">Ton code de parrainage</div>

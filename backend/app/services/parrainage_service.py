@@ -6,6 +6,7 @@ from decimal import Decimal
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.models import (
     Abonnement,
     Ambassadeur,
@@ -308,6 +309,38 @@ def semaine_courante(dt: datetime | None = None) -> str:
     return f"{iso[0]}-W{iso[1]:02d}"
 
 
+def _mois_courant(dt: datetime | None = None) -> tuple[datetime, datetime]:
+    """Borne [début, fin) du mois calendaire courant (UTC)."""
+    d = dt or _maintenant()
+    debut = d.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    if d.month == 12:
+        fin = debut.replace(year=debut.year + 1, month=1)
+    else:
+        fin = debut.replace(month=debut.month + 1)
+    return debut, fin
+
+
+async def _total_deja_verse_mois(
+    db: AsyncSession, ambassadeur_id: uuid.UUID
+) -> Decimal:
+    """Montant déjà engagé dans le mois calendaire courant.
+
+    Compte les lots ``PAYE`` exécutés dans le mois, plus les lots ``A_PAYER``
+    créés dans le mois (déjà engagés, non encore exécutés).
+    """
+    debut, fin = _mois_courant()
+    total = (
+        await db.execute(
+            select(func.coalesce(func.sum(Payout.montant_total), 0)).where(
+                Payout.ambassadeur_id == ambassadeur_id,
+                ((Payout.statut == "PAYE") & (Payout.date_execution >= debut) & (Payout.date_execution < fin))
+                | ((Payout.statut == "A_PAYER") & (Payout.date_creation >= debut) & (Payout.date_creation < fin)),
+            )
+        )
+    ).scalar_one()
+    return _to_decimal(total)
+
+
 async def generer_payouts_semaine(
     db: AsyncSession,
     *,
@@ -343,6 +376,29 @@ async def generer_payouts_semaine(
             continue
 
         amb = await db.get(Ambassadeur, ambassadeur_id)
+        plafond_restant: Decimal | None = None
+        if amb is not None and not amb.valide:
+            deja_verse = await _total_deja_verse_mois(db, ambassadeur_id)
+            plafond_restant = max(
+                settings.AMBASSADEUR_PLAFOND_MENSUEL - deja_verse, Decimal("0")
+            )
+            if plafond_restant <= 0:
+                continue
+
+        en_attente = (
+            await db.execute(
+                select(CommissionParrainage)
+                .where(
+                    CommissionParrainage.ambassadeur_id == ambassadeur_id,
+                    CommissionParrainage.statut == "VALIDEE",
+                    CommissionParrainage.payout_id.is_(None),
+                )
+                .order_by(CommissionParrainage.date_creation.asc())
+            )
+        ).scalars().all()
+        if not en_attente:
+            continue
+
         payout = (
             await db.execute(
                 select(Payout).where(
@@ -363,16 +419,22 @@ async def generer_payouts_semaine(
             db.add(payout)
             await db.flush()
 
-        await db.execute(
-            update(CommissionParrainage)
-            .where(
-                CommissionParrainage.ambassadeur_id == ambassadeur_id,
-                CommissionParrainage.statut == "VALIDEE",
-                CommissionParrainage.payout_id.is_(None),
-            )
-            .values(payout_id=payout.id)
-        )
+        # Rattache les commissions en attente, dans l'ordre, jusqu'au plafond
+        # mensuel restant (compte non validé) ou en totalité (compte validé).
+        montant_lot = Decimal("0.00")
+        for c in en_attente:
+            if (
+                plafond_restant is not None
+                and montant_lot + c.montant_commission > plafond_restant
+            ):
+                break
+            c.payout_id = payout.id
+            montant_lot += c.montant_commission
 
+        if montant_lot <= 0:
+            continue
+
+        await db.flush()
         total = (
             await db.execute(
                 select(

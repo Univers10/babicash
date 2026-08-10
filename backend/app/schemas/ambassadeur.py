@@ -57,6 +57,8 @@ class AmbassadeurOut(BaseModel):
     momo_numero: str
     momo_operateur: str
     actif: bool
+    # Compte validé (vérification d'identité) ; sinon versements plafonnés.
+    valide: bool
 
 
 class MonEspaceOut(BaseModel):
@@ -69,6 +71,8 @@ class MonEspaceOut(BaseModel):
     momo_numero: str
     momo_operateur: str
     actif: bool
+    # Compte validé (vérification d'identité) ; sinon versements plafonnés.
+    valide: bool
     nb_filleuls: int
     nb_filleuls_payants: int
     # Commissions validées non encore versées (= à recevoir au prochain lot).

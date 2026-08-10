@@ -422,6 +422,10 @@ class Ambassadeur(Base):
         String(20), nullable=False, default=""
     )  # WAVE | ORANGE | MTN | MOOV
     actif: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    # Compte validé (vérification d'identité effectuée). Tant que le compte n'est
+    # pas validé, ses versements sont plafonnés à
+    # ``settings.AMBASSADEUR_PLAFOND_MENSUEL`` par mois (le solde est reporté).
+    valide: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     date_creation: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
