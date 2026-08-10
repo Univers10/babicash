@@ -172,12 +172,27 @@ export default function TermsScreen() {
               numéro erroné fourni par l'Ambassadeur.
             </li>
             <li>
-              <strong>Tout changement du numéro Mobile Money de reversement est soumis à une
-              vérification d'identité</strong> : l'Ambassadeur doit fournir un justificatif
-              d'identité en cours de validité (pièce d'identité nationale, passeport ou permis
-              de conduire) ainsi que, le cas échéant, une pièce confirmant que le nouveau numéro
-              lui appartient (attestation de ligne, relevé ou carte SIM à son nom). Le
-              changement n'est effectif qu'après validation du justificatif par l'éditeur.
+              <strong>Vérification d'identité selon le niveau de commissions</strong> : tout
+              compte ambassadeur dont le cumul de commissions atteint ou dépasse{' '}
+              <strong>200 000 FCFA sur un mois</strong> doit, pour continuer à recevoir ses
+              versements, fournir un justificatif d'identité en cours de validité (pièce
+              d'identité nationale, passeport ou permis de conduire) ainsi que, le cas échéant,
+              une pièce confirmant que le numéro de versement lui appartient (attestation de
+              ligne, relevé ou carte SIM à son nom).
+            </li>
+            <li>
+              <strong>Plafond de versement d'un compte non validé</strong> : tant que la
+              vérification d'identité n'a pas été effectuée, le montant total des versements à
+              un compte ambassadeur est limité à <strong>200 000 FCFA par mois</strong>. Au-delà
+              de ce plafond, les commissions sont conservées sur le compte et versées une fois
+              le compte validé.
+            </li>
+            <li>
+              <strong>Changement du numéro de reversement</strong> : tout changement du numéro
+              Mobile Money de reversement est soumis à une vérification d'identité. L'Ambassadeur
+              doit fournir un justificatif d'identité en cours de validité ainsi que, le cas
+              échéant, une pièce confirmant que le nouveau numéro lui appartient. Le changement
+              n'est effectif qu'après validation du justificatif par l'éditeur.
             </li>
             <li>
               En attendant la validation du justificatif, les commissions continuent d'être
