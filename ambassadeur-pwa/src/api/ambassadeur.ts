@@ -1,10 +1,12 @@
 import { api } from './client'
 import type {
+  AmbassadeurNotification,
   CodeDisponible,
   Commission,
   Filleul,
   MonEspace,
   Operateur,
+  PushSubscriptionPayload,
   Versement,
 } from './types'
 
@@ -32,3 +34,30 @@ export const updateMomo = (momo_numero: string, momo_operateur: Operateur) =>
     method: 'PATCH',
     body: { momo_numero, momo_operateur },
   })
+
+// ── Notifications ─────────────────────────────────────────────────────
+
+export const getNotifications = (offset = 0, limit = PAGE_SIZE) =>
+  api<AmbassadeurNotification[]>(
+    `/ambassadeurs/notifications?limit=${limit}&offset=${offset}`,
+  )
+
+export const getNonLuesCount = () =>
+  api<{ count: number }>('/ambassadeurs/notifications/non-lues')
+
+export const marquerNotificationLue = (id: string) =>
+  api<void>(`/ambassadeurs/notifications/${id}/lu`, { method: 'POST' })
+
+export const marquerToutesNotificationsLues = () =>
+  api<void>('/ambassadeurs/notifications/lu-tout', { method: 'POST' })
+
+// ── Notifications push (Web Push) ─────────────────────────────────────
+
+export const getVapidPublicKey = () =>
+  api<{ public_key: string }>('/ambassadeurs/push/cle-publique', { auth: false })
+
+export const subscribePush = (payload: PushSubscriptionPayload) =>
+  api<void>('/ambassadeurs/push/abonner', { method: 'POST', body: payload })
+
+export const unsubscribePush = (payload: { endpoint: string }) =>
+  api<void>('/ambassadeurs/push/desabonner', { method: 'POST', body: payload })

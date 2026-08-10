@@ -36,6 +36,15 @@ class Settings(BaseSettings):
     # En dessous, le solde est reporté à la semaine suivante (cf. generer_payouts_semaine).
     AMBASSADEUR_SEUIL_MIN_PAYOUT: Decimal = Decimal("0")
 
+    # Notifications push (Web Push / VAPID) pour l'espace ambassadeur.
+    # Vides = push désactivé (les notifications restent visibles in-app uniquement).
+    # Générer une paire de clés : `vapid --gen` (CLI fournie par py-vapid, dépendance
+    # de pywebpush), puis `vapid --applicationServerKey` pour la clé publique
+    # URL-safe à donner à VAPID_PUBLIC_KEY.
+    VAPID_PUBLIC_KEY: str = ""
+    VAPID_PRIVATE_KEY: str = ""
+    VAPID_CLAIMS_EMAIL: str = "mailto:support@babicash.ci"
+
     @field_validator("SECRET_KEY")
     @classmethod
     def secret_key_must_be_changed(cls, v: str) -> str:

@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useAuth } from '../auth/AuthContext'
 import { useAsync } from '../hooks/useAsync'
 import { getMonEspace, updateMomo } from '../api/ambassadeur'
+import NotifBell from '../components/NotifBell'
 import { Avatar, Card, ErrorState, Loading } from '../components/ui'
 import { IconChevronRight, IconLogout, IconMail, IconPhone, IconUser } from '../components/icons'
 import type { Operateur } from '../api/types'
@@ -60,6 +61,7 @@ export default function ProfilScreen() {
     <div className="screen">
       <div className="topbar">
         <h1>Profil</h1>
+        <NotifBell />
       </div>
 
       <Card>

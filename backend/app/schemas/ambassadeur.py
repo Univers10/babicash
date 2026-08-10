@@ -111,6 +111,43 @@ class VersementOut(BaseModel):
     date_execution: datetime | None = None
 
 
+class NotificationOut(BaseModel):
+    """Une notification du centre de notifications ambassadeur."""
+
+    id: str
+    type: str
+    titre: str
+    message: str
+    lu: bool
+    date_creation: datetime
+
+
+class NonLuesOut(BaseModel):
+    """Nombre de notifications non lues (badge)."""
+
+    count: int
+
+
+class PushSubscriptionKeys(BaseModel):
+    p256dh: str
+    auth: str
+
+
+class PushSubscriptionRequest(BaseModel):
+    """Abonnement Web Push envoyé par le navigateur (PushSubscription.toJSON())."""
+
+    endpoint: str = Field(min_length=1, max_length=500)
+    keys: PushSubscriptionKeys
+
+
+class PushUnsubscribeRequest(BaseModel):
+    endpoint: str = Field(min_length=1, max_length=500)
+
+
+class VapidPublicKeyOut(BaseModel):
+    public_key: str
+
+
 class MomoUpdateRequest(BaseModel):
     """Mise à jour des coordonnées de versement."""
 

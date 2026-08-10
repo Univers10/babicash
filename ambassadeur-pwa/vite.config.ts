@@ -9,7 +9,12 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
-      workbox: {
+      // Service worker custom (src/sw.ts) : précache Workbox + gestion des
+      // notifications Web Push (voir usePushNotifications.ts).
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
+      injectManifest: {
         // Précache aussi les polices Inter (self-hosted) pour un rendu
         // fidèle à la charte même hors-ligne.
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],

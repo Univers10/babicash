@@ -427,6 +427,53 @@ class Ambassadeur(Base):
     )
 
 
+class Notification(Base):
+    """Notification in-app pour un ambassadeur (nouveau filleul, commission, versement)."""
+
+    __tablename__ = "notifications"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    ambassadeur_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("ambassadeurs.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    type: Mapped[str] = mapped_column(
+        String(30), nullable=False
+    )  # NOUVEAU_FILLEUL | COMMISSION | VERSEMENT
+    titre: Mapped[str] = mapped_column(String(120), nullable=False)
+    message: Mapped[str] = mapped_column(String(500), nullable=False)
+    lu: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    date_creation: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+class PushSubscription(Base):
+    """Abonnement Web Push (navigateur) d'un ambassadeur, pour les notifications push."""
+
+    __tablename__ = "push_subscriptions"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    ambassadeur_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("ambassadeurs.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    endpoint: Mapped[str] = mapped_column(String(500), unique=True, nullable=False)
+    p256dh: Mapped[str] = mapped_column(String(255), nullable=False)
+    auth: Mapped[str] = mapped_column(String(255), nullable=False)
+    date_creation: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
 class PaiementAbonnement(Base):
     """Journal des paiements d'abonnement confirmés (par l'admin).
 

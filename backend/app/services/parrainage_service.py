@@ -14,6 +14,7 @@ from app.models import (
     Payout,
     User,
 )
+from app.services import notification_service
 
 TAUX_COMMISSION = Decimal("0.200")
 FENETRE_JOURS = 365  # droits de l'ambassadeur : 12 mois après le 1er paiement
@@ -78,6 +79,15 @@ async def _generer_commission(
     )
     db.add(commission)
     await db.flush()
+
+    await notification_service.creer_notification(
+        db,
+        ambassadeur.id,
+        notification_service.TYPE_COMMISSION,
+        "Nouvelle commission 💰",
+        f"Vous avez gagné {montant_commission:.0f} FCFA grâce à {filleul.nom}.",
+    )
+
     return commission
 
 
@@ -400,6 +410,16 @@ async def marquer_payout_paye(
         )
         .values(statut="PAYEE")
     )
+
+    await notification_service.creer_notification(
+        db,
+        payout.ambassadeur_id,
+        notification_service.TYPE_VERSEMENT,
+        "Versement reçu 💸",
+        f"Votre versement de {payout.montant_total:.0f} FCFA pour la semaine "
+        f"{payout.semaine} a été effectué.",
+    )
+
     await db.commit()
     await db.refresh(payout)
     return payout

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { usePaginatedList } from '../hooks/usePaginatedList'
 import { getFilleuls } from '../api/ambassadeur'
+import NotifBell from '../components/NotifBell'
 import {
   Avatar,
   Card,
@@ -27,12 +28,15 @@ export default function FilleulsScreen() {
     <div className="screen">
       <div className="topbar">
         <h1>Mes filleuls</h1>
-        {items.length > 0 && (
-          <span className="badge">
-            {items.length}
-            {hasMore ? '+' : ''}
-          </span>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {items.length > 0 && (
+            <span className="badge">
+              {items.length}
+              {hasMore ? '+' : ''}
+            </span>
+          )}
+          <NotifBell />
+        </div>
       </div>
 
       {loading ? (
