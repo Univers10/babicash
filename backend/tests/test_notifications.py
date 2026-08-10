@@ -195,11 +195,27 @@ async def test_notification_isolee_par_ambassadeur(client, session_factory):
 
 
 @pytest.mark.asyncio
-async def test_push_cle_publique_vide_par_defaut(client):
+async def test_push_cle_publique_vide_si_non_configure(client, monkeypatch):
     """Sans VAPID configuré, la clé publique est une chaîne vide (push désactivé)."""
+    from app.api.v1 import ambassadeurs as ambassadeurs_module
+
+    monkeypatch.setattr(ambassadeurs_module.settings, "VAPID_PUBLIC_KEY", "")
+
     r = await client.get("/api/v1/ambassadeurs/push/cle-publique")
     assert r.status_code == 200, r.text
     assert r.json()["public_key"] == ""
+
+
+@pytest.mark.asyncio
+async def test_push_cle_publique_reflete_la_config(client, monkeypatch):
+    """Quand VAPID est configuré, la clé publique exposée correspond."""
+    from app.api.v1 import ambassadeurs as ambassadeurs_module
+
+    monkeypatch.setattr(ambassadeurs_module.settings, "VAPID_PUBLIC_KEY", "cle-de-test")
+
+    r = await client.get("/api/v1/ambassadeurs/push/cle-publique")
+    assert r.status_code == 200, r.text
+    assert r.json()["public_key"] == "cle-de-test"
 
 
 @pytest.mark.asyncio
