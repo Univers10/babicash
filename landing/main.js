@@ -150,22 +150,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Simple contact form handler (no backend yet)
+  // Contact form → BabiCash backend
   const form = document.querySelector('.contact-form');
   if (form) {
-    form.addEventListener('submit', event => {
+    form.addEventListener('submit', async event => {
       event.preventDefault();
       const btn = form.querySelector('button[type="submit"]');
       const originalText = btn.textContent;
 
-      btn.textContent = 'Message envoyé !';
-      btn.disabled = true;
+      const data = {
+        nom: form.querySelector('#name')?.value || null,
+        contact: form.querySelector('#email')?.value || null,
+        message: form.querySelector('#message')?.value || null,
+      };
 
+      try {
+        const response = await fetch('https://pos.babicash.ci/api/v1/landing-leads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+          btn.textContent = 'Message envoyé !';
+          form.reset();
+        } else {
+          btn.textContent = 'Erreur, réessayez';
+        }
+      } catch (err) {
+        btn.textContent = 'Problème de connexion';
+      }
+
+      btn.disabled = true;
       setTimeout(() => {
         btn.textContent = originalText;
         btn.disabled = false;
-        form.reset();
-      }, 2500);
+      }, 3000);
     });
   }
 });

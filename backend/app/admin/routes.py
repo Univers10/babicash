@@ -14,7 +14,16 @@ from app.core.config import settings
 from app.core.csrf import verify_csrf_token
 from app.core.db import get_db
 from app.core.security import hash_password
-from app.models import Abonnement, Ambassadeur, Boutique, LigneVente, Payout, User, Vente
+from app.models import (
+    Abonnement,
+    Ambassadeur,
+    Boutique,
+    LandingLead,
+    LigneVente,
+    Payout,
+    User,
+    Vente,
+)
 from app.schemas.auth import CurrentUser
 from app.services import abonnement_service, admin_analytics_service, parrainage_service
 from app.services.abonnement_service import compter_ventes_mois
@@ -561,3 +570,40 @@ async def versement_payer(
 
     await parrainage_service.marquer_payout_paye(db, pid, reference or None)
     return RedirectResponse(url="/admin/versements", status_code=303)
+
+
+# ── Landing page leads ───────────────────────────────────────────────
+
+@router.get("/landing-leads", response_class=HTMLResponse)
+async def landing_leads_list(
+    request: Request,
+    current_user: CurrentUser = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    leads = (
+        await db.execute(
+            select(LandingLead).order_by(LandingLead.date_creation.desc())
+        )
+    ).scalars().all()
+    return templates.TemplateResponse(request, "landing_leads/list.html", {
+        "user": current_user,
+        "leads": leads,
+    })
+
+
+@router.post("/landing-leads/{lead_id}/traiter")
+async def landing_lead_traiter(
+    lead_id: str,
+    current_user: CurrentUser = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    try:
+        lid = uuid.UUID(lead_id)
+    except ValueError:
+        return RedirectResponse(url="/admin/landing-leads", status_code=303)
+
+    lead = await db.get(LandingLead, lid)
+    if lead is not None:
+        lead.traite = not lead.traite
+        await db.commit()
+    return RedirectResponse(url="/admin/landing-leads", status_code=303)
