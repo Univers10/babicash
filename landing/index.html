@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BabiCash — La caisse intelligente pour les commerçants en Afrique</title>
+  <meta name="description" content="BabiCash simplifie la gestion de votre boutique : ventes, stock, dépenses, multi-établissements et abonnements adaptés.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" href="assets/logo.png">
+</head>
+<body>
+  <header class="header" id="accueil">
+    <nav class="nav container">
+      <a href="#" class="logo" aria-label="BabiCash">
+        <img src="assets/logo.png" alt="BabiCash" class="logo-img" width="120" height="40">
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Ouvrir le menu" aria-expanded="false">
+        <span class="hamburger"></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#fonctionnalites">Fonctionnalités</a></li>
+        <li><a href="#tarifs">Tarifs</a></li>
+        <li><a href="#temoignages">Témoignages</a></li>
+        <li><a href="/ambassadeur.html">Ambassadeur</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="#contact" class="btn btn-primary">Essayer gratuitement</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <div class="hero-tag">Gagnez du temps à la caisse</div>
+          <h1>La gestion de boutique <span class="text-accent">simple et fiable</span> pour les commerçants en Côte d'Ivoire</h1>
+          <p class="hero-lead">Ventes, stock, dépenses et suivi de trésorerie dans une application pensée pour fonctionner même hors connexion.</p>
+          <div class="hero-actions">
+            <a href="#contact" class="btn btn-primary btn-lg">Démarrer mon essai</a>
+            <a href="#tarifs" class="btn btn-outline btn-lg">Voir les tarifs</a>
+          </div>
+          <p class="hero-note">14 jours d'essai avec un code parrainage · 20 ventes gratuites sans engagement</p>
+        </div>
+        <div class="hero-visual">
+          <div class="phone-mockup" aria-hidden="true">
+            <div class="phone-screen">
+              <div class="screen-header">
+                <span class="dot green"></span>
+                <span class="screen-title">Caisse BabiCash</span>
+              </div>
+              <div class="screen-list">
+                <div class="screen-item"><span class="item-name">T-shirt Homme</span><span class="item-price">5 000 F</span></div>
+                <div class="screen-item"><span class="item-name">Chaussures</span><span class="item-price">12 000 F</span></div>
+                <div class="screen-item"><span class="item-name">Sac en cuir</span><span class="item-price">8 500 F</span></div>
+              </div>
+              <div class="screen-total">
+                <span>Total</span>
+                <span class="total-amount">25 500 F</span>
+              </div>
+              <button class="screen-cta">Valider la vente</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="trusted">
+      <div class="container">
+        <p class="trusted-label">Une application pensée avec et pour les commerçants</p>
+        <div class="trusted-stats">
+          <div><strong>+200</strong><span>commerçants actifs</span></div>
+          <div><strong>50k+</strong><span>ventes enregistrées</span></div>
+          <div><strong>24/7</strong><span>support dédié</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features" id="fonctionnalites">
+      <div class="container">
+        <header class="section-header">
+          <h2>Tout ce qu'il faut pour gérer votre commerce</h2>
+          <p>De la vente au bilan, BabiCash centralise vos opérations du quotidien.</p>
+        </header>
+        <div class="features-grid">
+          <article class="feature-card">
+            <div class="feature-icon" style="--bg:#E8F5E9"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg></div>
+            <h3>Caisse rapide</h3>
+            <p>Enregistrez vos ventes en quelques secondes, même sans connexion. Les données se synchronisent automatiquement.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon" style="--bg:#FFF3E0"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+            <h3>Suivi de stock</h3>
+            <p>Alertes de seuil, historiques et quantités en temps réel pour ne jamais manquer de produits.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon" style="--bg:#E3F2FD"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <h3>Dépenses & trésorerie</h3>
+            <p>Consignez toutes vos sorties d'argent et visualisez votre trésorerie en un coup d'œil.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon" style="--bg:#FCE4EC"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+            <h3>Multi-établissements</h3>
+            <p>Gérez plusieurs boutiques depuis un seul compte, avec des bilans par point de vente.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon" style="--bg:#E0F2F1"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10l10 0z"/></svg></div>
+            <h3>Analytics claires</h3>
+            <p>Tableaux de bord et rapports pour prendre les bonnes décisions au bon moment.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon" style="--bg:#FFFDE7"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <h3>Programme ambassadeur</h3>
+            <p>Parrainez d'autres commerçants et générez des revenus récurrents sur leurs abonnements.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="pricing" id="tarifs">
+      <div class="container">
+        <header class="section-header">
+          <h2>Des tarifs qui grandissent avec vous</h2>
+          <p>Choisissez le plan adapté à votre activité. Changez à tout moment.</p>
+        </header>
+        <div class="pricing-grid">
+          <article class="pricing-card">
+            <h3 class="plan-name">Kiosque</h3>
+            <p class="plan-desc">Pour les petits commerces.</p>
+            <div class="plan-price"><span class="amount">2 000</span><span class="currency">F / mois</span></div>
+            <ul class="plan-features">
+              <li>10 000 ventes par mois</li>
+              <li>1 boutique</li>
+              <li>1 gérant</li>
+              <li>Stock et catégories illimités</li>
+              <li>Support WhatsApp</li>
+            </ul>
+            <a href="#contact" class="btn btn-outline btn-block">Choisir Kiosque</a>
+          </article>
+          <article class="pricing-card featured">
+            <div class="plan-badge">Le plus populaire</div>
+            <h3 class="plan-name">Boutique</h3>
+            <p class="plan-desc">Le choix des commerçants sérieux.</p>
+            <div class="plan-price"><span class="amount">5 000</span><span class="currency">F / mois</span></div>
+            <ul class="plan-features">
+              <li>Ventes illimitées</li>
+              <li>1 boutique</li>
+              <li>Jusqu'à 3 gérants</li>
+              <li>Reçus PDF et impression thermique</li>
+              <li>Support prioritaire WhatsApp</li>
+            </ul>
+            <a href="#contact" class="btn btn-primary btn-block">Choisir Boutique</a>
+          </article>
+          <article class="pricing-card">
+            <h3 class="plan-name">Commerce</h3>
+            <p class="plan-desc">Pour plusieurs points de vente.</p>
+            <div class="plan-price"><span class="amount">10 000</span><span class="currency">F / mois</span></div>
+            <ul class="plan-features">
+              <li>Ventes illimitées</li>
+              <li>Jusqu'à 3 boutiques</li>
+              <li>Jusqu'à 6 gérants</li>
+              <li>Dashboard multi-boutiques</li>
+              <li>Support prioritaire</li>
+            </ul>
+            <a href="#contact" class="btn btn-outline btn-block">Choisir Commerce</a>
+          </article>
+          <article class="pricing-card">
+            <h3 class="plan-name">Entreprise</h3>
+            <p class="plan-desc">Pour les réseaux en croissance.</p>
+            <div class="plan-price"><span class="amount">15 000</span><span class="currency">F / mois</span></div>
+            <ul class="plan-features">
+              <li>Ventes illimitées</li>
+              <li>Jusqu'à 6 boutiques</li>
+              <li>Jusqu'à 12 gérants</li>
+              <li>Rapports avancés</li>
+              <li>Support prioritaire 7j/7</li>
+            </ul>
+            <a href="#contact" class="btn btn-outline btn-block">Choisir Entreprise</a>
+          </article>
+          <article class="pricing-card">
+            <h3 class="plan-name">Empire</h3>
+            <p class="plan-desc">Aucune limite, que de la croissance.</p>
+            <div class="plan-price"><span class="amount">20 000</span><span class="currency">F / mois</span></div>
+            <ul class="plan-features">
+              <li>Ventes illimitées</li>
+              <li>Boutiques illimitées</li>
+              <li>Gérants illimités</li>
+              <li>Formation de votre équipe offerte</li>
+              <li>Ligne de support dédiée</li>
+            </ul>
+            <a href="#contact" class="btn btn-outline btn-block">Choisir Empire</a>
+          </article>
+        </div>
+        <p class="pricing-note">Paiement mensuel sans engagement. Annuel : 2 mois offerts (10 mois payés).</p>
+      </div>
+    </section>
+
+    <section class="testimonials" id="temoignages">
+      <div class="container">
+        <header class="section-header">
+          <h2>Ils nous font confiance</h2>
+          <p>Commerçants, gérants de boutique et entrepreneurs témoignent.</p>
+        </header>
+        <div class="testimonials-carousel" data-carousel>
+          <div class="testimonials-track">
+            <blockquote class="testimonial-slide">
+              <p>"BabiCash m'a permis de savoir exactement ce que je vends chaque jour. Fini les calculs à la fin de la journée."</p>
+              <footer>
+                <img src="assets/avatar-1.svg" alt="" class="avatar">
+                <div>
+                  <cite>Aminata K.</cite>
+                  <span>Boutique mode, Abidjan</span>
+                </div>
+              </footer>
+            </blockquote>
+            <blockquote class="testimonial-slide">
+              <p>"J'ai pu ouvrir une deuxième boutique sans perdre le contrôle. Tout est synchronisé, même quand la connexion est faible."</p>
+              <footer>
+                <img src="assets/avatar-2.svg" alt="" class="avatar">
+                <div>
+                  <cite>Kouamé B.</cite>
+                  <span>Magasin électronique, Bouaké</span>
+                </div>
+              </footer>
+            </blockquote>
+            <blockquote class="testimonial-slide">
+              <p>"Le programme ambassadeur est un vrai plus. Je recommande l'application et cela me rapporte chaque mois."</p>
+              <footer>
+                <img src="assets/avatar-3.svg" alt="" class="avatar">
+                <div>
+                  <cite>Fatou D.</cite>
+                  <span>Ambassadeur BabiCash</span>
+                </div>
+              </footer>
+            </blockquote>
+          </div>
+          <div class="carousel-dots" aria-label="Témoignages"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ambassador" id="ambassadeur">
+      <div class="container">
+        <div class="ambassador-grid">
+          <div class="ambassador-content">
+            <span class="ambassador-tag">Revenus complémentaires</span>
+            <h2>Devenir ambassadeur BabiCash</h2>
+            <p>Recommandez BabiCash aux commerçants de votre entourage et générez des commissions récurrentes sur chaque abonnement actif.</p>
+            <ul class="ambassador-benefits">
+              <li>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Commission sur chaque filleul qui s'abonne</span>
+              </li>
+              <li>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Versement rapide et suivi de vos gains en temps réel</span>
+              </li>
+              <li>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Impact direct sur la croissance des commerçants</span>
+              </li>
+            </ul>
+            <a href="/ambassadeur.html" target="_blank" rel="noopener" class="btn btn-primary btn-lg">Postuler en 2 minutes</a>
+          </div>
+          <div class="ambassador-stats">
+            <div class="ambassador-stat">
+              <strong>20%</strong>
+              <span>de commissions sur le premier abonnement</span>
+            </div>
+            <div class="ambassador-stat">
+              <strong>5%+</strong>
+              <span>de revenus récurrents mensuels</span>
+            </div>
+            <div class="ambassador-stat">
+              <strong>24h</strong>
+              <span>pour obtenir votre code parrainage</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="contact" id="contact">
+      <div class="container contact-grid">
+        <div class="contact-content">
+          <h2>Prêt à transformer votre gestion ?</h2>
+          <p>Demandez un essai ou une démo personnalisée. Notre équipe vous répond en moins de 24h.</p>
+          <ul class="contact-ways">
+            <li>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.56 12.56 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.56 12.56 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <a href="https://wa.me/22500000000" target="_blank" rel="noopener">Discuter sur WhatsApp</a>
+            </li>
+            <li>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <a href="mailto:contact@babicash.ci">contact@babicash.ci</a>
+            </li>
+          </ul>
+        </div>
+        <form class="contact-form" action="#" method="POST">
+          <div class="form-group">
+            <label for="name">Nom complet</label>
+            <input type="text" id="name" name="name" placeholder="Votre nom" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Email ou téléphone</label>
+            <input type="text" id="email" name="email" placeholder="contact@exemple.ci" required>
+          </div>
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="4" placeholder="Dites-nous en plus sur votre activité..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Envoyer ma demande</button>
+          <p class="form-note">Pas de spam. Nous lisons chaque message.</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div>
+        <a href="#" class="logo">
+          <img src="assets/logo.png" alt="BabiCash" class="logo-img" width="140" height="46">
+        </a>
+        <p class="footer-mission">La caisse intelligente qui accompagne la croissance des commerçants africains.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Produit</h4>
+        <ul>
+          <li><a href="#fonctionnalites">Fonctionnalités</a></li>
+          <li><a href="#tarifs">Tarifs</a></li>
+          <li><a href="#">Application mobile</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Ressources</h4>
+        <ul>
+          <li><a href="#">Centre d'aide</a></li>
+          <li><a href="https://business.babicash.ci/" target="_blank" rel="noopener">Devenir ambassadeur</a></li>
+          <li><a href="#">Blog</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Légal</h4>
+        <ul>
+          <li><a href="cgu.html">Conditions d'utilisation</a></li>
+          <li><a href="cgu.html#donnees">Confidentialité</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <p>&copy; 2026 BabiCash. Tous droits réservés.</p>
+      <p>Fait avec rigueur à Abidjan.</p>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

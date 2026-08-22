@@ -14,9 +14,9 @@ from app.core.config import settings
 from app.core.csrf import verify_csrf_token
 from app.core.db import get_db
 from app.core.security import hash_password
-from app.models import Abonnement, Ambassadeur, Boutique, Payout, User
+from app.models import Abonnement, Ambassadeur, Boutique, LigneVente, Payout, User, Vente
 from app.schemas.auth import CurrentUser
-from app.services import abonnement_service, parrainage_service
+from app.services import abonnement_service, admin_analytics_service, parrainage_service
 from app.services.abonnement_service import compter_ventes_mois
 
 router = APIRouter()
@@ -63,6 +63,49 @@ async def _stats(db: AsyncSession) -> dict:
         prix = abonnement_service.calculer_prix_total(abo.prix_base, nb_bout)
         revenu_total += prix
 
+    # Montants réellement reversés aux ambassadeurs (lots de versement payés),
+    # déduits du revenu estimé pour refléter le revenu net réel de BabiCash.
+    total_verse_ambassadeurs = Decimal(
+        str(
+            (
+                await db.execute(
+                    select(func.coalesce(func.sum(Payout.montant_total), 0)).where(
+                        Payout.statut == "PAYE"
+                    )
+                )
+            ).scalar_one()
+        )
+    )
+    revenu_net = revenu_total - total_verse_ambassadeurs
+
+    # Activité globale du mois en cours (toutes boutiques confondues)
+    debut_mois = datetime.now(timezone.utc).replace(
+        day=1, hour=0, minute=0, second=0, microsecond=0
+    )
+    ca_row = (
+        await db.execute(
+            select(
+                func.coalesce(func.sum(LigneVente.prix_vendu_reel * LigneVente.quantite), 0),
+                func.count(func.distinct(Vente.id)),
+            )
+            .select_from(LigneVente)
+            .join(Vente, Vente.id == LigneVente.vente_id)
+            .where(Vente.date_vente >= debut_mois)
+        )
+    ).one()
+    ca_mois = float(Decimal(str(ca_row[0])))
+    nb_ventes_mois = int(ca_row[1])
+
+    nb_ambassadeurs_actifs = (
+        await db.execute(select(func.count(Ambassadeur.id)).where(Ambassadeur.actif.is_(True)))
+    ).scalar_one()
+
+    nb_filleuls_total = (
+        await db.execute(
+            select(func.count(User.id)).where(User.parraine_par_ambassadeur_id.is_not(None))
+        )
+    ).scalar_one()
+
     # Derniers owners
     last_owners = (
         await db.execute(
@@ -73,13 +116,23 @@ async def _stats(db: AsyncSession) -> dict:
         )
     ).scalars().all()
 
+    # Tendance revenus (12 derniers mois) pour l'aperçu du dashboard.
+    tendance_revenus = await admin_analytics_service.serie_revenus(db, "mois", 12)
+
     return {
         "nb_owners": nb_owners,
         "nb_boutiques": nb_boutiques,
         "nb_abos_actifs": nb_abos_actifs,
         "plans": plans,
         "revenu_total": float(revenu_total),
+        "total_verse_ambassadeurs": float(total_verse_ambassadeurs),
+        "revenu_net": float(revenu_net),
+        "ca_mois": ca_mois,
+        "nb_ventes_mois": nb_ventes_mois,
+        "nb_ambassadeurs_actifs": nb_ambassadeurs_actifs,
+        "nb_filleuls_total": nb_filleuls_total,
         "last_owners": last_owners,
+        "tendance_revenus": tendance_revenus,
     }
 
 
@@ -125,6 +178,36 @@ async def dashboard(
     return templates.TemplateResponse(request, "dashboard.html", {
         "user": current_user,
         "stats": stats,
+    })
+
+
+# ── Analytics ────────────────────────────────────────────────────────
+
+@router.get("/analytics", response_class=HTMLResponse)
+async def analytics(
+    request: Request,
+    granularite: str = "mois",
+    nb: int = 12,
+    current_user: CurrentUser = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Analyses détaillées : revenus, inscriptions, ventes, ambassadeurs sur
+    plusieurs mois ou années (paramètres ``granularite`` et ``nb``)."""
+    granularite, nb = admin_analytics_service.normaliser_params(granularite, nb)
+
+    revenus = await admin_analytics_service.serie_revenus(db, granularite, nb)
+    inscriptions = await admin_analytics_service.serie_inscriptions(db, granularite, nb)
+    ventes = await admin_analytics_service.serie_ventes(db, granularite, nb)
+    ambassadeurs_series = await admin_analytics_service.serie_ambassadeurs(db, granularite, nb)
+
+    return templates.TemplateResponse(request, "analytics.html", {
+        "user": current_user,
+        "granularite": granularite,
+        "nb": nb,
+        "revenus": revenus,
+        "inscriptions": inscriptions,
+        "ventes": ventes,
+        "ambassadeurs_series": ambassadeurs_series,
     })
 
 

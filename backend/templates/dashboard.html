@@ -1,10 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Dashboard - BabiCash Admin{% endblock %}
 {% block content %}
-<h2 class="text-2xl font-bold mb-6">Dashboard</h2>
+<div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <h2 class="text-2xl font-bold">Dashboard</h2>
+    <a href="/admin/analytics" class="btn btn-sm btn-outline">Voir l'analyse détaillée →</a>
+</div>
 
 <!-- Stats cards -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <div class="stat bg-base-100 rounded-box shadow">
         <div class="stat-title">Owners</div>
         <div class="stat-value text-primary">{{ stats.nb_owners }}</div>
@@ -21,9 +24,50 @@
         <div class="stat-desc">Plans payants en cours</div>
     </div>
     <div class="stat bg-base-100 rounded-box shadow">
-        <div class="stat-title">Revenu estimé</div>
+        <div class="stat-title">CA ce mois (toutes boutiques)</div>
+        <div class="stat-value text-info">{{ "%.0f"|format(stats.ca_mois) }} FCFA</div>
+        <div class="stat-desc">{{ stats.nb_ventes_mois }} ventes</div>
+    </div>
+</div>
+
+<!-- Revenu estimé, net des versements ambassadeurs -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <div class="stat bg-base-100 rounded-box shadow">
+        <div class="stat-title">Revenu estimé (brut)</div>
         <div class="stat-value text-success">{{ "%.0f"|format(stats.revenu_total) }} FCFA</div>
-        <div class="stat-desc">Ce mois</div>
+        <div class="stat-desc">MRR abonnements actifs</div>
+    </div>
+    <div class="stat bg-base-100 rounded-box shadow">
+        <div class="stat-title">Reversé aux ambassadeurs</div>
+        <div class="stat-value text-warning">− {{ "%.0f"|format(stats.total_verse_ambassadeurs) }} FCFA</div>
+        <div class="stat-desc">Versements payés à vie</div>
+    </div>
+    <div class="stat bg-base-100 rounded-box shadow">
+        <div class="stat-title">Revenu net estimé</div>
+        <div class="stat-value {% if stats.revenu_net < 0 %}text-error{% else %}text-success{% endif %}">
+            {{ "%.0f"|format(stats.revenu_net) }} FCFA
+        </div>
+        <div class="stat-desc">Brut − reversé ambassadeurs</div>
+    </div>
+</div>
+
+<!-- Parrainage -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+    <div class="stat bg-base-100 rounded-box shadow">
+        <div class="stat-title">Ambassadeurs actifs</div>
+        <div class="stat-value text-primary">{{ stats.nb_ambassadeurs_actifs }}</div>
+    </div>
+    <div class="stat bg-base-100 rounded-box shadow">
+        <div class="stat-title">Filleuls parrainés (total)</div>
+        <div class="stat-value text-secondary">{{ stats.nb_filleuls_total }}</div>
+    </div>
+</div>
+
+<!-- Tendance revenus -->
+<div class="card bg-base-100 shadow mb-8">
+    <div class="card-body">
+        <h3 class="card-title text-lg">Revenus encaissés — 12 derniers mois</h3>
+        <canvas id="chart-tendance-revenus" height="90"></canvas>
     </div>
 </div>
 
@@ -74,4 +118,26 @@
         </div>
     </div>
 </div>
+
+<script>
+new Chart(document.getElementById('chart-tendance-revenus'), {
+    type: 'line',
+    data: {
+        labels: {{ stats.tendance_revenus['labels'] | tojson }},
+        datasets: [{
+            label: 'Revenus (FCFA)',
+            data: {{ stats.tendance_revenus['values'] | tojson }},
+            borderColor: '#36d399',
+            backgroundColor: 'rgba(54, 211, 153, 0.15)',
+            tension: 0.3,
+            fill: true,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } },
+    },
+});
+</script>
 {% endblock %}
