@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Analytics - BabiCash Admin{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div>
+        <h2 class="text-2xl font-bold">Analytics</h2>
+        <p class="text-sm opacity-60">Évolution des revenus, inscriptions, ventes et parrainage.</p>
+    </div>
+    <form method="GET" class="flex items-center gap-2">
+        <select name="granularite" class="select select-bordered select-sm" onchange="this.form.submit()">
+            <option value="mois" {% if granularite == 'mois' %}selected{% endif %}>Par mois</option>
+            <option value="annee" {% if granularite == 'annee' %}selected{% endif %}>Par année</option>
+        </select>
+        <select name="nb" class="select select-bordered select-sm" onchange="this.form.submit()">
+            {% if granularite == 'annee' %}
+                {% for v in [2, 3, 4, 6] %}
+                <option value="{{ v }}" {% if nb == v %}selected{% endif %}>{{ v }} ans</option>
+                {% endfor %}
+            {% else %}
+                {% for v in [6, 12, 24, 36] %}
+                <option value="{{ v }}" {% if nb == v %}selected{% endif %}>{{ v }} mois</option>
+                {% endfor %}
+            {% endif %}
+        </select>
+    </form>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <h3 class="card-title text-lg">Revenus encaissés</h3>
+            <canvas id="chart-revenus" height="110"></canvas>
+        </div>
+    </div>
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <h3 class="card-title text-lg">Nouveaux propriétaires</h3>
+            <canvas id="chart-inscriptions" height="110"></canvas>
+        </div>
+    </div>
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <h3 class="card-title text-lg">Chiffre d'affaires &amp; ventes (toutes boutiques)</h3>
+            <canvas id="chart-ventes" height="110"></canvas>
+        </div>
+    </div>
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <h3 class="card-title text-lg">Commissions vs versements ambassadeurs</h3>
+            <canvas id="chart-ambassadeurs" height="110"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+const COLORS = {
+    primary: '#36d399',
+    secondary: '#3abff8',
+    accent: '#fbbd23',
+    warning: '#f87272',
+};
+
+new Chart(document.getElementById('chart-revenus'), {
+    type: 'bar',
+    data: {
+        labels: {{ revenus['labels'] | tojson }},
+        datasets: [{
+            label: 'Revenus (FCFA)',
+            data: {{ revenus['values'] | tojson }},
+            backgroundColor: COLORS.primary,
+        }],
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } },
+});
+
+new Chart(document.getElementById('chart-inscriptions'), {
+    type: 'line',
+    data: {
+        labels: {{ inscriptions['labels'] | tojson }},
+        datasets: [{
+            label: 'Nouveaux owners',
+            data: {{ inscriptions['values'] | tojson }},
+            borderColor: COLORS.secondary,
+            backgroundColor: 'rgba(58, 191, 248, 0.15)',
+            tension: 0.3,
+            fill: true,
+        }],
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } },
+});
+
+new Chart(document.getElementById('chart-ventes'), {
+    data: {
+        labels: {{ ventes['ca']['labels'] | tojson }},
+        datasets: [
+            {
+                type: 'bar',
+                label: 'CA (FCFA)',
+                data: {{ ventes['ca']['values'] | tojson }},
+                backgroundColor: COLORS.accent,
+                yAxisID: 'y',
+            },
+            {
+                type: 'line',
+                label: 'Nombre de ventes',
+                data: {{ ventes['nb_ventes']['values'] | tojson }},
+                borderColor: COLORS.secondary,
+                yAxisID: 'y1',
+                tension: 0.3,
+            },
+        ],
+    },
+    options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+            y: { type: 'linear', position: 'left', beginAtZero: true },
+            y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false } },
+        },
+    },
+});
+
+new Chart(document.getElementById('chart-ambassadeurs'), {
+    type: 'bar',
+    data: {
+        labels: {{ ambassadeurs_series['commissions']['labels'] | tojson }},
+        datasets: [
+            {
+                label: 'Commissions générées (FCFA)',
+                data: {{ ambassadeurs_series['commissions']['values'] | tojson }},
+                backgroundColor: COLORS.accent,
+            },
+            {
+                label: 'Versements payés (FCFA)',
+                data: {{ ambassadeurs_series['versements']['values'] | tojson }},
+                backgroundColor: COLORS.warning,
+            },
+        ],
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } },
+});
+</script>
+{% endblock %}

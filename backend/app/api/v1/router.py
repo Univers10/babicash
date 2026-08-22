@@ -8,6 +8,7 @@ from app.api.v1 import (
     boutiques,
     categories,
     dashboard,
+    landing_leads,
     mouvements_stock,
     oauth,
     produits,
@@ -47,6 +48,9 @@ api_router.include_router(
     ambassadeurs.router, prefix="/ambassadeurs", tags=["ambassadeurs"]
 )
 api_router.include_router(ventes.router, prefix="/ventes", tags=["ventes"])
+api_router.include_router(
+    landing_leads.router, prefix="/landing-leads", tags=["landing-leads"]
+)
 api_router.include_router(
     dashboard.router, prefix="/dashboard", tags=["dashboard"]
 )

@@ -5,6 +5,7 @@ from app.models.models import (
     Categorie,
     CommissionParrainage,
     CompteTiers,
+    LandingLead,
     LigneVente,
     MouvementStock,
     Notification,
@@ -38,4 +39,5 @@ __all__ = [
     "CommissionParrainage",
     "Notification",
     "PushSubscription",
+    "LandingLead",
 ]

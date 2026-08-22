@@ -571,3 +571,20 @@ class CommissionParrainage(Base):
     date_creation: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+
+
+class LandingLead(Base):
+    """Demande de contact ou d'essai issue du site landing."""
+
+    __tablename__ = "landing_leads"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    nom: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    contact: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    message: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    traite: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    date_creation: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )

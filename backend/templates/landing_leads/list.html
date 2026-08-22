@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Leads Landing - BabiCash Admin{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-bold">Leads landing page</h2>
+    <input type="text" id="search" placeholder="Rechercher..."
+           class="input input-bordered input-sm w-64" onkeyup="filterTable()">
+</div>
+
+<div class="card bg-base-100 shadow">
+    <div class="overflow-x-auto">
+        <table class="table table-hover" id="leads-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Nom</th>
+                    <th>Contact</th>
+                    <th>Message</th>
+                    <th class="text-center">Statut</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lead in leads %}
+                <tr>
+                    <td class="text-sm whitespace-nowrap">{{ lead.date_creation.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td class="font-medium">{{ lead.nom or '—' }}</td>
+                    <td class="text-sm">{{ lead.contact or '—' }}</td>
+                    <td class="text-sm max-w-md">
+                        <div class="truncate" title="{{ lead.message or '' }}">{{ lead.message or '—' }}</div>
+                    </td>
+                    <td class="text-center">
+                        {% if lead.traite %}
+                        <span class="badge badge-sm badge-success">Traité</span>
+                        {% else %}
+                        <span class="badge badge-sm badge-warning">À traiter</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="POST" action="/admin/landing-leads/{{ lead.id }}/traiter">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            {% if lead.traite %}
+                            <button type="submit" class="btn btn-ghost btn-xs">Marquer à traiter</button>
+                            {% else %}
+                            <button type="submit" class="btn btn-ghost btn-xs text-success">Marquer traité</button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center opacity-50 py-6">Aucun lead pour le moment.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function filterTable() {
+    const query = document.getElementById('search').value.toLowerCase();
+    document.querySelectorAll('#leads-table tbody tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}
