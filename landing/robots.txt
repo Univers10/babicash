@@ -1,0 +1,13 @@
+# BabiCash Landing Site
+User-agent: *
+Allow: /
+
+# Disallow backend API paths
+Disallow: /api/
+Disallow: /admin/
+
+# Sitemap
+Sitemap: https://babicash.ci/sitemap.xml
+
+# Crawl-delay for polite bots
+Crawl-delay: 1
