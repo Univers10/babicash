@@ -1,4 +1,7 @@
 """Endpoint public pour recevoir les demandes du formulaire landing."""
+import uuid
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,12 +19,12 @@ class LandingLeadIn(BaseModel):
 
 
 class LandingLeadOut(BaseModel):
-    id: str
+    id: uuid.UUID
     nom: str | None
     contact: str | None
     message: str | None
     traite: bool
-    date_creation: str
+    date_creation: datetime
 
     class Config:
         from_attributes = True

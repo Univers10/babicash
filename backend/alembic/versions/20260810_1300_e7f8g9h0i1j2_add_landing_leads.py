@@ -4,7 +4,7 @@ Ajoute la table ``landing_leads`` pour stocker les demandes de contact
 provenant du formulaire de la landing page.
 
 Revision ID: e7f8g9h0i1j2
-Revises: c4d5e6f7a8b1
+Revises: d5e6f7a8b9c2
 Create Date: 2026-08-10 13:00:00.000000
 
 """
@@ -16,7 +16,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "e7f8g9h0i1j2"
-down_revision: Union[str, Sequence[str], None] = "c4d5e6f7a8b1"
+down_revision: Union[str, Sequence[str], None] = "d5e6f7a8b9c2"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
