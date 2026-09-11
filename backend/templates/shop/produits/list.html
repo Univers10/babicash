@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Boutique · Produits - BabiCash Admin{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <div>
+        <h2 class="text-2xl font-bold">Boutique · Produits</h2>
+        <p class="text-sm opacity-60">Gestion du stock et du catalogue « Matériel &amp; accessoires »</p>
+    </div>
+    <a href="/admin/shop/produits/nouveau" class="btn btn-primary btn-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Nouveau produit
+    </a>
+</div>
+
+<form method="GET" class="flex gap-2 mb-4 flex-wrap items-center">
+    <div class="join">
+        <a href="/admin/shop/produits{% if cat or rupture or q %}{% endif %}" class="btn btn-sm join-item {% if not cat and rupture != '1' and not q %}btn-active{% endif %}">Tous</a>
+        {% for c in categories %}
+        <a href="/admin/shop/produits?cat={{ c }}{% if rupture %}&rupture=1{% endif %}{% if q %}&q={{ q }}{% endif %}" class="btn btn-sm join-item {% if cat == c %}btn-active{% endif %}">{{ labels[c] }}</a>
+        {% endfor %}
+        <a href="/admin/shop/produits?{% if cat %}cat={{ cat }}&{% endif %}rupture=1" class="btn btn-sm join-item {% if rupture == '1' %}btn-active btn-warning{% endif %}">Rupture / alerte</a>
+    </div>
+    <input type="text" name="q" value="{{ q }}" placeholder="Rechercher un produit..."
+           class="input input-bordered input-sm flex-1 min-w-40">
+    <button type="submit" class="btn btn-sm">Rechercher</button>
+</form>
+
+<div class="card bg-base-100 shadow">
+    <div class="overflow-x-auto">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Produit</th>
+                    <th>Catégorie</th>
+                    <th>Prix</th>
+                    <th class="text-center">Stock</th>
+                    <th class="text-center">Vente</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in produits %}
+                <tr class="{% if not p.en_vente %}opacity-50{% endif %}">
+                    <td>
+                        <div class="font-medium">{{ p.nom }}</div>
+                        <div class="text-xs opacity-50 flex gap-1 flex-wrap">
+                            {% if p.is_new %}<span class="badge badge-xs badge-info">Nouveau</span>{% endif %}
+                            {% if p.is_populaire %}<span class="badge badge-xs badge-accent">Populaire</span>{% endif %}
+                            {% if p.ancien_prix %}<span class="badge badge-xs badge-neutral">Promo</span>{% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge badge-sm badge-ghost">{{ labels[p.categorie] }}</span>
+                    </td>
+                    <td class="text-sm whitespace-nowrap">{{ fmt(p.prix) }}</td>
+                    <td class="text-center">
+                        {% if p.stock == 0 %}
+                        <span class="badge badge-sm badge-error">Rupture</span>
+                        {% elif p.stock <= p.stock_alerte %}
+                        <span class="badge badge-sm badge-warning">{{ p.stock }}</span>
+                        {% else %}
+                        <span class="badge badge-sm badge-success">{{ p.stock }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <form method="POST" action="/admin/shop/produits/{{ p.id }}/toggle">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            {% if p.en_vente %}
+                            <button type="submit" class="btn btn-ghost btn-xs" title="Retirer de la vente">
+                                <span class="text-success text-xs">En vente</span>
+                            </button>
+                            {% else %}
+                            <button type="submit" class="btn btn-ghost btn-xs" title="Mettre en vente">
+                                <span class="text-error text-xs">Retiré</span>
+                            </button>
+                            {% endif %}
+                        </form>
+                    </td>
+                    <td class="text-right whitespace-nowrap">
+                        <a href="/admin/shop/produits/{{ p.id }}" class="btn btn-ghost btn-xs">Modifier</a>
+                        <form method="POST" action="/admin/shop/produits/{{ p.id }}/supprimer"
+                              class="inline" onsubmit="return confirm('Supprimer ce produit ?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="btn btn-ghost btn-xs text-error">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center opacity-50 py-6">Aucun produit ne correspond.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -7,8 +7,10 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Integer,
+    JSON,
     Numeric,
     String,
+    Text,
     UniqueConstraint,
     Uuid,
     func,
@@ -588,3 +590,119 @@ class LandingLead(Base):
     date_creation: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+
+
+class ShopProduit(Base):
+    """Produit de la boutique « Matériel & accessoires » (catalogue BabiCash).
+
+    Sert à la fois au catalogue visible dans l'app mobile et au stock géré
+    depuis le backoffice admin.
+    """
+
+    __tablename__ = "shop_produits"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    nom: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    tagline: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    prix: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2), nullable=False, default=Decimal("0.00")
+    )
+    ancien_prix: Mapped[Decimal | None] = mapped_column(
+        Numeric(12, 2), nullable=True
+    )
+    categorie: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="ACCESSOIRES"
+    )  # IMPRIMANTES | ROULEAUX | ACCESSOIRES
+    icone: Mapped[str] = mapped_column(String(50), nullable=False, default="print")
+    specs: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    stock: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    stock_alerte: Mapped[int] = mapped_column(Integer, nullable=False, default=5)
+    en_vente: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    is_new: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_populaire: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False
+    )
+    position: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    date_creation: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    date_modification: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    lignes: Mapped[list["CommandeShopLigne"]] = relationship(
+        back_populates="produit", passive_deletes=True
+    )
+
+
+class CommandeShop(Base):
+    """Commande passée sur la boutique matériel (depuis l'app mobile ou saisie
+    manuellement depuis WhatsApp par l'équipe BabiCash).
+
+    Flux de statut : NOUVELLE → CONFIRMEE → PREPARATION → EXPEDIEE → LIVREE
+    (ou ANNULEE à tout moment avant livraison).
+    """
+
+    __tablename__ = "commandes_shop"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    client_nom: Mapped[str] = mapped_column(String(255), nullable=False)
+    client_telephone: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    client_adresse: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    statut: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="NOUVELLE"
+    )  # NOUVELLE | CONFIRMEE | PREPARATION | EXPEDIEE | LIVREE | ANNULEE
+    source: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="APP"
+    )  # APP | WHATSAPP | ADMIN
+    total: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2), nullable=False, default=Decimal("0.00")
+    )
+    notes: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    date_creation: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    date_modification: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    lignes: Mapped[list["CommandeShopLigne"]] = relationship(
+        back_populates="commande",
+        cascade="all, delete-orphan",
+        order_by="CommandeShopLigne.id",
+    )
+
+
+class CommandeShopLigne(Base):
+    """Ligne d'une commande boutique (snapshot du nom et du prix au passage)."""
+
+    __tablename__ = "commandes_shop_lignes"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    commande_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("commandes_shop.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    produit_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("shop_produits.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    nom: Mapped[str] = mapped_column(String(255), nullable=False)
+    prix_unitaire: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    quantite: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+    commande: Mapped["CommandeShop"] = relationship(back_populates="lignes")
+    produit: Mapped["ShopProduit | None"] = relationship(back_populates="lignes")

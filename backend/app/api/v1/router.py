@@ -13,6 +13,7 @@ from app.api.v1 import (
     oauth,
     produits,
     sessions,
+    shop,
     sync,
     tiers,
     uploads,
@@ -48,6 +49,7 @@ api_router.include_router(
     ambassadeurs.router, prefix="/ambassadeurs", tags=["ambassadeurs"]
 )
 api_router.include_router(ventes.router, prefix="/ventes", tags=["ventes"])
+api_router.include_router(shop.router, prefix="/shop", tags=["shop"])
 api_router.include_router(
     landing_leads.router, prefix="/landing-leads", tags=["landing-leads"]
 )

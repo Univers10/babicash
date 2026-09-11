@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Commande {{ commande.client_nom }} - BabiCash Admin{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-bold">Commande du {{ commande.date_creation.strftime('%d/%m/%Y %H:%M') }}</h2>
+    <a href="/admin/shop/commandes" class="btn btn-ghost btn-sm">← Retour aux commandes</a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <!-- Infos client -->
+    <div class="card bg-base-100 shadow p-5">
+        <h3 class="font-semibold mb-3">Client</h3>
+        <dl class="space-y-2 text-sm">
+            <div class="flex justify-between"><dt class="opacity-60">Nom</dt><dd class="font-medium">{{ commande.client_nom }}</dd></div>
+            <div class="flex justify-between"><dt class="opacity-60">Téléphone</dt><dd>{{ commande.client_telephone or '—' }}</dd></div>
+            <div class="flex justify-between"><dt class="opacity-60">Adresse</dt><dd class="text-right">{{ commande.client_adresse or '—' }}</dd></div>
+            <div class="flex justify-between"><dt class="opacity-60">Source</dt>
+                <dd>
+                    {% if commande.source == 'WHATSAPP' %}<span class="badge badge-sm badge-success">WhatsApp</span>
+                    {% elif commande.source == 'ADMIN' %}<span class="badge badge-sm badge-info">Saisie manuelle</span>
+                    {% else %}<span class="badge badge-sm badge-neutral">App</span>{% endif %}
+                </dd>
+            </div>
+        </dl>
+        {% if commande.notes %}
+        <div class="divider my-3"></div>
+        <h4 class="font-semibold text-sm mb-1">Notes</h4>
+        <p class="text-sm whitespace-pre-wrap">{{ commande.notes }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Lignes -->
+    <div class="card bg-base-100 shadow p-5 lg:col-span-2">
+        <h3 class="font-semibold mb-3">Articles</h3>
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Produit</th>
+                    <th class="text-right">Prix unitaire</th>
+                    <th class="text-center">Qté</th>
+                    <th class="text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for l in commande.lignes %}
+                <tr>
+                    <td class="font-medium">
+                        {{ l.nom }}
+                        {% if l.produit is not none %}<span class="text-xs opacity-50 block">Catalogue : {{ l.produit.nom }}</span>{% endif %}
+                    </td>
+                    <td class="text-right text-sm">{{ fmt(l.prix_unitaire) }}</td>
+                    <td class="text-center">{{ l.quantite }}</td>
+                    <td class="text-right font-semibold">{{ fmt(l.prix_unitaire * l.quantite) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="font-bold text-lg">
+                    <td colspan="3" class="text-right">Total</td>
+                    <td class="text-right">{{ fmt(commande.total) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <!-- Statut actuel + changement -->
+        <div class="divider my-3"></div>
+        <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+                {% if commande.statut == 'ANNULEE' %}
+                <span class="badge badge-error">Annulée</span>
+                {% elif commande.statut == 'LIVREE' %}
+                <span class="badge badge-success">Livrée · stock déduit</span>
+                {% else %}
+                <span class="badge badge-info">{{ labels[commande.statut] }}</span>
+                {% endif %}
+            </div>
+            <form method="POST" action="/admin/shop/commandes/{{ commande.id }}/statut" class="flex gap-2 items-center">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <select name="statut" class="select select-bordered select-sm">
+                    {% for s in statuts %}
+                    <option value="{{ s }}" {% if s == commande.statut %}selected{% endif %}>{{ labels[s] }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">Changer</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="mt-6 flex justify-end">
+    <form method="POST" action="/admin/shop/commandes/{{ commande.id }}/supprimer"
+          onsubmit="return confirm('Supprimer définitivement cette commande ?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="btn btn-sm btn-error btn-outline">Supprimer la commande</button>
+    </form>
+</div>
+{% endblock %}

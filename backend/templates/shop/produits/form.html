@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{% if produit %}Modifier{% else %}Nouveau{% endif %} produit - BabiCash Admin{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-bold">{% if produit %}Modifier{% else %}Nouveau{% endif %} produit</h2>
+    <a href="/admin/shop/produits" class="btn btn-ghost btn-sm">← Retour</a>
+</div>
+
+<form method="POST" class="card bg-base-100 shadow p-6 max-w-3xl" {% if produit %}action="/admin/shop/produits/{{ produit.id }}"{% else %}action="/admin/shop/produits/nouveau"{% endif %}>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="form-control md:col-span-2">
+            <label class="label"><span class="label-text">Nom *</span></label>
+            <input type="text" name="nom" required value="{{ produit.nom if produit else '' }}" class="input input-bordered">
+        </div>
+        <div class="form-control md:col-span-2">
+            <label class="label"><span class="label-text">Slogan court</span></label>
+            <input type="text" name="tagline" value="{{ produit.tagline if produit else '' }}" placeholder="ex : Bluetooth · Batterie" class="input input-bordered">
+        </div>
+        <div class="form-control md:col-span-2">
+            <label class="label"><span class="label-text">Description</span></label>
+            <textarea name="description" rows="3" class="textarea textarea-bordered">{{ produit.description if produit else '' }}</textarea>
+        </div>
+        <div class="form-control">
+            <label class="label"><span class="label-text">Prix (FCFA) *</span></label>
+            <input type="number" name="prix" step="50" min="0" required value="{{ produit.prix if produit else 0 }}" class="input input-bordered">
+        </div>
+        <div class="form-control">
+            <label class="label"><span class="label-text">Ancien prix (FCFA)</span></label>
+            <input type="number" name="ancien_prix" step="50" min="0" value="{{ produit.ancien_prix if produit and produit.ancien_prix is not none else '' }}" placeholder="laisser vide si pas de promo" class="input input-bordered">
+        </div>
+        <div class="form-control">
+            <label class="label"><span class="label-text">Catégorie</span></label>
+            <select name="categorie" class="select select-bordered">
+                {% for c in categories %}
+                <option value="{{ c }}" {% if produit and produit.categorie == c %}selected{% endif %}>{{ labels[c] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-control">
+            <label class="label"><span class="label-text">Icône</span></label>
+            <select name="icone" class="select select-bordered">
+                {% for i in icones %}
+                <option value="{{ i }}" {% if (produit and produit.icone == i) or (not produit and loop.first) %}selected{% endif %}>{{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-control md:col-span-2">
+            <label class="label"><span class="label-text">Caractéristiques (une par ligne ou séparées par des virgules)</span></label>
+            <textarea name="specs" rows="3" class="textarea textarea-bordered" placeholder="Bluetooth
+Batterie incluse
+58 mm">{{ produit.specs | join('\n') if produit else '' }}</textarea>
+        </div>
+        <div class="form-control">
+            <label class="label"><span class="label-text">Stock</span></label>
+            <input type="number" name="stock" min="0" value="{{ produit.stock if produit else 0 }}" class="input input-bordered">
+        </div>
+        <div class="form-control">
+            <label class="label"><span class="label-text">Seuil d'alerte</span></label>
+            <input type="number" name="stock_alerte" min="0" value="{{ produit.stock_alerte if produit else 5 }}" class="input input-bordered">
+        </div>
+        <div class="form-control">
+            <label class="label"><span class="label-text">Position (tri)</span></label>
+            <input type="number" name="position" min="0" value="{{ produit.position if produit else 0 }}" class="input input-bordered">
+        </div>
+        <div class="grid gap-2 content-center">
+            <label class="label cursor-pointer justify-start gap-2">
+                <input type="checkbox" name="en_vente" class="checkbox checkbox-primary" {% if not produit or produit.en_vente %}checked{% endif %}>
+                <span class="label-text">En vente</span>
+            </label>
+            <label class="label cursor-pointer justify-start gap-2">
+                <input type="checkbox" name="is_new" class="checkbox" {% if produit and produit.is_new %}checked{% endif %}>
+                <span class="label-text">Badge « Nouveau »</span>
+            </label>
+            <label class="label cursor-pointer justify-start gap-2">
+                <input type="checkbox" name="is_populaire" class="checkbox" {% if produit and produit.is_populaire %}checked{% endif %}>
+                <span class="label-text">Badge « Populaire »</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="mt-6 flex justify-end gap-2">
+        <a href="/admin/shop/produits" class="btn btn-ghost">Annuler</a>
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Boutique · Commandes - BabiCash Admin{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <div>
+        <h2 class="text-2xl font-bold">Boutique · Commandes</h2>
+        <p class="text-sm opacity-60">Commandes reçues via l'app ou WhatsApp</p>
+    </div>
+    <a href="/admin/shop/commandes/nouvelle" class="btn btn-primary btn-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Saisir une commande WhatsApp
+    </a>
+</div>
+
+<div class="tabs tabs-boxed mb-4 overflow-x-auto">
+    <a href="/admin/shop/commandes"
+       class="tab {% if not statut and not q %}tab-active{% endif %}">
+        Toutes
+        <span class="badge badge-sm ml-1">{{ commandes | length }}</span>
+    </a>
+    {% for s in statuts %}
+    <a href="/admin/shop/commandes?statut={{ s }}"
+       class="tab {% if statut == s %}tab-active{% endif %}">
+        {{ labels[s] }}
+        {% if nb_par_statut.get(s, 0) %}<span class="badge badge-sm ml-1 {% if s == 'NOUVELLE' %}badge-warning{% endif %}">{{ nb_par_statut.get(s, 0) }}</span>{% endif %}
+    </a>
+    {% endfor %}
+</div>
+
+<form method="GET" class="flex gap-2 mb-4">
+    <input type="hidden" name="statut" value="{{ statut }}">
+    <input type="text" name="q" value="{{ q }}" placeholder="Client, téléphone..."
+           class="input input-bordered input-sm flex-1 max-w-xs">
+    <button type="submit" class="btn btn-sm">Rechercher</button>
+</form>
+
+<div class="card bg-base-100 shadow">
+    <div class="overflow-x-auto">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Client</th>
+                    <th>Téléphone</th>
+                    <th>Lignes</th>
+                    <th class="text-right">Total</th>
+                    <th>Source</th>
+                    <th class="text-center">Statut</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in commandes %}
+                <tr>
+                    <td class="text-sm whitespace-nowrap">{{ c.date_creation.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td class="font-medium">{{ c.client_nom }}</td>
+                    <td class="text-sm">{{ c.client_telephone or '—' }}</td>
+                    <td class="text-sm">{{ c.lignes | length }} article(s)</td>
+                    <td class="text-right font-semibold whitespace-nowrap">{{ fmt(c.total) }}</td>
+                    <td>
+                        {% if c.source == 'WHATSAPP' %}
+                        <span class="badge badge-sm badge-success">WhatsApp</span>
+                        {% elif c.source == 'ADMIN' %}
+                        <span class="badge badge-sm badge-info">Saisie</span>
+                        {% else %}
+                        <span class="badge badge-sm badge-neutral">App</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if c.statut == 'ANNULEE' %}
+                        <span class="badge badge-sm badge-error">Annulée</span>
+                        {% elif c.statut == 'LIVREE' %}
+                        <span class="badge badge-sm badge-success">Livrée</span>
+                        {% elif c.statut == 'NOUVELLE' %}
+                        <span class="badge badge-sm badge-warning">Nouvelle</span>
+                        {% else %}
+                        <span class="badge badge-sm badge-info">{{ labels[c.statut] }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-right">
+                        <a href="/admin/shop/commandes/{{ c.id }}" class="btn btn-ghost btn-xs">Détail</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" class="text-center opacity-50 py-6">Aucune commande ne correspond.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Saisir une commande - BabiCash Admin{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-bold">Saisir une commande reçue par WhatsApp</h2>
+    <a href="/admin/shop/commandes" class="btn btn-ghost btn-sm">← Retour</a>
+</div>
+
+{% if erreur %}
+<div class="alert alert-error mb-4">
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <span>{{ erreur }}</span>
+</div>
+{% endif %}
+
+<form method="POST" class="card bg-base-100 shadow p-6 max-w-3xl" id="commande-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="form-control">
+            <label class="label"><span class="label-text">Nom du client *</span></label>
+            <input type="text" name="client_nom" required value="{{ client_nom or '' }}" class="input input-bordered">
+        </div>
+        <div class="form-control">
+            <label class="label"><span class="label-text">Téléphone</span></label>
+            <input type="text" name="client_telephone" value="{{ client_telephone or '' }}" placeholder="+225 ..." class="input input-bordered">
+        </div>
+        <div class="form-control md:col-span-2">
+            <label class="label"><span class="label-text">Adresse de livraison</span></label>
+            <input type="text" name="client_adresse" value="{{ client_adresse or '' }}" class="input input-bordered">
+        </div>
+    </div>
+
+    <div class="divider my-4">Articles</div>
+    <div id="lignes" class="space-y-2">
+        <div class="ligne grid grid-cols-1 md:grid-cols-[1fr_120px_40px] gap-2 items-center">
+            <select name="produit_id" class="select select-bordered select-sm w-full">
+                {% for p in produits %}
+                <option value="{{ p.id }}">{{ p.nom }} — {{ fmt(p.prix) }} (stock : {{ p.stock }})</option>
+                {% endfor %}
+            </select>
+            <input type="number" name="quantite" value="1" min="1" max="999" class="input input-bordered input-sm" title="Quantité">
+            <button type="button" class="btn btn-square btn-sm btn-ghost text-error" onclick="supprimerLigne(this)" title="Retirer la ligne">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm mt-2" onclick="ajouterLigne()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Ajouter une ligne
+    </button>
+
+    <div class="form-control mt-4">
+        <label class="label"><span class="label-text">Notes (optionnel)</span></label>
+        <textarea name="notes" rows="3" class="textarea textarea-bordered">{{ notes or '' }}</textarea>
+    </div>
+
+    <div class="mt-6 flex justify-end gap-2">
+        <a href="/admin/shop/commandes" class="btn btn-ghost">Annuler</a>
+        <button type="submit" class="btn btn-primary">Enregistrer la commande</button>
+    </div>
+</form>
+
+<script>
+function ajouterLigne() {
+    const ligne = document.querySelector('#lignes .ligne');
+    const clone = ligne.cloneNode(true);
+    clone.querySelector('input[name="quantite"]').value = 1;
+    clone.querySelectorAll('input, select').forEach(el => el.value = el.defaultValue);
+    document.getElementById('lignes').appendChild(clone);
+}
+function supprimerLigne(btn) {
+    const lignes = document.querySelectorAll('#lignes .ligne');
+    if (lignes.length > 1) btn.closest('.ligne').remove();
+}
+</script>
+{% endblock %}
