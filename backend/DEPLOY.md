@@ -103,9 +103,13 @@ curl http://localhost:8000/health
 nano /etc/nginx/sites-available/babicash
 ```
 
+Deux blocs `server` séparés — un pour l'API (`pos.babicash.ci`), un pour la
+PWA ambassadeur (`business.babicash.ci`) :
+
 ```nginx
+# ── pos.babicash.ci → API / Backend ──────────────────────────────────
 server {
-    server_name pos.babicash.ci business.babicash.ci;
+    server_name pos.babicash.ci;
 
     location / {
         proxy_pass http://127.0.0.1:8000;
@@ -119,12 +123,47 @@ server {
         client_max_body_size 10M;
     }
 }
+
+# ── business.babicash.ci → PWA Ambassadeur + API ────────────────────
+server {
+    server_name business.babicash.ci;
+
+    # Fichiers statiques de la PWA React (build Vite)
+    root /opt/babicash/ambassadeur-pwa/dist;
+    index index.html;
+
+    # Les appels API sont proxyés vers le backend
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        client_max_body_size 10M;
+    }
+
+    # SPA : toutes les routes non trouvées retournent index.html
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Cache long pour les assets hashés par Vite (js, css, images)
+    location ~* \.(?:js|css|woff2|ico|png|svg|jpg|jpeg|gif|webp)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
 ```
 
 Activer :
 
 ```bash
 ln -s /etc/nginx/sites-available/babicash /etc/nginx/sites-enabled/
+# Retirer la config par défaut si elle conflite
+rm -f /etc/nginx/sites-enabled/default
 nginx -t && systemctl restart nginx
 ```
 
@@ -140,7 +179,55 @@ Le renouvellement est automatique (cron certbot).
 
 ---
 
-## 7. DNS
+## 7. Déploiement de la PWA Ambassadeur
+
+La PWA React (`ambassadeur-pwa/`) doit être buildée et copiée sur le VPS.
+
+### Build local
+
+```bash
+cd ambassadeur-pwa
+npm install
+npm run build          # génère dist/
+```
+
+### Copie sur le VPS
+
+```bash
+# Depuis votre machine locale
+scp -r dist/ root@VOTRE_IP:/opt/babicash/ambassadeur-pwa/dist
+```
+
+### Ou directement sur le VPS
+
+```bash
+cd /opt/babicash/ambassadeur-pwa
+npm install
+npm run build
+# Les fichiers sont déjà dans /opt/babicash/ambassadeur-pwa/dist
+nginx -t && systemctl restart nginx
+```
+
+### Script de déploiement rapide
+
+```bash
+cat > /opt/babicash/deploy-pwa.sh << 'EOF'
+#!/bin/bash
+set -euo pipefail
+cd /opt/babicash/ambassadeur-pwa
+echo "🔨 Building PWA ambassadeur..."
+npm ci --prefer-offline
+npm run build
+echo "🔄 Redémarrage Nginx..."
+nginx -t && systemctl restart nginx
+echo "✅ PWA déployée sur business.babicash.ci"
+EOF
+chmod +x /opt/babicash/deploy-pwa.sh
+```
+
+---
+
+## 8. DNS
 
 Chez votre registrar ou panel DNS :
 
@@ -152,13 +239,22 @@ Chez votre registrar ou panel DNS :
 
 ---
 
-## 8. Vérification finale
+## 9. Vérification finale
 
 ```bash
+# API (pos.babicash.ci)
 curl https://pos.babicash.ci/health
 # → {"status":"ok","service":"BabiCash API"}
 
 curl https://pos.babicash.ci/api/v1/auth/me
+# → 401 Unauthorized (normal sans token)
+
+# PWA Ambassadeur (business.babicash.ci)
+curl -s https://business.babicash.ci/ | head -5
+# → <!doctype html> ... (le HTML de la PWA React)
+
+# API Ambassadeur via le même domaine
+curl https://business.babicash.ci/api/v1/ambassadeurs/me
 # → 401 Unauthorized (normal sans token)
 ```
 
@@ -168,23 +264,35 @@ curl https://pos.babicash.ci/api/v1/auth/me
 
 | Action | Commande |
 |--------|----------|
-| Voir les logs | `docker compose logs -f api` |
+| Voir les logs API | `docker compose logs -f api` |
 | Redémarrer l'API | `docker compose restart api` |
 | Rebuild après update | `docker compose up -d --build api` |
 | Shell dans le container | `docker compose exec api sh` |
 | Lancer une migration | `docker compose exec api alembic upgrade head` |
 | Arrêter tout | `docker compose down` |
 | Arrêter + supprimer données | `docker compose down -v` |
+| **Rebuild PWA ambassadeur** | `/opt/babicash/deploy-pwa.sh` |
+| **Vérifier Nginx** | `nginx -t && systemctl restart nginx` |
 
 ---
 
 ## Mises à jour
 
 ```bash
-cd /opt/babicash/backend
+cd /opt/babicash
 git pull origin main
+
+# Backend
+cd backend
 docker compose up -d --build api
+
+# PWA Ambassadeur
+cd /opt/babicash/ambassadeur-pwa
+npm ci --prefer-offline && npm run build
+nginx -t && systemctl restart nginx
 ```
+
+Ou via le script tout-en-un : `./deploy-pwa.sh`
 
 ---
 

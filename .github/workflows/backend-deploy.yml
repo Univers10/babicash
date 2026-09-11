@@ -1,10 +1,11 @@
-name: Backend Deploy
+name: Backend + PWA Deploy
 
 on:
   push:
     branches: [main]
     paths:
       - "backend/**"
+      - "ambassadeur-pwa/**"
   workflow_dispatch:
 
 jobs:
@@ -43,4 +44,12 @@ jobs:
             echo "🧹 Cleaning up old images..."
             docker image prune -f
 
-            echo "✅ Backend deploy complete"
+            echo "🎯 Building PWA ambassadeur..."
+            cd /opt/babicash/ambassadeur-pwa
+            npm ci --prefer-offline
+            npm run build
+
+            echo "🔄 Restarting Nginx..."
+            nginx -t && systemctl restart nginx
+
+            echo "✅ Backend + PWA deploy complete"
