@@ -1,7 +1,3 @@
-Voici un modèle complet de **Termes de Référence (TDR)** structuré, professionnel et percutant. Il est conçu pour expliquer votre projet de fond en comble à n'importe quel partenaire, investisseur ou collaborateur, en mettant en avant la réalité du marché ivoirien et la puissance technique de votre solution.
-
----
-
 # TERMES DE RÉFÉRENCE (TDR)
 
 ## PROJET : PLATEFORME DIGITALE DE GESTION COMMERCIALE MULTI-BOUTIQUE POUR LE COMMERCE DE PROXIMITÉ: BabiCash

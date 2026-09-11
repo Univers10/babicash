@@ -1,0 +1,1 @@
+> Source canonique : consultez **AGENTS.md** à la racine de ce repo avant de modifier quoi que ce soit. Il décrit l'état actuel (offline-first, multi-tenant, commandes `build_runner`/`pytest`, règles financières en Decimal). En cas de conflit avec un autre document, AGENTS.md et le code source font foi.

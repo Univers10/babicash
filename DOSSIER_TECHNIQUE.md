@@ -2,7 +2,12 @@
 
 > **Version** : 1.0.0 · **Dernière mise à jour** : 10 juillet 2026  
 > **Repo** : https://github.com/Univers10/babicash  
-> **Domaine de test** : https://pos.babicash.ci
+> **Domaine de test** : https://pos.babicash.ci  
+>
+> ⚠️ **Partiellement historique.** Depuis juillet 2026, des modules ont été ajoutés
+> (admin backoffice, ambassadeurs/parrainage, shop en ligne, mouvements de stock, notifications,
+> oauth Google, recu_config…) non détaillés ici. **`AGENTS.md`** est la référence canonique de
+> l'état actuel du code ; en cas de contradiction, le code source fait foi.
 
 ---
 

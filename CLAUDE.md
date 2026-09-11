@@ -1,122 +1,80 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> Ce fichier guide Claude Code sur le dépôt BabiCash. La **source canonique** complète est `AGENTS.md` (contexte partagé par tous les outils IA) — si une de ses informations contredit ce fichier, suivre `AGENTS.md` / le code source.
 
-## Project Overview
+## Vue d'ensemble
 
-BabiCash is a multi-tenant POS (point-of-sale) and commercial management Flutter app targeting small businesses in West Africa. It follows an **offline-first architecture**: all writes go to local SQLite (Drift) immediately, then sync to the backend when connectivity is available.
+BabiCash est une **plateforme de gestion commerciale multi-boutique (POS) offline-first** pour le commerce de proximité en Côte d'Ivoire : caisse (POS), stock, clients/fournisseurs, sessions de caisse anti-fraude, crédits, abonnements freemium, programme d'ambassadeurs (parrainage) et boutique en ligne par commerce.
 
-The Flutter frontend lives in `frontend/`. The backend lives in `backend/` (FastAPI + SQLAlchemy 2 async + Alembic, PostgreSQL in production, SQLite/aiosqlite in tests).
+- Toutes les écritures vont d'abord dans **SQLite local (Drift)** puis se synchronisent au backend dès que le réseau revient.
+- **Multi-tenant** : cloisonnement strict par `boutique_id`.
+- Monorepo : `frontend/` (Flutter), `backend/` (FastAPI + admin web), `ambassadeur-pwa/` (React), `landing/` (site statique), `docs/`.
 
-## Common Commands
+## Commandes
 
-### Backend (from `backend/`)
-
+### Backend (depuis `backend/`)
 ```bash
-# Virtualenv: backend/.venv (hidden directory)
-.venv/Scripts/python.exe -m pytest tests/     # run tests (Windows)
-
-# Migrations
-.venv/Scripts/python.exe -m alembic upgrade head
-
-# Dev server
+.venv/Scripts/python.exe -m pytest tests/        # tests (SQLite in-memory, Windows)
+.venv/Scripts/python.exe -m alembic upgrade head # migrations
 .venv/Scripts/python.exe -m uvicorn app.main:app --reload
+docker compose up -d --build                    # stack Docker PostgreSQL + API
 ```
+Push sur `main` → auto-deploy backend (SSH + Docker via GitHub Actions). Pas d'auto-deploy Flutter ni PWA.
 
-> **Deploy**: push to `main` auto-deploys the backend (SSH + Docker via GitHub Actions). The frontend has no auto-deploy.
-
-### Frontend (from `frontend/`)
-
+### Frontend (depuis `frontend/`)
 ```bash
-# Install dependencies
 flutter pub get
-
-# Code generation — REQUIRED after modifying Drift tables or Freezed models
-dart run build_runner build --delete-conflicting-outputs
-
-# Run the app
+dart run build_runner build --delete-conflicting-outputs  # OBLIGATOIRE après modif Drift/Freezed
 flutter run
-
-# Lint
 flutter analyze --no-fatal-infos
-
-# Tests
 flutter test --coverage
-
-# Build
 flutter build apk --release
-flutter build web --release
 ```
-
-> **Important**: Never edit `*.g.dart` or `*.freezed.dart` files manually — they are generated. Re-run `build_runner` instead.
+> ⚠️ Ne jamais éditer `*.g.dart`, `*.freezed.dart`, `*.drift.dart` — re-run `build_runner`.
 
 ## Architecture
 
-### Layer overview
-
 ```
 UI (Screens + Widgets)
-       ↓
-State (Riverpod AsyncNotifierProviders)
-       ↓
-Data — Local (Drift/SQLite) + Remote (Dio REST API)
-       ↓
+   ↓
+State (Riverpod AsyncNotifier / StateNotifier)
+   ↓
+Data — Local (Drift/SQLite) + Remote (Dio REST)
+   ↓
 Core (theme, router, network, storage, errors)
 ```
 
-### Key directories
+- `lib/core/` — Dio client, go_router, secure storage, Material 3 theme, erreurs.
+- `lib/data/` — base Drift (`local/`), modèles Freezed (`models/`), clients Dio (`remote/`).
+- `lib/features/` — un dossier par feature : `auth`, `caisse`, `stock`, `tiers`, `sessions`, `ventes`, `dashboard`, `users` (gérants), `abonnements`, `settings`, `shop` (boutique en ligne), `boutiques`, `sync`.
+- `lib/shared/` — shell bottom-nav, widgets réutilisables.
 
-- `lib/core/` — Dio client, go_router, secure storage, Material 3 theme, error types
-- `lib/data/` — Drift database (`local/`), Freezed models (`models/`), Dio API services (`remote/`)
-- `lib/features/` — One folder per feature (`auth`, `caisse`, `dashboard`, `stock`, `tiers`, `sessions`, `ventes`, `sync`, `abonnements`)
-- `lib/shared/` — Bottom-nav shell screen, shared providers, reusable widgets
-
-### State management — Riverpod
-
-Each feature exposes `AsyncNotifierProvider`(s) in its own `providers/` folder. Notable providers:
-
-| Provider | Purpose |
-|---|---|
-| `authStateProvider` | Session state, login/register, role-based redirect |
-| `currentBoutiqueIdProvider` | Active shop context (all DB queries filter by this) |
-| `syncInitProvider` | Auto-initializes sync, listens for connectivity changes |
-| `syncServiceProvider` | `pushPending()` / `pullCatalogue()` logic |
-| `caisseProvider` | Cart state, sale recording |
-| `sessionsProvider` | Cash session open/close |
-
-### Routing (go_router)
-
-Defined in `lib/core/router/app_router.dart`. After login, the router redirects based on `SessionUser.role`:
-- `OWNER` → `/dashboard`
-- `MANAGER` → `/caisse`
-
-### Database (Drift)
-
-Tables: `LocalProduits`, `LocalCategories`, `LocalVentes`, `LocalLignesVente`, `LocalDepenses`, `LocalSessions`, `LocalTiers`. Every table has a `synced` boolean. All queries are scoped by `boutique_id`.
-
-### Offline-first sync flow
-
-1. Write to SQLite with `synced = false`
-2. On connectivity restore (or app init), `SyncService.pushPending()` sends unsynced records
-3. Backend confirms → mark `synced = true`
-4. `SyncService.pullCatalogue()` fetches updated catalog
+### State & sync
+- Providers notables : `authStateProvider`, `currentBoutiqueIdProvider`, `syncInitProvider`, `syncServiceProvider` (`pushPending()` / `pullCatalogue()`), `caisseProvider`, `sessionsProvider`.
+- **Offline-first** : écriture SQLite `synced = false` → reconnexion `connectivity_plus` → push → `synced = true` ; `pullCatalogue()` met à jour produits/catégories.
 
 ### API client (Dio)
+Base URL prod : `https://pos.babicash.ci/api/v1`. Overrides dev : `http://192.168.x.x:8000` (LAN) / `http://10.0.2.2:8000` (émulateur). JWT injecté par interceptor ; 401 → session nettoyée (tables Drift vidées).
 
-Base URL: `https://pos.babicash.ci/api/v1`
-Dev overrides: `http://192.168.1.29:8000` (LAN) / `http://10.0.2.2:8000` (emulator)
-
-JWT is injected automatically by an interceptor. 401 responses clear the session.
+## Backend (hors `frontend/`)
+- FastAPI · SQLAlchemy 2 async · PostgreSQL 16 · Alembic · PyJWT (24 h, claim `token_version`) · bcrypt · rate limiting · CSRF/cookie secure sur l'admin.
+- Rôles API : `OWNER` / `MANAGER` ; backoffice admin séparé (`app/admin/` : Jinja + sessions cookie).
+- Tables : `users`, `boutiques`, `categories`, `produits`, `comptes_tiers`, `sessions_caisse`, `ventes`, `lignes_vente`, `abonnements`, `mouvements_stock`, `recu_configs`, `transactions_caisse`, `ambassadeurs`, `notifications`, `push_subscriptions`, `paiements_abonnement`, `payouts`, `commissions_parrainage`, `landing_leads`, `shop_produits`, `commandes_shop`, `commandes_shop_lignes`.
+- Règle : marge côté serveur, `Decimal` pour l'argent, idempotence via `id_local_smartphone`, CMP pour entrées de stock.
 
 ## Design System
-
-- **Primary**: `#1B6B2F` (green), **Accent**: `#F5A623` (orange)
-- **Font**: Inter (400/500/600/700) — defined in `lib/core/theme/`
-- **Button height**: 52 px, **border radius**: 16 px (cards) / 8 px (inputs)
-- Spacing constants live in `app_spacing.dart`; do not use ad-hoc `SizedBox` sizes
+- **Primaire** `#1B6B2F` (vert) · **Accent** `#F5A623` (orange) · fond `#F7F7F5` · texte `#3D1F00`.
+- **Font** Inter (400/500/600/700). Boutons 52 px, radius cartes 16 px / inputs 8 px.
+- Constantes de spacing dans `lib/core/theme/app_spacing.dart` — pas de `SizedBox` ad-hoc. Utiliser les constantes/valeurs existantes.
 
 ## CI/CD
+`.github/workflows/` : `backend-ci.yml` (pytest + ruff + build Docker), `backend-deploy.yml` (main → VPS), `frontend-ci.yml` (analyze + test + coverage + build APK/Web).
 
-GitHub Actions (`.github/workflows/frontend-ci.yml`):
-- **PR**: `flutter analyze --no-fatal-infos` + `flutter test --coverage` + Codecov
-- **main**: above + build APK + build web, both uploaded as artifacts
+## Règles pour l'agent
+1. Ne jamais éditer les fichiers générés ; re-run `build_runner`.
+2. Toujours récupérer `boutique_id` du contexte (token/`currentBoutiqueIdProvider`), cloisonnement multi-tenant.
+3. Offline-first : écriture locale d'abord, jamais de blocage réseau en UI.
+4. Montants : `Decimal` côté backend, jamais de float.
+5. Après backend : `pytest`. Après Flutter : `flutter analyze --no-fatal-infos`. Après Drift/Freezed : `build_runner`.
+6. Commits conventionnels (`feat:`, `fix:`, `docs:`, `refactor:`), branche `main`.
+7. Consulter avant de coder : `docs/design-*.md`, `backend/DEPLOY.md`.

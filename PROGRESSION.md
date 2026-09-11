@@ -1,19 +1,23 @@
 # BabiCash — Rapport de Progression
 
-> Dernière mise à jour : 04 juillet 2026  
-> Environnement : Python 3.14.6 · PostgreSQL 18 · FastAPI · SQLAlchemy 2.0 async
+> ⚠️ **Document historique** (journal du 04 juillet 2026). Ne reflète **plus** l'état actuel :
+> le frontend Flutter est aujourd'hui **complètement développé**, le backend compte ~22 fichiers
+> de tests et de nombreux modules ont été ajoutés (shop, ambassadeurs, notifications, admin…).
+> Pour l'état **actuel**, voir `README.md` et `AGENTS.md` (source canonique IA).
+>
+> Historique : Python 3.14.6 · PostgreSQL 18 / FastAPI · SQLAlchemy 2.0 async (dev local).
 
 ---
 
-## État général
+## État général (au 04/07 — voir note ci-dessus)
 
-| Composant | État |
+| Composant | État (historique) |
 |---|---|
 | Backend API | ✅ Stable — 35/35 tests passent |
 | Base de données | ✅ PostgreSQL 18 local, migrations appliquées |
 | Tests | ✅ pytest · SQLite in-memory |
 | GitHub | ✅ https://github.com/Univers10/babicash |
-| Frontend Flutter | ⏳ Non commencé |
+| Frontend Flutter | ⏳ Non commencé (développé depuis) |
 
 ---
 
